@@ -44,6 +44,8 @@ export const page = defineType({
       group: 'sections',
       of: [
         defineArrayMember({ type: 'heroSection' }),
+        defineArrayMember({ type: 'editorialIntroSection' }),
+        defineArrayMember({ type: 'statsSection' }),
         defineArrayMember({ type: 'experienceSection' }),
       ],
       options: { insertMenu: { filter: true, views: [{ name: 'grid' }, { name: 'list' }] } },

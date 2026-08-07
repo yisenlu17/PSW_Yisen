@@ -2,9 +2,15 @@ import { createDataAttribute } from 'next-sanity'
 
 import { Hero, type HeroSectionData } from './Hero'
 import { ExperienceSection, type ExperienceSectionData } from './ExperienceSection'
+import { EditorialIntro, type EditorialIntroSectionData } from './EditorialIntro'
+import { Stats, type StatsSectionData } from './Stats'
 import type { Locale } from '@/lib/locale'
 
-export type SectionData = HeroSectionData | ExperienceSectionData
+export type SectionData =
+  | HeroSectionData
+  | ExperienceSectionData
+  | EditorialIntroSectionData
+  | StatsSectionData
 
 /**
  * The registry. Adding a premium component means writing it, describing it as a
@@ -13,6 +19,8 @@ export type SectionData = HeroSectionData | ExperienceSectionData
  */
 const RENDERERS = {
   heroSection: Hero,
+  editorialIntroSection: EditorialIntro,
+  statsSection: Stats,
   experienceSection: ExperienceSection,
 } as const
 

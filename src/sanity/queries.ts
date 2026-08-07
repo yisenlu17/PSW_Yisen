@@ -44,6 +44,22 @@ const SECTIONS = /* groq */ `
       rotateHeadlineWord
     },
 
+    _type == "editorialIntroSection" => {
+      eyebrow,
+      title,
+      lede,
+      note,
+      steps[]{ _key, title, body }
+    },
+
+    _type == "statsSection" => {
+      eyebrow,
+      title,
+      note,
+      feature{ source, value, description },
+      stats[]{ _key, value, suffix, countTo, label, source }
+    },
+
     _type == "experienceSection" => {
       eyebrow,
       title,

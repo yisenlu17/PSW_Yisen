@@ -1,5 +1,38 @@
 [
   {
+    "type": "type",
+    "name": "feature",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "source": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeString"
+          },
+          "optional": true
+        },
+        "value": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeString"
+          },
+          "optional": true
+        },
+        "description": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeText"
+          },
+          "optional": true
+        }
+      }
+    }
+  },
+  {
     "name": "navigation",
     "type": "document",
     "attributes": {
@@ -1357,6 +1390,36 @@
                 },
                 "rest": {
                   "type": "inline",
+                  "name": "editorialIntroSection"
+                }
+              },
+              {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "rest": {
+                  "type": "inline",
+                  "name": "statsSection"
+                }
+              },
+              {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "rest": {
+                  "type": "inline",
                   "name": "experienceSection"
                 }
               }
@@ -1690,6 +1753,231 @@
                 "value": "none"
               }
             ]
+          },
+          "optional": true
+        }
+      }
+    }
+  },
+  {
+    "name": "statsSection",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "statsSection"
+          }
+        },
+        "eyebrow": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeString"
+          },
+          "optional": true
+        },
+        "title": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeString"
+          },
+          "optional": true
+        },
+        "note": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeText"
+          },
+          "optional": true
+        },
+        "feature": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "feature"
+          },
+          "optional": true
+        },
+        "stats": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "array",
+            "of": {
+              "type": "object",
+              "attributes": {
+                "value": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "suffix": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "countTo": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "label": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "inline",
+                    "name": "localeString"
+                  },
+                  "optional": true
+                },
+                "source": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "inline",
+                    "name": "localeString"
+                  },
+                  "optional": true
+                },
+                "_type": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string",
+                    "value": "stat"
+                  }
+                }
+              },
+              "rest": {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "optional": true
+        },
+        "settings": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "sectionSettings"
+          },
+          "optional": true
+        }
+      }
+    }
+  },
+  {
+    "name": "editorialIntroSection",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "editorialIntroSection"
+          }
+        },
+        "eyebrow": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeString"
+          },
+          "optional": true
+        },
+        "title": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeString"
+          },
+          "optional": true
+        },
+        "lede": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeText"
+          },
+          "optional": true
+        },
+        "note": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "localeText"
+          },
+          "optional": true
+        },
+        "steps": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "array",
+            "of": {
+              "type": "object",
+              "attributes": {
+                "title": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "inline",
+                    "name": "localeString"
+                  },
+                  "optional": true
+                },
+                "body": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "inline",
+                    "name": "localeText"
+                  },
+                  "optional": true
+                },
+                "_type": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string",
+                    "value": "step"
+                  }
+                }
+              },
+              "rest": {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "optional": true
+        },
+        "settings": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "inline",
+            "name": "sectionSettings"
           },
           "optional": true
         }

@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "typegen": "sanity schema extract --enforce-required-fields --path ./schema.json --overwrite && sanity typegen generate",
+    "typegen": "sanity schema extract --enforce-required-fields --force --path ./schema.json && sanity typegen generate",
     "seed": "node scripts/seed.mjs"
   },
   "dependencies": {

@@ -4,6 +4,8 @@ import { localeString, localeText } from './objects/locale'
 import { sectionSettings } from './objects/sectionSettings'
 import { heroSection } from './objects/sections/heroSection'
 import { experienceSection } from './objects/sections/experienceSection'
+import { editorialIntroSection } from './objects/sections/editorialIntroSection'
+import { statsSection } from './objects/sections/statsSection'
 
 import { experience } from './documents/experience'
 import { page } from './documents/page'
@@ -17,7 +19,7 @@ import { navigation } from './documents/navigation'
  * and from then on it is something the editor can add, reorder and hide — without
  * being able to change how it looks.
  */
-export const sectionTypes = [heroSection, experienceSection]
+export const sectionTypes = [heroSection, editorialIntroSection, statsSection, experienceSection]
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [

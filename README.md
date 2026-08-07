@@ -97,5 +97,14 @@ Carried over from the prototype — these are empty on purpose rather than inven
 - **Portrait image** — none supplied, so `Show portrait` is off.
 - **Hero paragraph (English)** — the prototype's English slot held Chinese text. The
   English in the seed is a translation of the Chinese, not your writing. Review it.
-- Sections beyond Hero and Experience (Projects, Playground, Numbers, Now, Contact)
-  are designed but not yet built as components.
+- Sections still to build: Projects, Playground, Currently, Contact/CTA, plus the
+  header and footer. They are designed in the prototype but not yet components.
+
+## Sections available today
+
+| Section | What it does |
+| --- | --- |
+| Hero | Headline with a rotating gold word, buttons, meta strip, optional portrait |
+| Editorial intro | A claim plus auto-numbered steps; the last step inverts to dark |
+| Stats | One wide feature panel plus a grid of numbers that count up on scroll |
+| Experience | Pulls Experience documents — featured as cards, the rest as a list |
