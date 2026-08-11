@@ -112,6 +112,24 @@ rather than a leaked token.
 The upside is that drafts stay private. A half-written role is not fetchable by
 anyone who knows the project ID.
 
+## Pages
+
+The site is a homepage plus real subpages, not one long scroll. Each page is a
+`page` document whose slug becomes its URL, so adding `/projects` means creating a
+document — no route to write.
+
+| URL | Holds |
+| --- | --- |
+| `/` | Hero, Numbers, three featured roles, closing CTA |
+| `/about` | The thread, Currently, CTA |
+| `/experience` | Every role, Numbers, CTA |
+| `/contact` | CTA only |
+
+Header and footer come from the **Navigation** document and render on every page.
+Language is stored in a cookie rather than a query string — layouts do not receive
+searchParams, so a `?lang=` approach would leave the header in English while the
+body switched.
+
 ## Sections available today
 
 | Section | What it does |

@@ -7,7 +7,7 @@ export const DEFAULT_LOCALE: Locale = 'en'
 export type LocaleString = { en?: string | null; zh?: string | null } | null | undefined
 export type LocaleText = LocaleString
 
-export function isLocale(value: string | undefined): value is Locale {
+export function isLocale(value: string | null | undefined): value is Locale {
   return LOCALES.includes(value as Locale)
 }
 

@@ -105,6 +105,10 @@ export const PAGE_QUERY = defineQuery(`
   }
 `)
 
+export const PAGE_SLUGS_QUERY = defineQuery(`
+  *[_type == "page" && defined(slug.current)].slug.current
+`)
+
 export const GLOBAL_SETTINGS_QUERY = defineQuery(`
   *[_type == "globalSettings"][0]{
     _id,
