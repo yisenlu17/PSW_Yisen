@@ -166,6 +166,18 @@ body switched.
 | Projects | Pulls Project documents — featured as alternating cards, the rest as "Also running". Cards link to `/projects/<slug>` |
 | Playground | Pulls Playground items — prominent sports as tiles, the rest stacked, interests as pills, plus a statement panel and two photographs |
 
+## Why a project has three narrative fields, not ten
+
+The spec listed Overview, Problem, Insight, Idea, Solution, What I Built, Process,
+Challenges, Results and Reflection as separate fields. They are consolidated into
+**Problem / Approach / Outcome**, plus a free-form body and a learnings list — a
+decision taken deliberately, not a gap.
+
+Ten adjacent boxes on one screen is a form nobody finishes, and the ones that do
+get filled repeat each other: Insight and Idea want the same sentence, Solution and
+What I Built want the same paragraph. Three fields carry the same story, and the
+body field takes anything that does not fit in them.
+
 ## Depth, and where it lives
 
 A project is written once and read at two depths. The **Card** field group is what

@@ -418,6 +418,65 @@ const playgroundSection = (key, extra = {}) => ({
   ...extra,
 })
 
+/**
+ * The highlight reel above the full mosaic.
+ *
+ * Draws on the same copy as the section below it — the mosaic is the index, this
+ * picks out the handful worth stopping on. Tiles carry a size, and the grid works
+ * out where they land.
+ */
+const weekendBento = {
+  _key: 'bento',
+  _type: 'bentoGridSection',
+  eyebrow: lit('The short version', '简版'),
+  title: lit('What the weekends turn into.', '周末最后变成了什么。'),
+  lede: LT('byLede'),
+  tiles: [
+    {
+      _key: 'basketball',
+      size: 'lg',
+      tone: 'navy',
+      kicker: lit('Basketball · 篮球', '篮球'),
+      title: lit('Two products and a commentary account', '两个产品和一个评论账号'),
+      body: LT('sp2'),
+    },
+    { _key: 'sports-count', size: 'sm', tone: 'gold', stat: '6', title: lit('Sports played', '在打的运动') },
+    {
+      _key: 'football',
+      size: 'wide',
+      tone: 'cream',
+      kicker: lit('Football · 足球', '足球'),
+      title: lit('Organised, not just played', '不只是参加,是组织'),
+      body: LT('sp1'),
+    },
+    {
+      _key: 'markets',
+      size: 'tall',
+      tone: 'paper',
+      kicker: L('byMk'),
+      title: lit('Reading, more than trading', '读得比交易多'),
+      body: LT('byMkB'),
+    },
+    {
+      _key: 'badminton',
+      size: 'sm',
+      tone: 'paper',
+      kicker: lit('Badminton · 羽毛球', '羽毛球'),
+      title: lit('China Open, Changzhou', '中国公开赛,常州'),
+      body: LT('sp3'),
+    },
+    {
+      _key: 'hotpot',
+      size: 'wide',
+      tone: 'cream',
+      kicker: lit('It paid off once, literally', '有一次真的换来了收益'),
+      title: lit('100 cups of drinks, negotiated', '谈下 100 多杯饮品赞助'),
+      body: LT('byNegot'),
+    },
+  ],
+  settings: settings('Bento — weekends', { theme: 'light' }),
+}
+
 /* ----------------------------------------------------------------------- pages */
 
 const pages = [
@@ -488,7 +547,7 @@ const pages = [
     slug: 'playground',
     seoTitle: lit('Playground — Yisen Lu', 'Playground —— 卢一森'),
     seoDescription: LT('byLede'),
-    sections: [playgroundSection('playground-full'), ctaSection('contact')],
+    sections: [playgroundSection('playground-full'), weekendBento, ctaSection('contact')],
   },
   {
     _id: 'page.contact',
