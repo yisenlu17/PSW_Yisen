@@ -8,8 +8,12 @@ import { editorialIntroSection } from './objects/sections/editorialIntroSection'
 import { statsSection } from './objects/sections/statsSection'
 import { currentlySection } from './objects/sections/currentlySection'
 import { ctaSection } from './objects/sections/ctaSection'
+import { projectsSection } from './objects/sections/projectsSection'
+import { playgroundSection } from './objects/sections/playgroundSection'
 
 import { experience } from './documents/experience'
+import { project } from './documents/project'
+import { playgroundItem } from './documents/playgroundItem'
 import { page } from './documents/page'
 import { globalSettings } from './documents/globalSettings'
 import { navigation } from './documents/navigation'
@@ -26,6 +30,8 @@ export const sectionTypes = [
   editorialIntroSection,
   statsSection,
   experienceSection,
+  projectsSection,
+  playgroundSection,
   currentlySection,
   ctaSection,
 ]
@@ -41,6 +47,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     // documents
     page,
     experience,
+    project,
+    playgroundItem,
     globalSettings,
     navigation,
   ],

@@ -137,6 +137,154 @@ const experienceDocs = EXPERIENCES.map((e, i) => ({
   skills: e.skills,
 }))
 
+/* -------------------------------------------------------------------- projects */
+
+/**
+ * The prototype's three featured projects plus the three smaller things under
+ * "Also running". Status is taken from what the prototype actually claimed —
+ * "In progress" and "In daily use" were written on the cards. 我是懂球王 said
+ * neither, and its link and user count were `[NEED CONTENT]`, so its status is
+ * left unset rather than guessed at: an unfilled chip is fixable in one click,
+ * a wrong one gets read as a claim.
+ */
+const PROJECTS = [
+  {
+    _id: 'project.dongqiuwang',
+    title: '我是懂球王',
+    slug: 'dongqiuwang',
+    category: lit('Product · Self-initiated · 2026', '产品 · 自主发起 · 2026'),
+    role: 'solo',
+    startDate: '2026-01-01',
+    featured: true,
+    tagline: lit(
+      'NBA prediction platform · planned and built solo',
+      'NBA 预测平台 · 独立规划与搭建'
+    ),
+    summaryKey: 'pr1b',
+    tags: [
+      lit('Vibe coding', 'Vibe coding'),
+      lit('Points & leaderboard', '积分与排行榜'),
+    ],
+    features: [
+      lit('Fixtures pulled in per game day', '按比赛日拉取赛程'),
+      lit('User picks against each fixture', '用户对每场比赛下注'),
+      lit('A points system that scores them', '给下注结果计分的积分体系'),
+      lit('A leaderboard people come back for', '让人愿意回来的排行榜'),
+    ],
+  },
+  {
+    _id: 'project.just-hoop',
+    title: 'Just Hoop',
+    slug: 'just-hoop',
+    category: lit('In progress · Singapore × China', '进行中 · 新加坡 × 中国'),
+    status: 'building',
+    role: 'solo',
+    startDate: '2026-03-01',
+    featured: true,
+    tagline: lit('Offline basketball, remote officiating', '线下篮球,远程执裁'),
+    summaryKey: 'pr2b',
+    tags: [lit('Operations design', '运营设计')],
+  },
+  {
+    _id: 'project.zhipai',
+    title: '智排',
+    slug: 'zhipai',
+    category: lit('Built for a real user', '为一个真实用户而做'),
+    status: 'inUse',
+    role: 'solo',
+    startDate: '2025-01-01',
+    featured: true,
+    tagline: lit(
+      'Scheduling & admin back office · AI-assisted build',
+      '排课与管理后台 · AI 辅助开发'
+    ),
+    summaryKey: 'pr3b',
+    highlight: lit('First real user', '第一个真实用户'),
+    tags: [lit('AI + vibe coding', 'AI + vibe coding'), lit('In daily use', '每天在用')],
+  },
+  {
+    _id: 'project.dongwang-brothers',
+    title: '懂王兄弟说球',
+    slug: 'dongwang-brothers',
+    category: lit('Commentary account', '评论账号'),
+    role: 'solo',
+    featured: false,
+    summaryKey: 'al1',
+  },
+  {
+    _id: 'project.life-channel',
+    title: 'Life & growth channel',
+    titleLocal: '生活与成长账号',
+    slug: 'life-growth-channel',
+    category: lit('Personal account', '个人账号'),
+    role: 'solo',
+    featured: false,
+    summaryKey: 'al2',
+  },
+  {
+    _id: 'project.uir-hunter',
+    title: 'UIR Hunter',
+    slug: 'uir-hunter',
+    category: lit('Student venture · 2023', '学生创业项目 · 2023'),
+    status: 'archived',
+    role: 'lead',
+    startDate: '2023-01-01',
+    endDate: '2023-12-01',
+    featured: false,
+    summaryKey: 'al3',
+    highlight: lit('Best Creativity Award, 2023', '2023 年最佳创意奖'),
+  },
+]
+
+const projectDocs = PROJECTS.map((p, i) => ({
+  _id: p._id,
+  _type: 'project',
+  title: p.title,
+  ...(p.titleLocal ? { titleLocal: p.titleLocal } : {}),
+  slug: { _type: 'slug', current: p.slug },
+  category: p.category,
+  ...(p.status ? { status: p.status } : {}),
+  role: p.role,
+  ...(p.startDate ? { startDate: p.startDate } : {}),
+  ...(p.endDate ? { endDate: p.endDate } : {}),
+  featured: p.featured,
+  order: i + 1,
+  ...(p.tagline ? { tagline: p.tagline } : {}),
+  summary: LT(p.summaryKey),
+  ...(p.tags ? { tags: p.tags } : {}),
+  ...(p.highlight ? { highlight: p.highlight } : {}),
+  ...(p.features ? { features: p.features } : {}),
+}))
+
+/* ------------------------------------------------------------------ playground */
+
+const PLAYGROUND = [
+  { name: 'Football', local: '足球', kind: 'sport', prominent: true, noteKey: 'sp1' },
+  { name: 'Basketball', local: '篮球', kind: 'sport', prominent: true, noteKey: 'sp2' },
+  { name: 'Badminton', local: '羽毛球', kind: 'sport', prominent: true, noteKey: 'sp3' },
+  { name: 'Table tennis', local: '乒乓球', kind: 'sport' },
+  { name: 'Tennis', local: '网球', kind: 'sport' },
+  { name: 'Baseball', local: '棒球', kind: 'sport' },
+  { name: 'Debate', local: '辩论', kind: 'interest' },
+  { name: 'Mystery & deduction games', local: '推理类活动', kind: 'interest' },
+  { name: 'Stock market research', local: '研究股市', kind: 'interest' },
+  { name: 'Short-form video', local: '短视频', kind: 'interest' },
+  { name: 'Student union organising', local: '学生会组织工作', kind: 'interest' },
+  // Already the same in both languages, so there is no second name to give it.
+  { name: '日本語', kind: 'interest' },
+]
+
+const playgroundDocs = PLAYGROUND.map((item, i) => ({
+  _id: `playground.${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `item-${i}`}`,
+  _type: 'playgroundItem',
+  kind: item.kind,
+  name: item.name,
+  ...(item.local ? { nameLocal: item.local } : {}),
+  ...(item.noteKey ? { note: LT(item.noteKey) } : {}),
+  ...(item.prominent ? { prominent: true } : {}),
+  order: i + 1,
+}))
+
 /* -------------------------------------------------------------------- sections */
 
 const heroSection = {
@@ -241,6 +389,35 @@ const experienceSection = (key, extra = {}) => ({
   ...extra,
 })
 
+const projectsSection = (key, extra = {}) => ({
+  _key: key,
+  _type: 'projectsSection',
+  eyebrow: L('prBrow'),
+  title: L('prTitle'),
+  lede: LT('prLede'),
+  source: 'auto',
+  alsoLabel: L('prAlso'),
+  linkToDetail: true,
+  // Deep navy with the cards floating on it — the one section the prototype
+  // inverted, and the reason it reads as the centrepiece.
+  settings: settings('Projects', { anchorId: 'projects', theme: 'dark' }),
+  ...extra,
+})
+
+const playgroundSection = (key, extra = {}) => ({
+  _key: key,
+  _type: 'playgroundSection',
+  eyebrow: L('byBrow'),
+  title: L('byTitle'),
+  lede: LT('byLede'),
+  source: 'auto',
+  statement: { label: L('byMk'), body: LT('byMkB') },
+  interestsLabel: L('byElse'),
+  note: LT('byNegot'),
+  settings: settings('Playground', { anchorId: 'playground', theme: 'cream' }),
+  ...extra,
+})
+
 /* ----------------------------------------------------------------------- pages */
 
 const pages = [
@@ -262,6 +439,12 @@ const pages = [
         variant: 'cards',
         limit: 3,
         settings: settings('Featured experience', { anchorId: 'experience', theme: 'light' }),
+      }),
+      // Three cards, no "Also running" strip — the full list lives on /projects.
+      projectsSection('projects-teaser', {
+        limit: 3,
+        alsoLabel: undefined,
+        settings: settings('Featured projects', { anchorId: 'projects', theme: 'dark' }),
       }),
       ctaSection('contact'),
     ],
@@ -290,6 +473,22 @@ const pages = [
       statsSection,
       ctaSection('contact'),
     ],
+  },
+  {
+    _id: 'page.projects',
+    title: 'Projects',
+    slug: 'projects',
+    seoTitle: lit('Projects — Yisen Lu', '项目 —— 卢一森'),
+    seoDescription: LT('prLede'),
+    sections: [projectsSection('projects-full'), ctaSection('contact')],
+  },
+  {
+    _id: 'page.playground',
+    title: 'Playground',
+    slug: 'playground',
+    seoTitle: lit('Playground — Yisen Lu', 'Playground —— 卢一森'),
+    seoDescription: LT('byLede'),
+    sections: [playgroundSection('playground-full'), ctaSection('contact')],
   },
   {
     _id: 'page.contact',
@@ -338,9 +537,11 @@ const navigation = {
   items: [
     { _key: 'n1', label: L('nAbout'), href: '/about', emphasis: 'plain', hidden: false },
     { _key: 'n2', label: L('nExp'), href: '/experience', emphasis: 'plain', hidden: false },
-    { _key: 'n3', label: L('nContact'), href: '/contact', emphasis: 'plain', hidden: false },
+    { _key: 'n3', label: L('nProj'), href: '/projects', emphasis: 'plain', hidden: false },
+    { _key: 'n4', label: L('nPlay'), href: '/playground', emphasis: 'plain', hidden: false },
+    { _key: 'n5', label: L('nContact'), href: '/contact', emphasis: 'plain', hidden: false },
     // Résumé points at the PDF once one is uploaded under Global settings.
-    { _key: 'n4', label: L('nResume'), href: '/contact', emphasis: 'gold', hidden: false },
+    { _key: 'n6', label: L('nResume'), href: '/contact', emphasis: 'gold', hidden: false },
   ],
   footerStatement: LT('ftState'),
   footerNote: L('ftMade'),
@@ -349,7 +550,14 @@ const navigation = {
 
 /* ------------------------------------------------------------------------ run */
 
-const all = [...experienceDocs, ...pageDocs, globalSettings, navigation]
+const all = [
+  ...experienceDocs,
+  ...projectDocs,
+  ...playgroundDocs,
+  ...pageDocs,
+  globalSettings,
+  navigation,
+]
 
 try {
   if (REPLACE) {
@@ -364,12 +572,20 @@ try {
   await all.reduce((t, doc) => t.createIfNotExists(doc), client.transaction()).commit()
 
   console.log(`✓ Seeded ${all.length} documents into ${projectId}/${dataset}`)
-  console.log(`  ${experienceDocs.length} experience · ${pageDocs.length} pages · globalSettings · navigation`)
+  console.log(
+    `  ${experienceDocs.length} experience · ${projectDocs.length} projects · ` +
+      `${playgroundDocs.length} playground · ${pageDocs.length} pages · globalSettings · navigation`
+  )
   console.log('\n  Pages:')
   pages.forEach((p) => console.log(`    ${p.slug === '/' ? '/' : '/' + p.slug}  (${p.sections.length} sections)`))
+  console.log(`    /projects/<slug>     (${projectDocs.length} generated from the project documents)`)
+  console.log(`    /experience/<slug>   (${experienceDocs.length} generated from the experience documents)`)
   console.log('\n  Still empty on purpose — fill these in the studio:')
   console.log('    · Global settings → Email, Social links, Résumé PDF')
   console.log('    · Hero → Portrait image (Show portrait is off until one exists)')
+  console.log('    · Projects → Cover images, links, and the case-study fields')
+  console.log('    · 我是懂球王 → Status (the prototype claimed neither live nor in progress)')
+  console.log('    · Playground → the two photographs')
 } catch (err) {
   console.error('✗ Seed failed:', err.message)
   process.exit(1)

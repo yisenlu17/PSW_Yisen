@@ -2,6 +2,8 @@ import { createDataAttribute } from 'next-sanity'
 
 import { Hero, type HeroSectionData } from './Hero'
 import { ExperienceSection, type ExperienceSectionData } from './ExperienceSection'
+import { ProjectsSection, type ProjectsSectionData } from './ProjectsSection'
+import { Playground, type PlaygroundSectionData } from './Playground'
 import { EditorialIntro, type EditorialIntroSectionData } from './EditorialIntro'
 import { Stats, type StatsSectionData } from './Stats'
 import { Currently, type CurrentlySectionData } from './Currently'
@@ -12,6 +14,8 @@ import type { SiteSettings } from '@/lib/site'
 export type SectionData =
   | HeroSectionData
   | ExperienceSectionData
+  | ProjectsSectionData
+  | PlaygroundSectionData
   | EditorialIntroSectionData
   | StatsSectionData
   | CurrentlySectionData
@@ -34,6 +38,8 @@ const RENDERERS = {
   editorialIntroSection: EditorialIntro,
   statsSection: Stats,
   experienceSection: ExperienceSection,
+  projectsSection: ProjectsSection,
+  playgroundSection: Playground,
   currentlySection: Currently,
   ctaSection: Cta,
 } as const

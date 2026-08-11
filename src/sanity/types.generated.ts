@@ -21,6 +21,11 @@ export type Feature = {
   description?: LocaleText;
 };
 
+export type Statement = {
+  label?: LocaleString;
+  body?: LocaleText;
+};
+
 export type Navigation = {
   _id: string;
   _type: "navigation";
@@ -135,6 +140,180 @@ export type SanityImageHotspot = {
   width: number;
 };
 
+export type PlaygroundItem = {
+  _id: string;
+  _type: "playgroundItem";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  kind: "sport" | "interest";
+  name: string;
+  nameLocal?: string;
+  note?: LocaleText;
+  prominent?: boolean;
+  order?: number;
+};
+
+export type ExperienceReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "experience";
+};
+
+export type ProjectReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "project";
+};
+
+export type Project = {
+  _id: string;
+  _type: "project";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  titleLocal?: string;
+  slug: Slug;
+  category?: LocaleString;
+  status?: "live" | "inUse" | "building" | "prototype" | "archived";
+  role?: "solo" | "lead" | "contributor";
+  startDate?: string;
+  endDate?: string;
+  featured?: boolean;
+  order?: number;
+  tagline?: LocaleString;
+  summary?: LocaleText;
+  tags?: Array<
+    {
+      _key: string;
+    } & LocaleString
+  >;
+  highlight?: LocaleString;
+  problem?: LocaleText;
+  approach?: LocaleText;
+  outcome?: LocaleText;
+  body?: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "normal" | "h3" | "blockquote";
+        listItem?: "bullet" | "number";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+    | {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        alt?: string;
+        caption?: LocaleString;
+        _type: "image";
+        _key: string;
+      }
+  >;
+  bodyZh?: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "normal" | "h3" | "blockquote";
+        listItem?: "bullet" | "number";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+    | {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        alt?: string;
+        caption?: LocaleString;
+        _type: "image";
+        _key: string;
+      }
+  >;
+  metrics?: Array<{
+    value?: string;
+    label?: LocaleString;
+    source?: LocaleString;
+    _type: "projectMetric";
+    _key: string;
+  }>;
+  features?: Array<
+    {
+      _key: string;
+    } & LocaleString
+  >;
+  learnings?: Array<
+    {
+      _key: string;
+    } & LocaleString
+  >;
+  stack?: Array<string>;
+  cover?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  gallery?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    caption?: LocaleString;
+    _type: "image";
+    _key: string;
+  }>;
+  links?: Array<{
+    kind?: "live" | "code" | "writeup" | "video" | "other";
+    label?: LocaleString;
+    url: string;
+    _type: "projectLink";
+    _key: string;
+  }>;
+  relatedExperience?: ExperienceReference;
+  relatedProjects?: Array<
+    {
+      _key: string;
+    } & ProjectReference
+  >;
+  seoTitle?: LocaleString;
+  seoDescription?: LocaleText;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
 export type Experience = {
   _id: string;
   _type: "experience";
@@ -213,12 +392,6 @@ export type Experience = {
   }>;
 };
 
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
-
 export type Page = {
   _id: string;
   _type: "page";
@@ -240,6 +413,12 @@ export type Page = {
     | ({
         _key: string;
       } & ExperienceSection)
+    | ({
+        _key: string;
+      } & ProjectsSection)
+    | ({
+        _key: string;
+      } & PlaygroundSection)
     | ({
         _key: string;
       } & CurrentlySection)
@@ -307,11 +486,61 @@ export type CurrentlySection = {
   settings?: SectionSettings;
 };
 
-export type ExperienceReference = {
+export type PlaygroundItemReference = {
   _ref: string;
   _type: "reference";
   _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "experience";
+  [internalGroqTypeReferenceTo]?: "playgroundItem";
+};
+
+export type PlaygroundSection = {
+  _type: "playgroundSection";
+  eyebrow?: LocaleString;
+  title?: LocaleString;
+  lede?: LocaleText;
+  source?: "auto" | "manual";
+  items?: Array<
+    {
+      _key: string;
+    } & PlaygroundItemReference
+  >;
+  statement?: Statement;
+  interestsLabel?: LocaleString;
+  note?: LocaleText;
+  primaryImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  secondaryImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  settings?: SectionSettings;
+};
+
+export type ProjectsSection = {
+  _type: "projectsSection";
+  eyebrow?: LocaleString;
+  title?: LocaleString;
+  lede?: LocaleText;
+  source?: "auto" | "manual";
+  projects?: Array<
+    {
+      _key: string;
+    } & ProjectReference
+  >;
+  limit?: number;
+  alsoLabel?: LocaleString;
+  linkToDetail?: boolean;
+  settings?: SectionSettings;
 };
 
 export type ExperienceSection = {
@@ -499,6 +728,7 @@ export type Geopoint = {
 
 export type AllSanitySchemaTypes =
   | Feature
+  | Statement
   | Navigation
   | LocaleString
   | LocaleText
@@ -507,13 +737,19 @@ export type AllSanitySchemaTypes =
   | GlobalSettings
   | SanityImageCrop
   | SanityImageHotspot
-  | Experience
+  | PlaygroundItem
+  | ExperienceReference
+  | ProjectReference
+  | Project
   | Slug
+  | Experience
   | Page
   | CtaSection
   | SectionSettings
   | CurrentlySection
-  | ExperienceReference
+  | PlaygroundItemReference
+  | PlaygroundSection
+  | ProjectsSection
   | ExperienceSection
   | StatsSection
   | EditorialIntroSection
@@ -529,7 +765,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills }      )    }  }  }
+// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills }      )    },    _type == "projectsSection" => {      eyebrow,      title,      lede,      source,      limit,      alsoLabel,      linkToDetail,      "projects": select(        source == "manual" => projects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },        *[_type == "project" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }      )    },    _type == "playgroundSection" => {      eyebrow,      title,      lede,      source,      statement{ label, body },      interestsLabel,      note,      primaryImage,      secondaryImage,      "items": select(        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, name asc)[0...60]{            _id, kind, name, nameLocal, note, prominent, order          }      )    }  }  }
 export type PAGE_QUERY_RESULT = {
   _id: string;
   _type: "page";
@@ -669,6 +905,88 @@ export type PAGE_QUERY_RESULT = {
       }
     | {
         _key: string;
+        _type: "playgroundSection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString | null;
+        lede: LocaleText | null;
+        source: "auto" | "manual" | null;
+        statement: {
+          label: LocaleString | null;
+          body: LocaleText | null;
+        } | null;
+        interestsLabel: LocaleString | null;
+        note: LocaleText | null;
+        primaryImage: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          alt?: string;
+          _type: "image";
+        } | null;
+        secondaryImage: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          alt?: string;
+          _type: "image";
+        } | null;
+        items: Array<{
+          _id: string;
+          kind: "interest" | "sport";
+          name: string;
+          nameLocal: string | null;
+          note: LocaleText | null;
+          prominent: boolean | null;
+          order: number | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "projectsSection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString | null;
+        lede: LocaleText | null;
+        source: "auto" | "manual" | null;
+        limit: number | null;
+        alsoLabel: LocaleString | null;
+        linkToDetail: boolean | null;
+        projects: Array<{
+          _id: string;
+          title: string;
+          titleLocal: string | null;
+          slug: string;
+          category: LocaleString | null;
+          status:
+            "archived" | "building" | "inUse" | "live" | "prototype" | null;
+          role: "contributor" | "lead" | "solo" | null;
+          startDate: string | null;
+          endDate: string | null;
+          featured: boolean | null;
+          order: number | null;
+          tagline: LocaleString | null;
+          summary: LocaleText | null;
+          tags: Array<
+            {
+              _key: string;
+            } & LocaleString
+          > | null;
+          highlight: LocaleString | null;
+          cover: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            _type: "image";
+          } | null;
+        }> | null;
+      }
+    | {
+        _key: string;
         _type: "statsSection";
         settings: SectionSettings | null;
         eyebrow: LocaleString | null;
@@ -695,6 +1013,281 @@ export type PAGE_QUERY_RESULT = {
 // Variable: PAGE_SLUGS_QUERY
 // Query: *[_type == "page" && defined(slug.current)].slug.current
 export type PAGE_SLUGS_QUERY_RESULT = Array<string>;
+
+// Source: src/sanity/queries.ts
+// Variable: PROJECT_QUERY
+// Query: *[_type == "project" && slug.current == $slug][0]{    _id,    _type,      _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover,    problem,    approach,    outcome,    body,    bodyZh,    metrics[]{ _key, value, label, source },    features,    learnings,    stack,    gallery[]{ _key, alt, caption, asset },    links[]{ _key, kind, label, url },    relatedExperience->{ _id, company, "slug": slug.current, role, category },    relatedProjects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },    seoTitle,    seoDescription  }
+export type PROJECT_QUERY_RESULT = {
+  _id: string;
+  _type: "project";
+  title: string;
+  titleLocal: string | null;
+  slug: string;
+  category: LocaleString | null;
+  status: "archived" | "building" | "inUse" | "live" | "prototype" | null;
+  role: "contributor" | "lead" | "solo" | null;
+  startDate: string | null;
+  endDate: string | null;
+  featured: boolean | null;
+  order: number | null;
+  tagline: LocaleString | null;
+  summary: LocaleText | null;
+  tags: Array<
+    {
+      _key: string;
+    } & LocaleString
+  > | null;
+  highlight: LocaleString | null;
+  cover: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  problem: LocaleText | null;
+  approach: LocaleText | null;
+  outcome: LocaleText | null;
+  body: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "blockquote" | "h3" | "normal";
+        listItem?: "bullet" | "number";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+    | {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        alt?: string;
+        caption?: LocaleString;
+        _type: "image";
+        _key: string;
+      }
+  > | null;
+  bodyZh: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "blockquote" | "h3" | "normal";
+        listItem?: "bullet" | "number";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+    | {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        alt?: string;
+        caption?: LocaleString;
+        _type: "image";
+        _key: string;
+      }
+  > | null;
+  metrics: Array<{
+    _key: string;
+    value: string | null;
+    label: LocaleString | null;
+    source: LocaleString | null;
+  }> | null;
+  features: Array<
+    {
+      _key: string;
+    } & LocaleString
+  > | null;
+  learnings: Array<
+    {
+      _key: string;
+    } & LocaleString
+  > | null;
+  stack: Array<string> | null;
+  gallery: Array<{
+    _key: string;
+    alt: string | null;
+    caption: LocaleString | null;
+    asset: SanityImageAssetReference | null;
+  }> | null;
+  links: Array<{
+    _key: string;
+    kind: "code" | "live" | "other" | "video" | "writeup" | null;
+    label: LocaleString | null;
+    url: string;
+  }> | null;
+  relatedExperience: {
+    _id: string;
+    company: string;
+    slug: string;
+    role: LocaleString;
+    category: LocaleString | null;
+  } | null;
+  relatedProjects: Array<{
+    _id: string;
+    title: string;
+    titleLocal: string | null;
+    slug: string;
+    category: LocaleString | null;
+    status: "archived" | "building" | "inUse" | "live" | "prototype" | null;
+    role: "contributor" | "lead" | "solo" | null;
+    startDate: string | null;
+    endDate: string | null;
+    featured: boolean | null;
+    order: number | null;
+    tagline: LocaleString | null;
+    summary: LocaleText | null;
+    tags: Array<
+      {
+        _key: string;
+      } & LocaleString
+    > | null;
+    highlight: LocaleString | null;
+    cover: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      alt?: string;
+      _type: "image";
+    } | null;
+  }> | null;
+  seoTitle: LocaleString | null;
+  seoDescription: LocaleText | null;
+} | null;
+
+// Source: src/sanity/queries.ts
+// Variable: PROJECT_SLUGS_QUERY
+// Query: *[_type == "project" && defined(slug.current)].slug.current
+export type PROJECT_SLUGS_QUERY_RESULT = Array<string>;
+
+// Source: src/sanity/queries.ts
+// Variable: EXPERIENCE_QUERY
+// Query: *[_type == "experience" && slug.current == $slug][0]{      _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills,    _type,    secondary,    fullStory,    responsibilities,    problemsSolved,    metrics[]{ _key, value, label },    images[]{ _key, alt, asset },    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]      | order(coalesce(order, 9999) asc)[0...6]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }  }
+export type EXPERIENCE_QUERY_RESULT = {
+  _id: string;
+  company: string;
+  slug: string;
+  role: LocaleString;
+  category: LocaleString | null;
+  location: string | null;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  startDate: string;
+  endDate: string | null;
+  featured: boolean | null;
+  order: number | null;
+  summary: LocaleText | null;
+  secondary: LocaleText | null;
+  highlight: LocaleString | null;
+  skills: Array<string> | null;
+  _type: "experience";
+  fullStory: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  responsibilities: Array<
+    {
+      _key: string;
+    } & LocaleString
+  > | null;
+  problemsSolved: Array<
+    {
+      _key: string;
+    } & LocaleString
+  > | null;
+  metrics: Array<{
+    _key: string;
+    value: string | null;
+    label: LocaleString | null;
+  }> | null;
+  images: Array<{
+    _key: string;
+    alt: string | null;
+    asset: SanityImageAssetReference | null;
+  }> | null;
+  documents: Array<{
+    _key: string;
+    url: string | null;
+    filename: string | null;
+  }> | null;
+  projects: Array<{
+    _id: string;
+    title: string;
+    titleLocal: string | null;
+    slug: string;
+    category: LocaleString | null;
+    status: "archived" | "building" | "inUse" | "live" | "prototype" | null;
+    role: "contributor" | "lead" | "solo" | null;
+    startDate: string | null;
+    endDate: string | null;
+    featured: boolean | null;
+    order: number | null;
+    tagline: LocaleString | null;
+    summary: LocaleText | null;
+    tags: Array<
+      {
+        _key: string;
+      } & LocaleString
+    > | null;
+    highlight: LocaleString | null;
+    cover: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      alt?: string;
+      _type: "image";
+    } | null;
+  }>;
+} | null;
+
+// Source: src/sanity/queries.ts
+// Variable: EXPERIENCE_SLUGS_QUERY
+// Query: *[_type == "experience" && defined(slug.current)].slug.current
+export type EXPERIENCE_SLUGS_QUERY_RESULT = Array<string>;
 
 // Source: src/sanity/queries.ts
 // Variable: GLOBAL_SETTINGS_QUERY
@@ -763,8 +1356,12 @@ export type NAVIGATION_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
+    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n }\n      )\n    },\n\n    _type == "projectsSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      limit,\n      alsoLabel,\n      linkToDetail,\n      "projects": select(\n        source == "manual" => projects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n        *[_type == "project" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n      )\n    },\n\n    _type == "playgroundSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      statement{ label, body },\n      interestsLabel,\n      note,\n      primaryImage,\n      secondaryImage,\n      "items": select(\n        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },\n        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, name asc)[0...60]{\n            _id, kind, name, nameLocal, note, prominent, order\n          }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
     '\n  *[_type == "page" && defined(slug.current)].slug.current\n': PAGE_SLUGS_QUERY_RESULT;
+    '\n  *[_type == "project" && slug.current == $slug][0]{\n    _id,\n    _type,\n    \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n,\n    problem,\n    approach,\n    outcome,\n    body,\n    bodyZh,\n    metrics[]{ _key, value, label, source },\n    features,\n    learnings,\n    stack,\n    gallery[]{ _key, alt, caption, asset },\n    links[]{ _key, kind, label, url },\n    relatedExperience->{ _id, company, "slug": slug.current, role, category },\n    relatedProjects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n    seoTitle,\n    seoDescription\n  }\n': PROJECT_QUERY_RESULT;
+    '\n  *[_type == "project" && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT;
+    '\n  *[_type == "experience" && slug.current == $slug][0]{\n    \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n,\n    _type,\n    secondary,\n    fullStory,\n    responsibilities,\n    problemsSolved,\n    metrics[]{ _key, value, label },\n    images[]{ _key, alt, asset },\n    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },\n    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]\n      | order(coalesce(order, 9999) asc)[0...6]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n  }\n': EXPERIENCE_QUERY_RESULT;
+    '\n  *[_type == "experience" && defined(slug.current)].slug.current\n': EXPERIENCE_SLUGS_QUERY_RESULT;
     '\n  *[_type == "globalSettings"][0]{\n    _id,\n    name,\n    nameLocal,\n    profileImage,\n    shortBio,\n    currentRole,\n    currentLocation,\n    availability,\n    email,\n    socialLinks[]{ _key, platform, label, url },\n    "resumeUrl": resume.asset->url,\n    seoTitle,\n    seoDescription,\n    ogImage\n  }\n': GLOBAL_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "navigation"][0]{\n    _id,\n    items[!hidden]{ _key, label, href, external, emphasis },\n    footerStatement,\n    footerNote,\n    copyright\n  }\n': NAVIGATION_QUERY_RESULT;
   }

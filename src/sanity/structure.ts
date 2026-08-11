@@ -4,6 +4,8 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { MenuIcon } from '@sanity/icons/Menu'
 import { DocumentIcon } from '@sanity/icons/Document'
 import { CaseIcon } from '@sanity/icons/Case'
+import { RocketIcon } from '@sanity/icons/Rocket'
+import { PlayIcon } from '@sanity/icons/Play'
 
 /**
  * Studio navigation.
@@ -29,6 +31,24 @@ export const structure: StructureResolver = (S) =>
           S.documentTypeList('experience')
             .title('Experience')
             .defaultOrdering([{ field: 'startDate', direction: 'desc' }])
+        ),
+
+      S.listItem()
+        .title('Projects')
+        .icon(RocketIcon)
+        .child(
+          S.documentTypeList('project')
+            .title('Projects')
+            .defaultOrdering([{ field: 'order', direction: 'asc' }])
+        ),
+
+      S.listItem()
+        .title('Playground')
+        .icon(PlayIcon)
+        .child(
+          S.documentTypeList('playgroundItem')
+            .title('Playground')
+            .defaultOrdering([{ field: 'order', direction: 'asc' }])
         ),
 
       S.divider(),

@@ -24,6 +24,30 @@ const EXPERIENCE_FIELDS = /* groq */ `
   skills
 `
 
+/**
+ * Card-level project fields. The case-study fields are deliberately absent: a
+ * Projects section with five cards would otherwise drag five full write-ups and
+ * their galleries across the wire to render three paragraphs.
+ */
+const PROJECT_CARD_FIELDS = /* groq */ `
+  _id,
+  title,
+  titleLocal,
+  "slug": slug.current,
+  category,
+  status,
+  role,
+  startDate,
+  endDate,
+  featured,
+  order,
+  tagline,
+  summary,
+  tags,
+  highlight,
+  cover
+`
+
 const SECTIONS = /* groq */ `
   sections[]{
     _key,
@@ -88,6 +112,40 @@ const SECTIONS = /* groq */ `
         *[_type == "experience" && !(_id in path("drafts.**"))]
           | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ ${EXPERIENCE_FIELDS} }
       )
+    },
+
+    _type == "projectsSection" => {
+      eyebrow,
+      title,
+      lede,
+      source,
+      limit,
+      alsoLabel,
+      linkToDetail,
+      "projects": select(
+        source == "manual" => projects[]->{ ${PROJECT_CARD_FIELDS} },
+        *[_type == "project" && !(_id in path("drafts.**"))]
+          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ ${PROJECT_CARD_FIELDS} }
+      )
+    },
+
+    _type == "playgroundSection" => {
+      eyebrow,
+      title,
+      lede,
+      source,
+      statement{ label, body },
+      interestsLabel,
+      note,
+      primaryImage,
+      secondaryImage,
+      "items": select(
+        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },
+        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]
+          | order(coalesce(order, 9999) asc, name asc)[0...60]{
+            _id, kind, name, nameLocal, note, prominent, order
+          }
+      )
     }
   }
 `
@@ -107,6 +165,68 @@ export const PAGE_QUERY = defineQuery(`
 
 export const PAGE_SLUGS_QUERY = defineQuery(`
   *[_type == "page" && defined(slug.current)].slug.current
+`)
+
+/* ------------------------------------------------------------------ details */
+
+/**
+ * The full project, for `/projects/<slug>`.
+ *
+ * `relatedProjects` resolves to card fields only — one hop, not a recursive walk —
+ * so a chain of projects that all reference each other still costs a single query.
+ */
+export const PROJECT_QUERY = defineQuery(`
+  *[_type == "project" && slug.current == $slug][0]{
+    _id,
+    _type,
+    ${PROJECT_CARD_FIELDS},
+    problem,
+    approach,
+    outcome,
+    body,
+    bodyZh,
+    metrics[]{ _key, value, label, source },
+    features,
+    learnings,
+    stack,
+    gallery[]{ _key, alt, caption, asset },
+    links[]{ _key, kind, label, url },
+    relatedExperience->{ _id, company, "slug": slug.current, role, category },
+    relatedProjects[]->{ ${PROJECT_CARD_FIELDS} },
+    seoTitle,
+    seoDescription
+  }
+`)
+
+export const PROJECT_SLUGS_QUERY = defineQuery(`
+  *[_type == "project" && defined(slug.current)].slug.current
+`)
+
+/**
+ * The full role, for `/experience/<slug>`.
+ *
+ * Projects point at roles rather than the other way round, so the "what came out of
+ * it" list is found by reverse lookup instead of a second field an editor would have
+ * to keep in sync with the one on the project.
+ */
+export const EXPERIENCE_QUERY = defineQuery(`
+  *[_type == "experience" && slug.current == $slug][0]{
+    ${EXPERIENCE_FIELDS},
+    _type,
+    secondary,
+    fullStory,
+    responsibilities,
+    problemsSolved,
+    metrics[]{ _key, value, label },
+    images[]{ _key, alt, asset },
+    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },
+    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]
+      | order(coalesce(order, 9999) asc)[0...6]{ ${PROJECT_CARD_FIELDS} }
+  }
+`)
+
+export const EXPERIENCE_SLUGS_QUERY = defineQuery(`
+  *[_type == "experience" && defined(slug.current)].slug.current
 `)
 
 export const GLOBAL_SETTINGS_QUERY = defineQuery(`

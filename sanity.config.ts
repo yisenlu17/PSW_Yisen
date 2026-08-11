@@ -38,6 +38,24 @@ export default defineConfig({
               ],
             }),
           }),
+          // A project turns up on its own page and on whichever page carries the
+          // Projects section, so both are offered rather than only the detail page.
+          project: defineLocations({
+            select: { title: 'title', slug: 'slug.current' },
+            resolve: (doc) => ({
+              locations: [
+                { title: doc?.title || 'Project', href: `/projects/${doc?.slug}` },
+                { title: 'Projects', href: '/projects' },
+                { title: 'Homepage', href: '/' },
+              ],
+            }),
+          }),
+          playgroundItem: defineLocations({
+            select: { name: 'name' },
+            resolve: () => ({
+              locations: [{ title: 'Playground', href: '/playground' }],
+            }),
+          }),
           page: defineLocations({
             select: { title: 'title', slug: 'slug.current' },
             resolve: (doc) => ({

@@ -45,6 +45,8 @@ npm run dev
 | --- | --- |
 | Change any wording | Studio → Pages → Homepage |
 | Add an internship | Studio → Experience → Create |
+| Add a project | Studio → Projects → Create |
+| Add a sport or interest | Studio → Playground → Create |
 | Reorder sections | Studio → Presentation → drag the section |
 | Hide a section | Section settings → Hide this section |
 | Swap an image | Click the image field, upload |
@@ -97,8 +99,17 @@ Carried over from the prototype — these are empty on purpose rather than inven
 - **Portrait image** — none supplied, so `Show portrait` is off.
 - **Hero paragraph (English)** — the prototype's English slot held Chinese text. The
   English in the seed is a translation of the Chinese, not your writing. Review it.
-- Sections still to build: Projects, Playground, Currently, Contact/CTA, plus the
-  header and footer. They are designed in the prototype but not yet components.
+- **Project covers and links** — every project card has a 16:10 image slot and a
+  Links list, both empty. The cards keep their frame without an image, so the page
+  works meanwhile, but an interviewer sees three grey rectangles.
+- **我是懂球王's status** — the prototype claimed neither "live" nor "in progress" for
+  it, and its link and user count were `[NEED CONTENT]`. Status is left unset rather
+  than guessed; pick one in the studio and the chip appears.
+- **Playground photographs** — the two `<image-slot>`s in the prototype were empty.
+  The mosaic drops to fewer columns until they are filled, rather than showing gaps.
+- **Case-study fields** — every project publishes from its card fields alone. The
+  problem/approach/outcome fields and the full write-up are what turn `/projects/…`
+  into something worth reading; they are empty on every seeded project.
 
 ## A note on the dataset
 
@@ -120,10 +131,24 @@ document — no route to write.
 
 | URL | Holds |
 | --- | --- |
-| `/` | Hero, Numbers, three featured roles, closing CTA |
+| `/` | Hero, Numbers, three featured roles, three featured projects, closing CTA |
 | `/about` | The thread, Currently, CTA |
 | `/experience` | Every role, Numbers, CTA |
+| `/projects` | Every project, "Also running", CTA |
+| `/playground` | The sports-and-interests mosaic, CTA |
 | `/contact` | CTA only |
+
+Two routes are generated from documents rather than from `page` documents, because a
+project and a role each need a page of their own without one being assembled by hand:
+
+| URL | Comes from |
+| --- | --- |
+| `/projects/<slug>` | One per **Project** document |
+| `/experience/<slug>` | One per **Experience** document |
+
+Creating a project in the studio publishes its page. Nothing else is needed — no
+route to write, no section to add, no link to remember: the Projects section picks it
+up and the card links to it.
 
 Header and footer come from the **Navigation** document and render on every page.
 Language is stored in a cookie rather than a query string — layouts do not receive
@@ -138,3 +163,21 @@ body switched.
 | Editorial intro | A claim plus auto-numbered steps; the last step inverts to dark |
 | Stats | One wide feature panel plus a grid of numbers that count up on scroll |
 | Experience | Pulls Experience documents — featured as cards, the rest as a list |
+| Projects | Pulls Project documents — featured as alternating cards, the rest as "Also running". Cards link to `/projects/<slug>` |
+| Playground | Pulls Playground items — prominent sports as tiles, the rest stacked, interests as pills, plus a statement panel and two photographs |
+
+## Depth, and where it lives
+
+A project is written once and read at two depths. The **Card** field group is what
+appears in the Projects section; the **Case study** group only ever appears on
+`/projects/<slug>`. A project with just its card fields filled in is publishable —
+the detail page falls back to showing those. Fill in the case-study fields and the
+same page grows into a write-up, with no content moved between fields.
+
+The same is true of a role: the Experience section shows the summary, and
+`/experience/<slug>` shows the full story, responsibilities, problems solved,
+metrics, images and attachments that the Experience document could always hold.
+
+Projects point at roles (**Links & related → Related role**), not the other way
+round. A role's page finds its projects by looking for the ones that name it, so the
+connection is made once, in one document.

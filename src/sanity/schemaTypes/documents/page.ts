@@ -47,6 +47,8 @@ export const page = defineType({
         defineArrayMember({ type: 'editorialIntroSection' }),
         defineArrayMember({ type: 'statsSection' }),
         defineArrayMember({ type: 'experienceSection' }),
+        defineArrayMember({ type: 'projectsSection' }),
+        defineArrayMember({ type: 'playgroundSection' }),
         defineArrayMember({ type: 'currentlySection' }),
         defineArrayMember({ type: 'ctaSection' }),
       ],

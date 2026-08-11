@@ -1,0 +1,57 @@
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+
+import { client } from '@/sanity/client'
+import { sanityFetch } from '@/sanity/live'
+import { EXPERIENCE_QUERY, EXPERIENCE_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
+import { ExperienceDetail, type ExperienceDetailData } from '@/components/detail/ExperienceDetail'
+import { getLocale } from '@/lib/locale-server'
+import { t } from '@/lib/locale'
+
+/**
+ * `/experience/<slug>`. The studio's Presentation config has pointed at this URL
+ * since the Experience document type was written; this is the page it was pointing at.
+ */
+export async function generateStaticParams() {
+  const slugs = await client.fetch(EXPERIENCE_SLUGS_QUERY)
+  return (slugs ?? []).filter((s): s is string => Boolean(s)).map((slug) => ({ slug }))
+}
+
+export const dynamicParams = true
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const [locale, { data: role }, { data: settings }] = await Promise.all([
+    getLocale(),
+    sanityFetch({ query: EXPERIENCE_QUERY, params: { slug }, stega: false }),
+    sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false }),
+  ])
+
+  if (!role) return {}
+
+  const name = settings?.name || 'Yisen Lu'
+  const title = [t(role.role, locale), role.company].filter(Boolean).join(' — ') || name
+  const description = t(role.summary, locale)
+
+  return {
+    title: `${title} — ${name}`,
+    description: description || undefined,
+    openGraph: { title, description: description || undefined, type: 'article' },
+  }
+}
+
+export default async function ExperiencePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const [locale, { data: role }] = await Promise.all([
+    getLocale(),
+    sanityFetch({ query: EXPERIENCE_QUERY, params: { slug } }),
+  ])
+
+  if (!role) notFound()
+
+  return <ExperienceDetail experience={role as unknown as ExperienceDetailData} locale={locale} />
+}
