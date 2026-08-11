@@ -1,4 +1,8 @@
+import type { urlFor } from '@/sanity/image'
 import type { LocaleString, LocaleText } from './locale'
+
+/** Whatever shape `urlFor` accepts, so image fields stay assignable to it. */
+type SanityImage = Parameters<typeof urlFor>[0]
 
 /** Global settings, as read once per page and threaded to whichever section needs it. */
 export type SiteSettings = {
@@ -19,4 +23,5 @@ export type SiteSettings = {
   resumeUrl?: string | null
   seoTitle?: LocaleString
   seoDescription?: LocaleText
+  favicon?: SanityImage | null
 }

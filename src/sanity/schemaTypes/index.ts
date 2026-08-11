@@ -10,6 +10,11 @@ import { currentlySection } from './objects/sections/currentlySection'
 import { ctaSection } from './objects/sections/ctaSection'
 import { projectsSection } from './objects/sections/projectsSection'
 import { playgroundSection } from './objects/sections/playgroundSection'
+import { quoteSection } from './objects/sections/quoteSection'
+import { photoGallerySection } from './objects/sections/photoGallerySection'
+import { bentoGridSection } from './objects/sections/bentoGridSection'
+import { videoFeatureSection } from './objects/sections/videoFeatureSection'
+import { videoEmbed } from './objects/videoEmbed'
 
 import { experience } from './documents/experience'
 import { project } from './documents/project'
@@ -33,6 +38,10 @@ export const sectionTypes = [
   projectsSection,
   playgroundSection,
   currentlySection,
+  quoteSection,
+  photoGallerySection,
+  bentoGridSection,
+  videoFeatureSection,
   ctaSection,
 ]
 
@@ -42,6 +51,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     localeString,
     localeText,
     sectionSettings,
+    videoEmbed,
     // sections
     ...sectionTypes,
     // documents

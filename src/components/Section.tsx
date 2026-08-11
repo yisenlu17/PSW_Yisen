@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react'
 import { stegaClean } from 'next-sanity'
+import { urlFor } from '@/sanity/image'
 
 export type SectionSettings = {
   hidden?: boolean | null
   label?: string | null
   anchorId?: string | null
-  theme?: 'light' | 'cream' | 'dark' | 'accent' | null
-  spacing?: 'compact' | 'normal' | 'large' | null
-  align?: 'left' | 'center' | null
-  animation?: 'default' | 'reduced' | 'none' | null
+  theme?: string | null
+  spacing?: string | null
+  align?: string | null
+  animation?: string | null
+  imagePosition?: string | null
+  backgroundImage?: (Parameters<typeof urlFor>[0] & { alt?: string | null }) | null
+  overlay?: string | null
 }
 
 /**
@@ -33,6 +37,12 @@ export function Section({
   const spacing = pick(settings?.spacing, ['compact', 'normal', 'large'], 'normal')
   const align = pick(settings?.align, ['left', 'center'], 'left')
   const animation = pick(settings?.animation, ['default', 'reduced', 'none'], 'default')
+  const imagePosition = pick(settings?.imagePosition, ['right', 'left'], 'right')
+  const overlay = pick(settings?.overlay, ['light', 'medium', 'heavy'], 'medium')
+
+  const background = settings?.backgroundImage
+    ? urlFor(settings.backgroundImage).width(2000).quality(70).url()
+    : null
 
   return (
     <section
@@ -41,8 +51,21 @@ export function Section({
       data-spacing={spacing}
       data-align={align}
       data-animation={animation}
-      className={['section', className].filter(Boolean).join(' ')}
+      data-image-position={imagePosition}
+      data-overlay={background ? overlay : undefined}
+      className={['section', background ? 'has-background' : null, className]
+        .filter(Boolean)
+        .join(' ')}
     >
+      {background && (
+        // Decorative: whatever the section says is in the markup already, so
+        // announcing the backdrop as well would just be noise.
+        <div
+          className="section-bg"
+          aria-hidden
+          style={{ backgroundImage: `url(${background})` }}
+        />
+      )}
       <div className="wrap">{children}</div>
     </section>
   )

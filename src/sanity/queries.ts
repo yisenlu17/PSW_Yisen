@@ -91,6 +91,44 @@ const SECTIONS = /* groq */ `
       items[]{ _key, label, body }
     },
 
+    _type == "quoteSection" => {
+      quote,
+      attribution,
+      context,
+      portrait,
+      variant
+    },
+
+    _type == "photoGallerySection" => {
+      eyebrow,
+      title,
+      lede,
+      variant,
+      photos[]{ _key, asset, hotspot, crop, alt, caption }
+    },
+
+    _type == "bentoGridSection" => {
+      eyebrow,
+      title,
+      lede,
+      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }
+    },
+
+    _type == "videoFeatureSection" => {
+      eyebrow,
+      title,
+      body,
+      variant,
+      video{
+        source,
+        url,
+        "file": file{ asset->{ url } },
+        poster,
+        title,
+        caption
+      }
+    },
+
     _type == "ctaSection" => {
       eyebrow,
       title,
@@ -244,7 +282,8 @@ export const GLOBAL_SETTINGS_QUERY = defineQuery(`
     "resumeUrl": resume.asset->url,
     seoTitle,
     seoDescription,
-    ogImage
+    ogImage,
+    favicon
   }
 `)
 

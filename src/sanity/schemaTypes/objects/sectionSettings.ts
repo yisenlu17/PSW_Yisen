@@ -34,6 +34,17 @@ export const ALIGNMENT = [
   { title: 'Centre', value: 'center' },
 ] as const
 
+export const IMAGE_POSITION = [
+  { title: 'Image on the right', value: 'right' },
+  { title: 'Image on the left', value: 'left' },
+] as const
+
+export const OVERLAY = [
+  { title: 'Light — image stays bright', value: 'light' },
+  { title: 'Medium', value: 'medium' },
+  { title: 'Heavy — text stays readable over anything', value: 'heavy' },
+] as const
+
 export const sectionSettings = defineType({
   name: 'sectionSettings',
   title: 'Section settings',
@@ -91,6 +102,32 @@ export const sectionSettings = defineType({
       type: 'string',
       options: { list: [...ANIMATION], layout: 'dropdown' },
       initialValue: 'default',
+    }),
+    defineField({
+      name: 'imagePosition',
+      title: 'Image position',
+      description: 'Which side the image sits on, in sections that have one. Ignored elsewhere.',
+      type: 'string',
+      options: { list: [...IMAGE_POSITION], layout: 'radio', direction: 'horizontal' },
+      initialValue: 'right',
+    }),
+    defineField({
+      name: 'backgroundImage',
+      title: 'Background image',
+      description: 'Sits behind the whole section. The theme still decides the text colour.',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+    }),
+    defineField({
+      name: 'overlay',
+      title: 'Background overlay',
+      description:
+        'How much the background is dimmed. Text sits on top of it, so this is what keeps a section readable over a busy photograph.',
+      type: 'string',
+      options: { list: [...OVERLAY], layout: 'dropdown' },
+      initialValue: 'medium',
+      hidden: ({ parent }) => !parent?.backgroundImage,
     }),
   ],
 })

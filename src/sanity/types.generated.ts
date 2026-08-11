@@ -26,6 +26,22 @@ export type Statement = {
   body?: LocaleText;
 };
 
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
+export type BentoTileImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "bentoTile.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: "image";
+};
+
 export type Navigation = {
   _id: string;
   _type: "navigation";
@@ -56,13 +72,6 @@ export type LocaleText = {
   _type: "localeText";
   en?: string;
   zh?: string;
-};
-
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
 export type SanityFileAssetReference = {
@@ -116,6 +125,13 @@ export type GlobalSettings = {
   seoTitle?: LocaleString;
   seoDescription?: LocaleText;
   ogImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  favicon?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
@@ -424,6 +440,18 @@ export type Page = {
       } & CurrentlySection)
     | ({
         _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & PhotoGallerySection)
+    | ({
+        _key: string;
+      } & BentoGridSection)
+    | ({
+        _key: string;
+      } & VideoFeatureSection)
+    | ({
+        _key: string;
       } & CtaSection)
   >;
   seoTitle?: LocaleString;
@@ -470,6 +498,103 @@ export type SectionSettings = {
   spacing?: "compact" | "normal" | "large";
   align?: "left" | "center";
   animation?: "default" | "reduced" | "none";
+  imagePosition?: "right" | "left";
+  backgroundImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  overlay?: "light" | "medium" | "heavy";
+};
+
+export type VideoFeatureSection = {
+  _type: "videoFeatureSection";
+  eyebrow?: LocaleString;
+  title?: LocaleString;
+  body?: LocaleText;
+  video: VideoEmbed;
+  variant?: "full" | "split";
+  settings?: SectionSettings;
+};
+
+export type VideoEmbed = {
+  _type: "videoEmbed";
+  source: "youtube" | "vimeo" | "file";
+  url?: string;
+  file?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: "file";
+  };
+  poster?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  title?: LocaleString;
+  caption?: LocaleString;
+};
+
+export type BentoGridSection = {
+  _type: "bentoGridSection";
+  eyebrow?: LocaleString;
+  title?: LocaleString;
+  lede?: LocaleText;
+  tiles?: Array<{
+    size?: "sm" | "wide" | "tall" | "lg";
+    tone?: "paper" | "cream" | "navy" | "gold";
+    kicker?: LocaleString;
+    title?: LocaleString;
+    body?: LocaleText;
+    stat?: string;
+    image?: BentoTileImage;
+    href?: string;
+    _type: "bentoTile";
+    _key: string;
+  }>;
+  settings?: SectionSettings;
+};
+
+export type PhotoGallerySection = {
+  _type: "photoGallerySection";
+  eyebrow?: LocaleString;
+  title?: LocaleString;
+  lede?: LocaleText;
+  photos?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    caption?: LocaleString;
+    _type: "image";
+    _key: string;
+  }>;
+  variant?: "grid" | "masonry" | "filmstrip";
+  settings?: SectionSettings;
+};
+
+export type QuoteSection = {
+  _type: "quoteSection";
+  quote: LocaleText;
+  attribution?: LocaleString;
+  context?: LocaleString;
+  portrait?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  variant?: "display" | "portrait" | "pull";
+  settings?: SectionSettings;
 };
 
 export type CurrentlySection = {
@@ -729,10 +854,11 @@ export type Geopoint = {
 export type AllSanitySchemaTypes =
   | Feature
   | Statement
+  | SanityImageAssetReference
+  | BentoTileImage
   | Navigation
   | LocaleString
   | LocaleText
-  | SanityImageAssetReference
   | SanityFileAssetReference
   | GlobalSettings
   | SanityImageCrop
@@ -746,6 +872,11 @@ export type AllSanitySchemaTypes =
   | Page
   | CtaSection
   | SectionSettings
+  | VideoFeatureSection
+  | VideoEmbed
+  | BentoGridSection
+  | PhotoGallerySection
+  | QuoteSection
   | CurrentlySection
   | PlaygroundItemReference
   | PlaygroundSection
@@ -765,7 +896,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills }      )    },    _type == "projectsSection" => {      eyebrow,      title,      lede,      source,      limit,      alsoLabel,      linkToDetail,      "projects": select(        source == "manual" => projects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },        *[_type == "project" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }      )    },    _type == "playgroundSection" => {      eyebrow,      title,      lede,      source,      statement{ label, body },      interestsLabel,      note,      primaryImage,      secondaryImage,      "items": select(        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, name asc)[0...60]{            _id, kind, name, nameLocal, note, prominent, order          }      )    }  }  }
+// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "quoteSection" => {      quote,      attribution,      context,      portrait,      variant    },    _type == "photoGallerySection" => {      eyebrow,      title,      lede,      variant,      photos[]{ _key, asset, hotspot, crop, alt, caption }    },    _type == "bentoGridSection" => {      eyebrow,      title,      lede,      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }    },    _type == "videoFeatureSection" => {      eyebrow,      title,      body,      variant,      video{        source,        url,        "file": file{ asset->{ url } },        poster,        title,        caption      }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills }      )    },    _type == "projectsSection" => {      eyebrow,      title,      lede,      source,      limit,      alsoLabel,      linkToDetail,      "projects": select(        source == "manual" => projects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },        *[_type == "project" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }      )    },    _type == "playgroundSection" => {      eyebrow,      title,      lede,      source,      statement{ label, body },      interestsLabel,      note,      primaryImage,      secondaryImage,      "items": select(        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, name asc)[0...60]{            _id, kind, name, nameLocal, note, prominent, order          }      )    }  }  }
 export type PAGE_QUERY_RESULT = {
   _id: string;
   _type: "page";
@@ -781,6 +912,25 @@ export type PAGE_QUERY_RESULT = {
     _type: "image";
   } | null;
   sections: Array<
+    | {
+        _key: string;
+        _type: "bentoGridSection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString | null;
+        lede: LocaleText | null;
+        tiles: Array<{
+          _key: string;
+          size: "lg" | "sm" | "tall" | "wide" | null;
+          tone: "cream" | "gold" | "navy" | "paper" | null;
+          kicker: LocaleString | null;
+          title: LocaleString | null;
+          body: LocaleText | null;
+          stat: string | null;
+          image: BentoTileImage | null;
+          href: string | null;
+        }> | null;
+      }
     | {
         _key: string;
         _type: "ctaSection";
@@ -905,6 +1055,23 @@ export type PAGE_QUERY_RESULT = {
       }
     | {
         _key: string;
+        _type: "photoGallerySection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString | null;
+        lede: LocaleText | null;
+        variant: "filmstrip" | "grid" | "masonry" | null;
+        photos: Array<{
+          _key: string;
+          asset: SanityImageAssetReference | null;
+          hotspot: SanityImageHotspot | null;
+          crop: SanityImageCrop | null;
+          alt: string;
+          caption: LocaleString | null;
+        }> | null;
+      }
+    | {
+        _key: string;
         _type: "playgroundSection";
         settings: SectionSettings | null;
         eyebrow: LocaleString | null;
@@ -987,6 +1154,23 @@ export type PAGE_QUERY_RESULT = {
       }
     | {
         _key: string;
+        _type: "quoteSection";
+        settings: SectionSettings | null;
+        quote: LocaleText;
+        attribution: LocaleString | null;
+        context: LocaleString | null;
+        portrait: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          alt?: string;
+          _type: "image";
+        } | null;
+        variant: "display" | "portrait" | "pull" | null;
+      }
+    | {
+        _key: string;
         _type: "statsSection";
         settings: SectionSettings | null;
         eyebrow: LocaleString | null;
@@ -1005,6 +1189,34 @@ export type PAGE_QUERY_RESULT = {
           label: LocaleString | null;
           source: LocaleString | null;
         }> | null;
+      }
+    | {
+        _key: string;
+        _type: "videoFeatureSection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString | null;
+        body: LocaleText | null;
+        variant: "full" | "split" | null;
+        video: {
+          source: "file" | "vimeo" | "youtube";
+          url: string | null;
+          file: {
+            asset: {
+              url: string;
+            } | null;
+          } | null;
+          poster: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            _type: "image";
+          } | null;
+          title: LocaleString | null;
+          caption: LocaleString | null;
+        };
       }
   > | null;
 } | null;
@@ -1291,7 +1503,7 @@ export type EXPERIENCE_SLUGS_QUERY_RESULT = Array<string>;
 
 // Source: src/sanity/queries.ts
 // Variable: GLOBAL_SETTINGS_QUERY
-// Query: *[_type == "globalSettings"][0]{    _id,    name,    nameLocal,    profileImage,    shortBio,    currentRole,    currentLocation,    availability,    email,    socialLinks[]{ _key, platform, label, url },    "resumeUrl": resume.asset->url,    seoTitle,    seoDescription,    ogImage  }
+// Query: *[_type == "globalSettings"][0]{    _id,    name,    nameLocal,    profileImage,    shortBio,    currentRole,    currentLocation,    availability,    email,    socialLinks[]{ _key, platform, label, url },    "resumeUrl": resume.asset->url,    seoTitle,    seoDescription,    ogImage,    favicon  }
 export type GLOBAL_SETTINGS_QUERY_RESULT = {
   _id: string;
   name: string | null;
@@ -1333,6 +1545,13 @@ export type GLOBAL_SETTINGS_QUERY_RESULT = {
     crop?: SanityImageCrop;
     _type: "image";
   } | null;
+  favicon: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
 } | null;
 
 // Source: src/sanity/queries.ts
@@ -1356,13 +1575,13 @@ export type NAVIGATION_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n }\n      )\n    },\n\n    _type == "projectsSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      limit,\n      alsoLabel,\n      linkToDetail,\n      "projects": select(\n        source == "manual" => projects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n        *[_type == "project" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n      )\n    },\n\n    _type == "playgroundSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      statement{ label, body },\n      interestsLabel,\n      note,\n      primaryImage,\n      secondaryImage,\n      "items": select(\n        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },\n        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, name asc)[0...60]{\n            _id, kind, name, nameLocal, note, prominent, order\n          }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
+    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "quoteSection" => {\n      quote,\n      attribution,\n      context,\n      portrait,\n      variant\n    },\n\n    _type == "photoGallerySection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      photos[]{ _key, asset, hotspot, crop, alt, caption }\n    },\n\n    _type == "bentoGridSection" => {\n      eyebrow,\n      title,\n      lede,\n      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }\n    },\n\n    _type == "videoFeatureSection" => {\n      eyebrow,\n      title,\n      body,\n      variant,\n      video{\n        source,\n        url,\n        "file": file{ asset->{ url } },\n        poster,\n        title,\n        caption\n      }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n }\n      )\n    },\n\n    _type == "projectsSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      limit,\n      alsoLabel,\n      linkToDetail,\n      "projects": select(\n        source == "manual" => projects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n        *[_type == "project" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n      )\n    },\n\n    _type == "playgroundSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      statement{ label, body },\n      interestsLabel,\n      note,\n      primaryImage,\n      secondaryImage,\n      "items": select(\n        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },\n        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, name asc)[0...60]{\n            _id, kind, name, nameLocal, note, prominent, order\n          }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
     '\n  *[_type == "page" && defined(slug.current)].slug.current\n': PAGE_SLUGS_QUERY_RESULT;
     '\n  *[_type == "project" && slug.current == $slug][0]{\n    _id,\n    _type,\n    \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n,\n    problem,\n    approach,\n    outcome,\n    body,\n    bodyZh,\n    metrics[]{ _key, value, label, source },\n    features,\n    learnings,\n    stack,\n    gallery[]{ _key, alt, caption, asset },\n    links[]{ _key, kind, label, url },\n    relatedExperience->{ _id, company, "slug": slug.current, role, category },\n    relatedProjects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n    seoTitle,\n    seoDescription\n  }\n': PROJECT_QUERY_RESULT;
     '\n  *[_type == "project" && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT;
     '\n  *[_type == "experience" && slug.current == $slug][0]{\n    \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n,\n    _type,\n    secondary,\n    fullStory,\n    responsibilities,\n    problemsSolved,\n    metrics[]{ _key, value, label },\n    images[]{ _key, alt, asset },\n    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },\n    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]\n      | order(coalesce(order, 9999) asc)[0...6]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n  }\n': EXPERIENCE_QUERY_RESULT;
     '\n  *[_type == "experience" && defined(slug.current)].slug.current\n': EXPERIENCE_SLUGS_QUERY_RESULT;
-    '\n  *[_type == "globalSettings"][0]{\n    _id,\n    name,\n    nameLocal,\n    profileImage,\n    shortBio,\n    currentRole,\n    currentLocation,\n    availability,\n    email,\n    socialLinks[]{ _key, platform, label, url },\n    "resumeUrl": resume.asset->url,\n    seoTitle,\n    seoDescription,\n    ogImage\n  }\n': GLOBAL_SETTINGS_QUERY_RESULT;
+    '\n  *[_type == "globalSettings"][0]{\n    _id,\n    name,\n    nameLocal,\n    profileImage,\n    shortBio,\n    currentRole,\n    currentLocation,\n    availability,\n    email,\n    socialLinks[]{ _key, platform, label, url },\n    "resumeUrl": resume.asset->url,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    favicon\n  }\n': GLOBAL_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "navigation"][0]{\n    _id,\n    items[!hidden]{ _key, label, href, external, emphasis },\n    footerStatement,\n    footerNote,\n    copyright\n  }\n': NAVIGATION_QUERY_RESULT;
   }
 }

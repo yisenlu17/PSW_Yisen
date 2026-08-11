@@ -8,6 +8,10 @@ import { EditorialIntro, type EditorialIntroSectionData } from './EditorialIntro
 import { Stats, type StatsSectionData } from './Stats'
 import { Currently, type CurrentlySectionData } from './Currently'
 import { Cta, type CtaSectionData } from './Cta'
+import { Quote, type QuoteSectionData } from './Quote'
+import { PhotoGallery, type PhotoGallerySectionData } from './PhotoGallery'
+import { BentoGrid, type BentoGridSectionData } from './BentoGrid'
+import { VideoFeature, type VideoFeatureSectionData } from './VideoFeature'
 import type { Locale } from '@/lib/locale'
 import type { SiteSettings } from '@/lib/site'
 
@@ -19,6 +23,10 @@ export type SectionData =
   | EditorialIntroSectionData
   | StatsSectionData
   | CurrentlySectionData
+  | QuoteSectionData
+  | PhotoGallerySectionData
+  | BentoGridSectionData
+  | VideoFeatureSectionData
   | CtaSectionData
 
 /** Every section receives the same props; most ignore `site`. */
@@ -41,6 +49,10 @@ const RENDERERS = {
   projectsSection: ProjectsSection,
   playgroundSection: Playground,
   currentlySection: Currently,
+  quoteSection: Quote,
+  photoGallerySection: PhotoGallery,
+  bentoGridSection: BentoGrid,
+  videoFeatureSection: VideoFeature,
   ctaSection: Cta,
 } as const
 

@@ -114,6 +114,15 @@ export const globalSettings = defineType({
       group: 'seo',
       options: { hotspot: true },
     }),
+    defineField({
+      name: 'favicon',
+      title: 'Favicon',
+      description:
+        'The browser-tab icon. A square image, at least 512×512 — it gets scaled down to 32px, so anything with fine detail turns to mush.',
+      type: 'image',
+      group: 'seo',
+      options: { accept: 'image/png,image/svg+xml' },
+    }),
   ],
 
   preview: {
