@@ -240,6 +240,12 @@ export type Page = {
     | ({
         _key: string;
       } & ExperienceSection)
+    | ({
+        _key: string;
+      } & CurrentlySection)
+    | ({
+        _key: string;
+      } & CtaSection)
   >;
   seoTitle?: LocaleString;
   seoDescription?: LocaleText;
@@ -250,6 +256,55 @@ export type Page = {
     crop?: SanityImageCrop;
     _type: "image";
   };
+};
+
+export type CtaSection = {
+  _type: "ctaSection";
+  eyebrow?: LocaleString;
+  title: LocaleString;
+  body?: LocaleText;
+  actions?: Array<{
+    label?: LocaleString;
+    intent: "email" | "resume" | "social" | "custom";
+    platform?:
+      | "linkedin"
+      | "github"
+      | "x"
+      | "instagram"
+      | "xiaohongshu"
+      | "bilibili"
+      | "youtube";
+    href?: string;
+    style?: "gold" | "ghost";
+    _type: "ctaAction";
+    _key: string;
+  }>;
+  settings?: SectionSettings;
+};
+
+export type SectionSettings = {
+  _type: "sectionSettings";
+  hidden?: boolean;
+  label?: string;
+  anchorId?: string;
+  theme?: "light" | "cream" | "dark" | "accent";
+  spacing?: "compact" | "normal" | "large";
+  align?: "left" | "center";
+  animation?: "default" | "reduced" | "none";
+};
+
+export type CurrentlySection = {
+  _type: "currentlySection";
+  eyebrow?: LocaleString;
+  title?: LocaleString;
+  updatedLabel?: LocaleString;
+  items?: Array<{
+    label?: LocaleString;
+    body?: LocaleText;
+    _type: "currentlyItem";
+    _key: string;
+  }>;
+  settings?: SectionSettings;
 };
 
 export type ExperienceReference = {
@@ -273,17 +328,6 @@ export type ExperienceSection = {
   limit?: number;
   variant?: "cardsAndList" | "cards" | "timeline";
   settings?: SectionSettings;
-};
-
-export type SectionSettings = {
-  _type: "sectionSettings";
-  hidden?: boolean;
-  label?: string;
-  anchorId?: string;
-  theme?: "light" | "cream" | "dark" | "accent";
-  spacing?: "compact" | "normal" | "large";
-  align?: "left" | "center";
-  animation?: "default" | "reduced" | "none";
 };
 
 export type StatsSection = {
@@ -466,9 +510,11 @@ export type AllSanitySchemaTypes =
   | Experience
   | Slug
   | Page
+  | CtaSection
+  | SectionSettings
+  | CurrentlySection
   | ExperienceReference
   | ExperienceSection
-  | SectionSettings
   | StatsSection
   | EditorialIntroSection
   | HeroSection
@@ -483,7 +529,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills }      )    }  }  }
+// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills }      )    }  }  }
 export type PAGE_QUERY_RESULT = {
   _id: string;
   _type: "page";
@@ -499,6 +545,43 @@ export type PAGE_QUERY_RESULT = {
     _type: "image";
   } | null;
   sections: Array<
+    | {
+        _key: string;
+        _type: "ctaSection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString;
+        body: LocaleText | null;
+        actions: Array<{
+          _key: string;
+          label: LocaleString | null;
+          intent: "custom" | "email" | "resume" | "social";
+          platform:
+            | "bilibili"
+            | "github"
+            | "instagram"
+            | "linkedin"
+            | "x"
+            | "xiaohongshu"
+            | "youtube"
+            | null;
+          href: string | null;
+          style: "ghost" | "gold" | null;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "currentlySection";
+        settings: SectionSettings | null;
+        eyebrow: LocaleString | null;
+        title: LocaleString | null;
+        updatedLabel: LocaleString | null;
+        items: Array<{
+          _key: string;
+          label: LocaleString | null;
+          body: LocaleText | null;
+        }> | null;
+      }
     | {
         _key: string;
         _type: "editorialIntroSection";
@@ -675,7 +758,7 @@ export type NAVIGATION_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
+    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
     '\n  *[_type == "globalSettings"][0]{\n    _id,\n    name,\n    nameLocal,\n    profileImage,\n    shortBio,\n    currentRole,\n    currentLocation,\n    availability,\n    email,\n    socialLinks[]{ _key, platform, label, url },\n    "resumeUrl": resume.asset->url,\n    seoTitle,\n    seoDescription,\n    ogImage\n  }\n': GLOBAL_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "navigation"][0]{\n    _id,\n    items[!hidden]{ _key, label, href, external, emphasis },\n    footerStatement,\n    footerNote,\n    copyright\n  }\n': NAVIGATION_QUERY_RESULT;
   }

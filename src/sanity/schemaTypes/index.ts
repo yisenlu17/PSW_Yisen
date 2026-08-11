@@ -6,6 +6,8 @@ import { heroSection } from './objects/sections/heroSection'
 import { experienceSection } from './objects/sections/experienceSection'
 import { editorialIntroSection } from './objects/sections/editorialIntroSection'
 import { statsSection } from './objects/sections/statsSection'
+import { currentlySection } from './objects/sections/currentlySection'
+import { ctaSection } from './objects/sections/ctaSection'
 
 import { experience } from './documents/experience'
 import { page } from './documents/page'
@@ -19,7 +21,14 @@ import { navigation } from './documents/navigation'
  * and from then on it is something the editor can add, reorder and hide — without
  * being able to change how it looks.
  */
-export const sectionTypes = [heroSection, editorialIntroSection, statsSection, experienceSection]
+export const sectionTypes = [
+  heroSection,
+  editorialIntroSection,
+  statsSection,
+  experienceSection,
+  currentlySection,
+  ctaSection,
+]
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [

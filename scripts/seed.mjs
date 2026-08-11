@@ -242,6 +242,45 @@ const homepage = {
         animation: 'default',
       },
     },
+    {
+      _key: 'now',
+      _type: 'currentlySection',
+      eyebrow: L('cuBrow'),
+      title: L('cuTitle'),
+      updatedLabel: lit('Updated August 2026', '更新于 2026 年 8 月'),
+      items: [1, 2, 3, 4, 5].map((n) => ({
+        _key: `now${n}`,
+        label: L(`cu${n}t`),
+        body: LT(`cu${n}b`),
+      })),
+      settings: {
+        _type: 'sectionSettings',
+        label: 'Currently',
+        anchorId: 'now',
+        theme: 'light',
+      },
+    },
+    {
+      _key: 'contact',
+      _type: 'ctaSection',
+      eyebrow: L('coBrow'),
+      title: L('coTitle'),
+      body: LT('coBody'),
+      // Each button names an intent; the address comes from Global settings. Until
+      // those are filled in the buttons stay hidden rather than linking nowhere.
+      actions: [
+        { _key: 'a1', label: L('coCta1'), intent: 'email', style: 'gold' },
+        { _key: 'a2', label: L('coCta2'), intent: 'social', platform: 'linkedin', style: 'ghost' },
+        { _key: 'a3', label: L('coCta3'), intent: 'resume', style: 'ghost' },
+      ],
+      settings: {
+        _type: 'sectionSettings',
+        label: 'Closing CTA',
+        anchorId: 'contact',
+        theme: 'dark',
+        align: 'center',
+      },
+    },
   ],
 }
 

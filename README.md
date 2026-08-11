@@ -100,6 +100,18 @@ Carried over from the prototype — these are empty on purpose rather than inven
 - Sections still to build: Projects, Playground, Currently, Contact/CTA, plus the
   header and footer. They are designed in the prototype but not yet components.
 
+## A note on the dataset
+
+The dataset is not anonymously readable — this project uses role-based access
+control and the anonymous group has no read grant. Every query therefore needs
+`SANITY_API_READ_TOKEN`, which is why `src/sanity/client.ts` starts with
+`import 'server-only'`: reads happen in Server Components and route handlers, and
+that import turns any accidental use from a Client Component into a build error
+rather than a leaked token.
+
+The upside is that drafts stay private. A half-written role is not fetchable by
+anyone who knows the project ID.
+
 ## Sections available today
 
 | Section | What it does |

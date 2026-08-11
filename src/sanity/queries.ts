@@ -60,6 +60,20 @@ const SECTIONS = /* groq */ `
       stats[]{ _key, value, suffix, countTo, label, source }
     },
 
+    _type == "currentlySection" => {
+      eyebrow,
+      title,
+      updatedLabel,
+      items[]{ _key, label, body }
+    },
+
+    _type == "ctaSection" => {
+      eyebrow,
+      title,
+      body,
+      actions[]{ _key, label, intent, platform, href, style }
+    },
+
     _type == "experienceSection" => {
       eyebrow,
       title,

@@ -7,6 +7,7 @@ import { PAGE_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { SectionRenderer, type SectionData } from '@/components/sections'
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { t, isLocale, DEFAULT_LOCALE, type Locale } from '@/lib/locale'
+import type { SiteSettings } from '@/lib/site'
 
 type SearchParams = Promise<{ lang?: string }>
 
@@ -38,7 +39,10 @@ export async function generateMetadata({
 
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   const locale = await resolveLocale(searchParams)
-  const { data: page } = await sanityFetch({ query: PAGE_QUERY, params: { slug: '/' } })
+  const [{ data: page }, { data: settings }] = await Promise.all([
+    sanityFetch({ query: PAGE_QUERY, params: { slug: '/' } }),
+    sanityFetch({ query: GLOBAL_SETTINGS_QUERY }),
+  ])
 
   if (!page) notFound()
 
@@ -50,6 +54,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         documentId={stegaClean(page._id)}
         documentType={stegaClean(page._type)}
         locale={locale}
+        site={(settings ?? null) as SiteSettings | null}
       />
     </>
   )

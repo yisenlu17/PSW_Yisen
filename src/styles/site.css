@@ -244,6 +244,40 @@
 .section[data-theme='dark'] .stat-value,
 .section[data-theme='dark'] .stat-label { color: #fff; }
 
+/* ---------- currently ---------- */
+.now-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(30px, 5vw, 70px);
+  align-items: start;
+}
+.now-updated {
+  margin-top: 18px; color: var(--muted);
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.now-list { display: flex; flex-direction: column; }
+.now-row {
+  display: grid; grid-template-columns: minmax(0, 150px) 1fr;
+  gap: 18px; padding: 20px 0; border-top: 1px solid var(--line);
+}
+.now-row:last-child { border-bottom: 1px solid var(--line); }
+.now-label { font-weight: 800; color: var(--ink); font-size: 16px; }
+.now-body { font-size: 15px; line-height: 1.6; }
+
+.section[data-theme='dark'] .now-row { border-color: var(--line-navy); }
+.section[data-theme='dark'] .now-label { color: #fff; }
+
+/* ---------- closing cta ---------- */
+/* `.cta` (background, gradient, centring) already lives in the UI kit. */
+.cta .lede { margin: 20px auto 0; color: rgba(255,255,255,.86); }
+.cta .cta-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 34px; }
+.cta-inner { display: contents; }
+.cta-warning {
+  margin-top: 22px; font-size: 13px; color: var(--gold);
+  font-family: var(--mono); letter-spacing: .08em;
+}
+
 /* ---------- chrome ---------- */
 .lang-toggle {
   position: fixed; top: 18px; right: 18px; z-index: 80;

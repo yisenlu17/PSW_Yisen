@@ -4,13 +4,25 @@ import { Hero, type HeroSectionData } from './Hero'
 import { ExperienceSection, type ExperienceSectionData } from './ExperienceSection'
 import { EditorialIntro, type EditorialIntroSectionData } from './EditorialIntro'
 import { Stats, type StatsSectionData } from './Stats'
+import { Currently, type CurrentlySectionData } from './Currently'
+import { Cta, type CtaSectionData } from './Cta'
 import type { Locale } from '@/lib/locale'
+import type { SiteSettings } from '@/lib/site'
 
 export type SectionData =
   | HeroSectionData
   | ExperienceSectionData
   | EditorialIntroSectionData
   | StatsSectionData
+  | CurrentlySectionData
+  | CtaSectionData
+
+/** Every section receives the same props; most ignore `site`. */
+type SectionProps = {
+  data: never
+  locale: Locale
+  site: SiteSettings | null
+}
 
 /**
  * The registry. Adding a premium component means writing it, describing it as a
@@ -22,6 +34,8 @@ const RENDERERS = {
   editorialIntroSection: EditorialIntro,
   statsSection: Stats,
   experienceSection: ExperienceSection,
+  currentlySection: Currently,
+  ctaSection: Cta,
 } as const
 
 export function SectionRenderer({
@@ -29,11 +43,13 @@ export function SectionRenderer({
   documentId,
   documentType,
   locale,
+  site,
 }: {
   sections: SectionData[] | null | undefined
   documentId: string
   documentType: string
   locale: Locale
+  site: SiteSettings | null
 }) {
   const visible = (sections ?? []).filter((s) => !s.settings?.hidden)
 
@@ -46,7 +62,7 @@ export function SectionRenderer({
     <main data-sanity={attr.scope(['sections']).toString()}>
       {visible.map((section) => {
         const Component = RENDERERS[section._type] as
-          | ((props: { data: SectionData; locale: Locale }) => React.ReactNode)
+          | ((props: SectionProps) => React.ReactNode)
           | undefined
 
         if (!Component) {
@@ -63,7 +79,7 @@ export function SectionRenderer({
             key={section._key}
             data-sanity={attr.scope(['sections', { _key: section._key }]).toString()}
           >
-            <Component data={section} locale={locale} />
+            <Component data={section as never} locale={locale} site={site} />
           </div>
         )
       })}
