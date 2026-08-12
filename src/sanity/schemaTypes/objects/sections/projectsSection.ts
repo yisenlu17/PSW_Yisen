@@ -55,8 +55,18 @@ export const projectsSection = defineType({
       validation: (rule) => rule.min(1).integer(),
     }),
     defineField({
+      name: 'compact',
+      title: 'Compact cards',
+      description:
+        'Drops the full-width image cards and the "Also running" strip for a row of one-liners — for a homepage that points at /projects rather than repeating it.',
+      type: 'boolean',
+      group: 'content',
+      initialValue: false,
+    }),
+    defineField({
       name: 'alsoLabel',
       title: '"Also running" heading',
+      hidden: ({ parent }) => parent?.compact === true,
       description: 'The label above the smaller projects. Leave empty to hide that strip entirely.',
       type: 'localeString',
       group: 'content',

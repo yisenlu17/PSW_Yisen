@@ -25,6 +25,21 @@ const EXPERIENCE_FIELDS = /* groq */ `
 `
 
 /**
+ * What an expandable Experience card needs on top of the card itself.
+ *
+ * Roles number in the handful, so this rides along with the section rather than
+ * waiting for a click — a card that pauses before it opens reads as broken. The
+ * portable-text story, the images and the attachments stay out of it: those are the
+ * reason `/experience/<slug>` exists, and they are the expensive half.
+ */
+const EXPERIENCE_EXPAND_FIELDS = /* groq */ `
+  ${EXPERIENCE_FIELDS},
+  responsibilities,
+  problemsSolved,
+  metrics[]{ _key, value, label }
+`
+
+/**
  * Card-level project fields. The case-study fields are deliberately absent: a
  * Projects section with five cards would otherwise drag five full write-ups and
  * their galleries across the wire to render three paragraphs.
@@ -133,7 +148,7 @@ const SECTIONS = /* groq */ `
       eyebrow,
       title,
       body,
-      actions[]{ _key, label, intent, platform, href, style }
+      actions[]{ _key, label, intent, platform, resumeLanguage, href, style }
     },
 
     _type == "experienceSection" => {
@@ -141,14 +156,15 @@ const SECTIONS = /* groq */ `
       title,
       lede,
       variant,
+      compact,
       source,
       limit,
       // GROQ slice bounds must be literal, so the ceiling is fixed here and the
       // editor's own limit is applied when rendering.
       "roles": select(
-        source == "manual" => roles[]->{ ${EXPERIENCE_FIELDS} },
+        source == "manual" => roles[]->{ ${EXPERIENCE_EXPAND_FIELDS} },
         *[_type == "experience" && !(_id in path("drafts.**"))]
-          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ ${EXPERIENCE_FIELDS} }
+          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ ${EXPERIENCE_EXPAND_FIELDS} }
       )
     },
 
@@ -158,6 +174,7 @@ const SECTIONS = /* groq */ `
       lede,
       source,
       limit,
+      compact,
       alsoLabel,
       linkToDetail,
       "projects": select(
@@ -279,7 +296,10 @@ export const GLOBAL_SETTINGS_QUERY = defineQuery(`
     availability,
     email,
     socialLinks[]{ _key, platform, label, url },
-    "resumeUrl": resume.asset->url,
+    "resume": {
+      "en": resume.en.asset->{ url, originalFilename },
+      "zh": resume.zh.asset->{ url, originalFilename }
+    },
     seoTitle,
     seoDescription,
     ogImage,

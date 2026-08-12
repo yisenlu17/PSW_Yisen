@@ -164,6 +164,88 @@
 }
 .exp-timeline .exp-highlight-wrap { padding-top: 16px; }
 
+/* ---------- experience: the card that opens ---------- */
+/* Cards size to their own content. Without this, opening one stretches every empty
+   card beside it to match, and three quarters of the row becomes whitespace. */
+.exp-cards { align-items: start; }
+
+.exp-toggle {
+  align-self: flex-start;
+  margin-top: 22px;
+  display: inline-flex; align-items: center; gap: 9px;
+  background: none; border: 0; padding: 0;
+  font: inherit; font-size: 12.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--navy); cursor: pointer;
+  transition: color var(--t-fast);
+}
+.exp-toggle:hover { color: var(--gold); }
+.exp-toggle-mark {
+  display: grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--cream); color: var(--navy);
+  font-size: 11px; line-height: 1;
+  transition: transform var(--t-base), background var(--t-fast);
+}
+.exp-card[data-open='true'] .exp-toggle-mark { transform: rotate(180deg); background: var(--gold); }
+/* An open card stays put — a panel that slides out from under the pointer while the
+   card is also lifting is two movements fighting each other. */
+.exp-card[data-open='true']:hover { transform: none; box-shadow: var(--shadow); }
+
+/* 0fr → 1fr animates to a height the card does not have to know in advance, so the
+   panel opens smoothly whether it holds two bullets or fifteen. */
+.exp-panel {
+  display: grid; grid-template-rows: 0fr;
+  overflow: hidden; opacity: 0;
+  transition: grid-template-rows var(--t-slow), opacity var(--t-base);
+}
+.exp-panel-inner { min-height: 0; overflow: hidden; }
+.exp-card[data-open='true'] .exp-panel { grid-template-rows: 1fr; opacity: 1; }
+
+.exp-panel-inner > :first-child { margin-top: 24px; }
+.exp-panel .detail-block + .detail-block { margin-top: 22px; }
+.exp-panel .detail-block h2 { font-size: 11px; letter-spacing: .14em; margin-bottom: 10px; }
+.exp-panel .detail-block > p { font-size: 15.5px; line-height: 1.65; }
+.exp-panel .detail-list li { padding: 9px 0 9px 22px; font-size: 15px; }
+.exp-panel .detail-list li::before { top: 17px; width: 5px; height: 5px; }
+.exp-panel .detail-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 16px; padding-bottom: 22px; margin-bottom: 22px;
+}
+.exp-panel .detail-metric-value { font-size: clamp(24px, 2.4vw, 30px); }
+.exp-panel .detail-metric-label { font-size: 13px; }
+.exp-panel .detail-tag { font-size: 12.5px; padding: 6px 13px; }
+.exp-panel-more {
+  margin-top: 24px;
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 12.5px; font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold);
+  transition: gap var(--t-fast), color var(--t-fast);
+}
+.exp-panel-more:hover { gap: 13px; color: var(--navy); }
+
+/* ---------- experience: the homepage card that does not ---------- */
+.exp-cards[data-compact] { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.exp-card-compact { position: relative; padding: 26px 26px 24px; }
+.exp-card-compact h3 { margin: 0 0 4px; font-size: 21px; }
+.exp-card-compact .exp-body { margin-top: 12px; font-size: 15px; }
+/* One link, stretched over the whole tile: the card is a single target without
+   nesting the summary text inside an anchor. */
+.exp-card-stretch { color: inherit; }
+.exp-card-stretch::after { content: ""; position: absolute; inset: 0; }
+
+.section[data-theme='dark'] .exp-toggle { color: rgba(255,255,255,.86); }
+.section[data-theme='dark'] .exp-toggle:hover { color: var(--gold); }
+.section[data-theme='dark'] .exp-toggle-mark { background: rgba(255,255,255,.1); color: #fff; }
+.section[data-theme='dark'] .exp-card[data-open='true'] .exp-toggle-mark { color: var(--navy-deep); }
+.section[data-theme='dark'] .exp-panel .detail-block > p { color: rgba(255,255,255,.82); }
+.section[data-theme='dark'] .exp-panel .detail-list li { border-color: var(--line-navy); color: rgba(255,255,255,.86); }
+.section[data-theme='dark'] .exp-panel .detail-metrics { border-color: var(--line-navy); }
+.section[data-theme='dark'] .exp-panel .detail-metric-value,
+.section[data-theme='dark'] .exp-panel .detail-metric-label { color: #fff; }
+.section[data-theme='dark'] .exp-panel .detail-tag { background: rgba(255,255,255,.08); color: #fff; }
+.section[data-theme='dark'] .exp-panel-more:hover { color: #fff; }
+
 /* ---------- projects ---------- */
 .proj-list { display: flex; flex-direction: column; gap: 22px; }
 
@@ -269,6 +351,35 @@
 .section[data-theme='dark'] .proj-also-label { color: rgba(255,255,255,.5); }
 .section[data-theme='dark'] .proj-also-item h4 { color: #fff; }
 .section[data-theme='dark'] .proj-also-item p { color: rgba(255,255,255,.7); }
+
+/* ---------- projects: the homepage row of one-liners ---------- */
+.proj-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 22px;
+}
+.proj-compact-item {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--r-lg);
+  padding: 26px 26px 24px;
+  transition: transform .26s, box-shadow .26s;
+}
+.proj-compact-item:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.proj-compact-item h3 { margin: 10px 0 0; font-size: 21px; }
+.proj-compact-item p { margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: var(--body); }
+.proj-compact-stretch { color: inherit; }
+.proj-compact-stretch::after { content: ""; position: absolute; inset: 0; }
+
+.section[data-theme='dark'] .proj-compact-item {
+  background: rgba(255,255,255,.04); border-color: var(--line-navy); border-top-color: var(--gold);
+}
+.section[data-theme='dark'] .proj-compact-item h3 { color: #fff; }
+.section[data-theme='dark'] .proj-compact-item p { color: rgba(255,255,255,.78); }
+.section[data-animation='reduced'] .proj-compact-item:hover,
+.section[data-animation='reduced'] .exp-card-compact:hover { transform: none; }
 
 /* ---------- playground ---------- */
 .play-head { max-width: 800px; }

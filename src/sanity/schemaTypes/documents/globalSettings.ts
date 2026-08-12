@@ -90,9 +90,10 @@ export const globalSettings = defineType({
     defineField({
       name: 'resume',
       title: 'Résumé (PDF)',
-      type: 'file',
+      description:
+        'One PDF per language. A visitor reading the site in 中文 gets the Chinese file; upload only one and everybody gets that one.',
+      type: 'localeFile',
       group: 'contact',
-      options: { accept: '.pdf' },
     }),
 
     defineField({

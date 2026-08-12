@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
-import type { SiteSettings } from '@/lib/site'
+import { resumeFor, type SiteSettings } from '@/lib/site'
 import type { NavigationData } from './Header'
 
 /**
@@ -40,7 +40,7 @@ export function Footer({
     .filter((i) => i.label && i.href)
 
   // Only real, filled-in ways to reach someone. An empty column beats a dead link.
-  const connect: Array<{ key: string; label: string; href: string }> = []
+  const connect: Array<{ key: string; label: string; href: string; download?: boolean }> = []
   if (site?.email) {
     connect.push({ key: 'email', label: stegaClean(site.email), href: `mailto:${stegaClean(site.email)}` })
   }
@@ -53,11 +53,33 @@ export function Footer({
       href: stegaClean(s.url),
     })
   }
-  if (site?.resumeUrl) {
+  // With both languages uploaded the footer offers both by name — this is the one
+  // place on the site with room to list them, and a visitor who reads the site in one
+  // language may well want the CV in the other. With one uploaded it stays a single
+  // unlabelled link, because "Résumé (English)" next to nothing else invites a hunt
+  // for a Chinese version that does not exist.
+  const resumeZh = site?.resume?.zh?.url ? resumeFor(site, locale, 'zh') : null
+  const resumeEn = site?.resume?.en?.url ? resumeFor(site, locale, 'en') : null
+
+  if (resumeZh && resumeEn) {
+    connect.push({
+      key: 'resume-zh',
+      label: locale === 'zh' ? '简历 (中文)' : 'Résumé (中文)',
+      href: resumeZh.url,
+      download: true,
+    })
+    connect.push({
+      key: 'resume-en',
+      label: locale === 'zh' ? '简历 (English)' : 'Résumé (English)',
+      href: resumeEn.url,
+      download: true,
+    })
+  } else if (resumeZh || resumeEn) {
     connect.push({
       key: 'resume',
       label: locale === 'zh' ? '简历 (PDF)' : 'Résumé (PDF)',
-      href: stegaClean(site.resumeUrl),
+      href: (resumeZh ?? resumeEn)!.url,
+      download: true,
     })
   }
 
@@ -90,7 +112,11 @@ export function Footer({
                 <a
                   key={c.key}
                   href={c.href}
-                  {...(c.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  {...(c.download
+                    ? { download: '' }
+                    : c.href.startsWith('http')
+                      ? { target: '_blank', rel: 'noopener noreferrer' }
+                      : {})}
                 >
                   {c.label}
                 </a>

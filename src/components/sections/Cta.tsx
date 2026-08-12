@@ -2,7 +2,7 @@ import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
-import type { SiteSettings } from '@/lib/site'
+import { resumeFor, type ResumeChoice, type SiteSettings } from '@/lib/site'
 
 export type CtaSectionData = {
   _key: string
@@ -15,6 +15,7 @@ export type CtaSectionData = {
     label?: LocaleString
     intent?: 'email' | 'resume' | 'social' | 'custom' | null
     platform?: string | null
+    resumeLanguage?: string | null
     href?: string | null
     style?: 'gold' | 'ghost' | null
   }> | null
@@ -29,13 +30,16 @@ export type CtaSectionData = {
  */
 function resolveHref(
   action: NonNullable<CtaSectionData['actions']>[number],
-  site: SiteSettings | null
+  site: SiteSettings | null,
+  locale: Locale
 ): string | null {
   switch (stegaClean(action.intent ?? '')) {
     case 'email':
       return site?.email ? `mailto:${stegaClean(site.email)}` : null
-    case 'resume':
-      return site?.resumeUrl ? stegaClean(site.resumeUrl) : null
+    case 'resume': {
+      const choice = (stegaClean(action.resumeLanguage ?? 'auto') || 'auto') as ResumeChoice
+      return resumeFor(site, locale, choice)?.url ?? null
+    }
     case 'social': {
       const wanted = stegaClean(action.platform ?? '')
       const match = site?.socialLinks?.find((l) => stegaClean(l.platform ?? '') === wanted)
@@ -58,7 +62,11 @@ export function Cta({
   site: SiteSettings | null
 }) {
   const actions = (data.actions ?? [])
-    .map((a) => ({ ...a, resolved: resolveHref(a, site) }))
+    .map((a) => ({
+      ...a,
+      resolved: resolveHref(a, site, locale),
+      isDownload: stegaClean(a.intent ?? '') === 'resume',
+    }))
     .filter((a) => a.resolved && t(a.label, locale))
 
   const missing = (data.actions ?? []).length - actions.length
@@ -77,9 +85,14 @@ export function Cta({
                 key={a._key}
                 href={a.resolved!}
                 className={`btn ${stegaClean(a.style ?? 'ghost') === 'gold' ? 'btn-gold' : 'btn-ghost'}`}
-                {...(a.resolved!.startsWith('http')
-                  ? { target: '_blank', rel: 'noopener noreferrer' }
-                  : {})}
+                {...(a.isDownload
+                  ? // A download must not open a tab: `target="_blank"` on a `?dl=` URL
+                    // flashes a blank window that closes itself the moment the file
+                    // starts, which reads as the button having failed.
+                    { download: '' }
+                  : a.resolved!.startsWith('http')
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {})}
               >
                 {t(a.label, locale)}
               </a>

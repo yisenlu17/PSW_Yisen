@@ -94,11 +94,20 @@ export function MetricRow({
   )
 }
 
-/** Wording that belongs to the page rather than to the dataset. */
+/**
+ * Wording that belongs to the code rather than to the dataset.
+ *
+ * The expandable Experience card reuses these labels too — an expanded card and the
+ * role's own page are the same content at two depths, and "What I was responsible
+ * for" changing in one place but not the other is exactly the drift this avoids.
+ */
 export const DETAIL_COPY = {
   en: {
     backToProjects: 'All projects',
     backToExperience: 'All experience',
+    expand: 'What I actually did',
+    collapse: 'Close',
+    fullPage: 'Full page',
     problem: 'The problem',
     approach: 'What I did',
     outcome: 'What happened',
@@ -118,6 +127,9 @@ export const DETAIL_COPY = {
   zh: {
     backToProjects: '全部项目',
     backToExperience: '全部经历',
+    expand: '具体做了什么',
+    collapse: '收起',
+    fullPage: '完整页面',
     problem: '问题是什么',
     approach: '我做了什么',
     outcome: '结果如何',

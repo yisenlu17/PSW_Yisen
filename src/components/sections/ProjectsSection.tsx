@@ -14,6 +14,7 @@ export type ProjectsSectionData = {
   title?: LocaleString
   lede?: LocaleText
   limit?: number | null
+  compact?: boolean | null
   alsoLabel?: LocaleString
   linkToDetail?: boolean | null
   projects?: ProjectCardData[] | null
@@ -49,6 +50,11 @@ export function ProjectsSection({
   const featured = limit ? cards.slice(0, limit) : cards
   const alsoLabelText = t(data.alsoLabel, locale)
 
+  // Compact drops the full-bleed alternating cards for a row of one-liners, and with
+  // them the "Also running" strip. It is what a homepage wants: enough to prove the
+  // work exists, and a link to the page that actually shows it.
+  const compact = data.compact === true
+
   return (
     <Section settings={data.settings}>
       <div className="section-head">
@@ -57,21 +63,33 @@ export function ProjectsSection({
         {t(data.lede, locale) && <p className="lede">{t(data.lede, locale)}</p>}
       </div>
 
-      {featured.length > 0 && (
-        <div className="proj-list">
-          {featured.map((project, i) => (
-            <ProjectCard
-              key={project._id}
-              project={project}
-              locale={locale}
-              linked={linked}
-              flipped={i % 2 === 1}
-            />
-          ))}
-        </div>
-      )}
+      {featured.length > 0 &&
+        (compact ? (
+          <div className="proj-compact-grid">
+            {featured.map((project) => (
+              <CompactProject
+                key={project._id}
+                project={project}
+                locale={locale}
+                linked={linked}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="proj-list">
+            {featured.map((project, i) => (
+              <ProjectCard
+                key={project._id}
+                project={project}
+                locale={locale}
+                linked={linked}
+                flipped={i % 2 === 1}
+              />
+            ))}
+          </div>
+        ))}
 
-      {also.length > 0 && alsoLabelText && (
+      {!compact && also.length > 0 && alsoLabelText && (
         <div className="proj-also">
           <p className="proj-also-label">{alsoLabelText}</p>
           <div className="proj-also-grid">
@@ -164,6 +182,44 @@ function ProjectCard({
           </Link>
         )}
       </div>
+    </article>
+  )
+}
+
+/**
+ * The homepage shape: name, what kind of thing it is, one line, and a link over the
+ * whole tile. No image, no tags, no status chip — those are the project page's, and
+ * repeating them here is what made the homepage long enough to need this in the first
+ * place.
+ */
+function CompactProject({
+  project,
+  locale,
+  linked,
+}: {
+  project: ProjectCardData
+  locale: Locale
+  linked: boolean
+}) {
+  const slug = project.slug ? stegaClean(project.slug) : null
+  const href = linked && slug ? `/projects/${slug}` : null
+  const body = t(project.tagline, locale) || t(project.summary, locale)
+
+  return (
+    <article className="proj-compact-item">
+      {t(project.category, locale) && (
+        <span className="proj-kicker">{t(project.category, locale)}</span>
+      )}
+      <h3>
+        {href ? (
+          <Link href={href} className="proj-compact-stretch">
+            {projectTitle(project, locale)}
+          </Link>
+        ) : (
+          projectTitle(project, locale)
+        )}
+      </h3>
+      {body && <p>{body}</p>}
     </article>
   )
 }

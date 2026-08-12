@@ -3,22 +3,10 @@ import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
+import { type ExperienceRole } from '@/lib/experience'
+import { ExperienceCard } from './ExperienceCard'
 
-export type ExperienceRole = {
-  _id: string
-  company?: string | null
-  slug?: string | null
-  role?: LocaleString
-  category?: LocaleString
-  location?: string | null
-  startDate?: string | null
-  endDate?: string | null
-  featured?: boolean | null
-  summary?: LocaleText
-  secondary?: LocaleText
-  highlight?: LocaleString
-  skills?: string[] | null
-}
+export type { ExperienceRole }
 
 export type ExperienceSectionData = {
   _key: string
@@ -27,6 +15,7 @@ export type ExperienceSectionData = {
   title?: LocaleString
   lede?: LocaleText
   variant?: 'cardsAndList' | 'cards' | 'timeline' | null
+  compact?: boolean | null
   limit?: number | null
   roles?: ExperienceRole[] | null
   settings?: SectionSettings | null
@@ -45,12 +34,17 @@ export function ExperienceSection({
   const limit = data.limit ?? undefined
   const roles = limit ? (data.roles ?? []).slice(0, limit) : (data.roles ?? [])
 
+  // Compact is the homepage setting: one line per card, nothing opens, and the detail
+  // stays where it belongs. It also rules out the "and the rest" list — a page that is
+  // pointing somewhere else should not also carry the long tail.
+  const compact = data.compact === true
+
   // `cards` promotes everything; `cardsAndList` honours the per-role Featured flag.
   // Falling back to "all cards" when nothing is featured avoids an empty-looking
   // section the first time someone adds roles and forgets the tickbox.
   const featured =
     variant === 'cards' || !roles.some((r) => r.featured) ? roles : roles.filter((r) => r.featured)
-  const rest = variant === 'cardsAndList' ? roles.filter((r) => !featured.includes(r)) : []
+  const rest = variant === 'cardsAndList' && !compact ? roles.filter((r) => !featured.includes(r)) : []
 
   return (
     <Section settings={data.settings}>
@@ -61,9 +55,12 @@ export function ExperienceSection({
       </div>
 
       {featured.length > 0 && (
-        <div className={variant === 'timeline' ? 'exp-timeline' : 'exp-cards'}>
+        <div
+          className={variant === 'timeline' && !compact ? 'exp-timeline' : 'exp-cards'}
+          data-compact={compact || undefined}
+        >
           {featured.map((role) => (
-            <ExperienceCard key={role._id} role={role} locale={locale} />
+            <ExperienceCard key={role._id} role={role} locale={locale} compact={compact} />
           ))}
         </div>
       )}
@@ -86,26 +83,6 @@ export function ExperienceSection({
 function RoleName({ role }: { role: ExperienceRole }) {
   const slug = role.slug ? stegaClean(role.slug) : null
   return slug ? <Link href={`/experience/${slug}`}>{role.company}</Link> : <>{role.company}</>
-}
-
-function ExperienceCard({ role, locale }: { role: ExperienceRole; locale: Locale }) {
-  const dates = formatDateRange(role.startDate, role.endDate, locale)
-  return (
-    <article className="exp-card">
-      {t(role.category, locale) && <span className="exp-kicker">{t(role.category, locale)}</span>}
-      <h3><RoleName role={role} /></h3>
-      <p className="exp-meta">
-        {[t(role.role, locale), dates].filter(Boolean).join(' · ')}
-      </p>
-      {t(role.summary, locale) && <p className="exp-body">{t(role.summary, locale)}</p>}
-      {t(role.secondary, locale) && <p className="exp-body exp-body-soft">{t(role.secondary, locale)}</p>}
-      {t(role.highlight, locale) && (
-        <div className="exp-highlight-wrap">
-          <span className="exp-highlight">{t(role.highlight, locale)}</span>
-        </div>
-      )}
-    </article>
-  )
 }
 
 function ExperienceRow({ role, locale }: { role: ExperienceRole; locale: Locale }) {

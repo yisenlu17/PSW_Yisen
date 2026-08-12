@@ -1,6 +1,6 @@
 import { type SchemaTypeDefinition } from 'sanity'
 
-import { localeString, localeText } from './objects/locale'
+import { localeString, localeText, localeFile } from './objects/locale'
 import { sectionSettings } from './objects/sectionSettings'
 import { heroSection } from './objects/sections/heroSection'
 import { experienceSection } from './objects/sections/experienceSection'
@@ -50,6 +50,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     // primitives
     localeString,
     localeText,
+    localeFile,
     sectionSettings,
     videoEmbed,
     // sections

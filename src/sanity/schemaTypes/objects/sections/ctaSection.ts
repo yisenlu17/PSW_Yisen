@@ -75,6 +75,23 @@ export const ctaSection = defineType({
               },
             }),
             defineField({
+              name: 'resumeLanguage',
+              title: 'Which résumé',
+              description:
+                'Following the site language is usually right. Pin a language to offer both files as two buttons side by side.',
+              type: 'string',
+              hidden: ({ parent }) => parent?.intent !== 'resume',
+              options: {
+                list: [
+                  { title: 'Follow the site language', value: 'auto' },
+                  { title: 'Always the English PDF', value: 'en' },
+                  { title: 'Always the Chinese PDF', value: 'zh' },
+                ],
+                layout: 'radio',
+              },
+              initialValue: 'auto',
+            }),
+            defineField({
               name: 'href',
               title: 'Link',
               type: 'string',

@@ -32,6 +32,32 @@ export const localeString = defineType({
   ),
 })
 
+/**
+ * One file per language, for the things that exist twice.
+ *
+ * The résumé is the only such thing today, which is why the picker is scoped to PDFs.
+ * A second use with different formats is the moment to lift `accept` out of here and
+ * make it per-field — not before.
+ *
+ * Neither language is required: a résumé uploaded in one language is served to
+ * everyone, which is better than a download button that does nothing for half the
+ * visitors.
+ */
+export const localeFile = defineType({
+  name: 'localeFile',
+  title: 'File per language',
+  type: 'object',
+  options: { columns: 2 },
+  fields: LANGUAGES.map((lang) =>
+    defineField({
+      name: lang.id,
+      title: lang.title,
+      type: 'file',
+      options: { accept: '.pdf' },
+    })
+  ),
+})
+
 export const localeText = defineType({
   name: 'localeText',
   title: 'Paragraph',

@@ -344,36 +344,6 @@
     }
   },
   {
-    "type": "type",
-    "name": "sanity.fileAsset.reference",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_ref": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          }
-        },
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "reference"
-          }
-        },
-        "_weak": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "boolean"
-          },
-          "optional": true
-        }
-      },
-      "dereferencesTo": "sanity.fileAsset"
-    }
-  },
-  {
     "name": "globalSettings",
     "type": "document",
     "attributes": {
@@ -603,31 +573,8 @@
       "resume": {
         "type": "objectAttribute",
         "value": {
-          "type": "object",
-          "attributes": {
-            "asset": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "inline",
-                "name": "sanity.fileAsset.reference"
-              },
-              "optional": true
-            },
-            "media": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "unknown"
-              },
-              "optional": true
-            },
-            "_type": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string",
-                "value": "file"
-              }
-            }
-          }
+          "type": "inline",
+          "name": "localeFile"
         },
         "optional": true
       },
@@ -827,6 +774,114 @@
             "type": "number"
           },
           "optional": false
+        }
+      }
+    }
+  },
+  {
+    "type": "type",
+    "name": "sanity.fileAsset.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "sanity.fileAsset"
+    }
+  },
+  {
+    "name": "localeFile",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "localeFile"
+          }
+        },
+        "en": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "object",
+            "attributes": {
+              "asset": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "inline",
+                  "name": "sanity.fileAsset.reference"
+                },
+                "optional": true
+              },
+              "media": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "unknown"
+                },
+                "optional": true
+              },
+              "_type": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string",
+                  "value": "file"
+                }
+              }
+            }
+          },
+          "optional": true
+        },
+        "zh": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "object",
+            "attributes": {
+              "asset": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "inline",
+                  "name": "sanity.fileAsset.reference"
+                },
+                "optional": true
+              },
+              "media": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "unknown"
+                },
+                "optional": true
+              },
+              "_type": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string",
+                  "value": "file"
+                }
+              }
+            }
+          },
+          "optional": true
         }
       }
     }
@@ -3042,6 +3097,27 @@
                   },
                   "optional": true
                 },
+                "resumeLanguage": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "union",
+                    "of": [
+                      {
+                        "type": "string",
+                        "value": "auto"
+                      },
+                      {
+                        "type": "string",
+                        "value": "en"
+                      },
+                      {
+                        "type": "string",
+                        "value": "zh"
+                      }
+                    ]
+                  },
+                  "optional": true
+                },
                 "href": {
                   "type": "objectAttribute",
                   "value": {
@@ -4399,6 +4475,13 @@
           },
           "optional": true
         },
+        "compact": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        },
         "alsoLabel": {
           "type": "objectAttribute",
           "value": {
@@ -4526,6 +4609,13 @@
                 "value": "timeline"
               }
             ]
+          },
+          "optional": true
+        },
+        "compact": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
           },
           "optional": true
         },

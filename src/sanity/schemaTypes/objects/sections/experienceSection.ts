@@ -90,6 +90,15 @@ export const experienceSection = defineType({
       initialValue: 'cardsAndList',
     }),
     defineField({
+      name: 'compact',
+      title: 'Compact cards',
+      description:
+        'One line per role and nothing opens — for a homepage that points at /experience rather than repeating it. Off, each card opens in place to show what the role involved.',
+      type: 'boolean',
+      group: 'content',
+      initialValue: false,
+    }),
+    defineField({
       name: 'settings',
       title: 'Section settings',
       type: 'sectionSettings',
