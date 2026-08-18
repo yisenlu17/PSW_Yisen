@@ -126,12 +126,109 @@ export const experience = defineType({
       group: 'story',
     }),
     defineField({
-      name: 'fullStory',
-      title: 'Full story',
-      description: 'Long form, used on the detail page only.',
+      name: 'contributions',
+      title: 'What I actually did',
+      description:
+        'One entry per piece of work: the lead-in, the detail behind it, the one or two skills it took, and a picture when you have one. This is the body of the page for this role.',
       type: 'array',
       group: 'story',
-      of: [defineArrayMember({ type: 'block' })],
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'contribution',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Lead-in',
+              description: 'The bold half-line that opens the entry, e.g. "Complaint analysis and a standard way to handle it".',
+              type: 'localeString',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'body',
+              title: 'Detail',
+              type: 'localeText',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'skills',
+              title: 'Skills',
+              description: 'One or two — what this particular piece of work demanded, not the whole role.',
+              type: 'array',
+              of: [defineArrayMember({ type: 'localeString' })],
+              validation: (rule) => rule.max(2),
+            }),
+            defineField({
+              name: 'image',
+              title: 'Image',
+              description: 'Optional. A screenshot, a photo, a diagram — whatever shows the work.',
+              type: 'image',
+              options: { hotspot: true },
+              fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+            }),
+          ],
+          preview: {
+            select: { title: 'title.en', subtitle: 'body.en', media: 'image' },
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'fullStory',
+      title: 'Full write-up',
+      description:
+        'Long form, used on the detail page only — what the role actually involved, at the length a CV bullet cannot carry.',
+      type: 'array',
+      group: 'story',
+      of: [
+        defineArrayMember({
+          type: 'block',
+          styles: [
+            { title: 'Paragraph', value: 'normal' },
+            { title: 'Heading', value: 'h3' },
+            { title: 'Quote', value: 'blockquote' },
+          ],
+          lists: [
+            { title: 'Bulleted', value: 'bullet' },
+            { title: 'Numbered', value: 'number' },
+          ],
+          marks: {
+            decorators: [
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+              { title: 'Code', value: 'code' },
+            ],
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'fullStoryZh',
+      title: 'Full write-up (中文)',
+      description: 'Optional. Empty falls back to the English write-up, same as every other field.',
+      type: 'array',
+      group: 'story',
+      of: [
+        defineArrayMember({
+          type: 'block',
+          styles: [
+            { title: 'Paragraph', value: 'normal' },
+            { title: 'Heading', value: 'h3' },
+            { title: 'Quote', value: 'blockquote' },
+          ],
+          lists: [
+            { title: 'Bulleted', value: 'bullet' },
+            { title: 'Numbered', value: 'number' },
+          ],
+          marks: {
+            decorators: [
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+              { title: 'Code', value: 'code' },
+            ],
+          },
+        }),
+      ],
     }),
 
     defineField({
@@ -140,20 +237,6 @@ export const experience = defineType({
       description: 'The pill on the card, e.g. "6 projects in parallel" or "2 DAYS → 2 HOURS".',
       type: 'localeString',
       group: 'evidence',
-    }),
-    defineField({
-      name: 'responsibilities',
-      title: 'Responsibilities',
-      type: 'array',
-      group: 'evidence',
-      of: [defineArrayMember({ type: 'localeString' })],
-    }),
-    defineField({
-      name: 'problemsSolved',
-      title: 'Problems solved',
-      type: 'array',
-      group: 'evidence',
-      of: [defineArrayMember({ type: 'localeString' })],
     }),
     defineField({
       name: 'metrics',
@@ -175,15 +258,6 @@ export const experience = defineType({
         }),
       ],
     }),
-    defineField({
-      name: 'skills',
-      title: 'Skills',
-      type: 'array',
-      group: 'evidence',
-      of: [defineArrayMember({ type: 'string' })],
-      options: { layout: 'tags' },
-    }),
-
     defineField({
       name: 'images',
       title: 'Images',

@@ -59,56 +59,44 @@ export function Header({
       .toUpperCase() || 'YL'
 
   return (
-    <>
-      <div className="utility">
-        <div className="wrap">
-          {t(site?.availability, locale) && (
-            <span className="utility-status">
-              <span className="utility-dot" aria-hidden />
-              {t(site?.availability, locale)}
-            </span>
-          )}
-          <span className="utility-right">
-            <span className="utility-clock">
-              {t(site?.currentLocation, locale) || 'Singapore'} <Clock />
-            </span>
-            <LanguageToggle current={locale} />
+    <header className="masthead">
+      <div className="wrap">
+        <Link href="/" className="brand">
+          <span className="brand-mark">{initials}</span>
+          <span className="brand-text">
+            <span className="brand-name">{stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()}</span>
+            {site?.nameLocal && <span className="brand-local">{stegaClean(site.nameLocal)}</span>}
           </span>
-        </div>
+        </Link>
+
+        <nav className="nav">
+          {items.map((i) => (
+            <NavLink
+              key={i.key}
+              href={i.href}
+              external={i.external}
+              className={
+                i.emphasis === 'gold'
+                  ? 'btn btn-gold nav-cta'
+                  : i.emphasis === 'navy'
+                    ? 'btn btn-navy nav-cta'
+                    : undefined
+              }
+            >
+              {i.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <span className="masthead-meta">
+          <span className="masthead-clock">
+            {t(site?.currentLocation, locale) || 'Singapore'} <Clock />
+          </span>
+          <LanguageToggle current={locale} />
+        </span>
+
+        <MobileMenu links={menuLinks} name={stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()} />
       </div>
-
-      <header className="masthead">
-        <div className="wrap">
-          <Link href="/" className="brand">
-            <span className="brand-mark">{initials}</span>
-            <span className="brand-text">
-              <span className="brand-name">{stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()}</span>
-              {site?.nameLocal && <span className="brand-local">{stegaClean(site.nameLocal)}</span>}
-            </span>
-          </Link>
-
-          <nav className="nav">
-            {items.map((i) => (
-              <NavLink
-                key={i.key}
-                href={i.href}
-                external={i.external}
-                className={
-                  i.emphasis === 'gold'
-                    ? 'btn btn-gold nav-cta'
-                    : i.emphasis === 'navy'
-                      ? 'btn btn-navy nav-cta'
-                      : undefined
-                }
-              >
-                {i.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <MobileMenu links={menuLinks} name={stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()} />
-        </div>
-      </header>
-    </>
+    </header>
   )
 }

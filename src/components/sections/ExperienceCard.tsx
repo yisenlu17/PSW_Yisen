@@ -1,28 +1,25 @@
-'use client'
-
-import { useId, useState } from 'react'
 import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
-import { DetailList, MetricRow, copy } from '@/components/detail/DetailChrome'
+import { copy } from '@/components/detail/DetailChrome'
 import { t, formatDateRange, type Locale } from '@/lib/locale'
-import { roleDetail, type ExperienceRole } from '@/lib/experience'
+import type { ExperienceRole } from '@/lib/experience'
 
 /**
- * One role, as a card that opens where it stands.
+ * One role, as a card that points at the role's own page.
  *
- * Two shapes, one component:
+ * The card carries the identifying line, the company, the role and dates, and one
+ * paragraph — enough to tell five roles apart at a glance. Everything else lives on
+ * `/experience/<slug>`: skills, what the role actually involved, the numbers, the
+ * images. Nothing opens in place, so a visitor scanning the page is never reading a
+ * card that has grown three screens tall while its neighbours stayed one.
  *
- * - **Compact** is the homepage's. Company, role, dates, one line, and the whole card
- *   is a link. Nothing opens, because the homepage's job is to point at the work, not
- *   to reproduce it.
- * - **Expandable** is the Experience page's. The same card grows a toggle that reveals
- *   what the role actually involved, in place, without losing scroll position — the
- *   thing a visitor wants when they are comparing five roles rather than reading one.
+ * `compact` is the homepage's smaller version — same card, no category line.
  *
- * `/experience/<slug>` survives both. An expanded card is a summary a visitor can skim
- * five of; the page is the long version with the narrative, the images and the files,
- * and it stays a real URL that can be linked to, shared and indexed.
+ * The link is stretched over the card in CSS rather than wrapping it, so the whole
+ * card is one target while the accessible name stays the company; the "learn more"
+ * line beside it is the visible affordance, and is hidden from screen readers
+ * because it would otherwise announce a second link that does not exist.
  */
 export function ExperienceCard({
   role,
@@ -34,105 +31,35 @@ export function ExperienceCard({
   compact?: boolean
 }) {
   const c = copy(locale)
-  const panelId = useId()
-  const [open, setOpen] = useState(false)
 
   const slug = role.slug ? stegaClean(role.slug) : null
   const href = slug ? `/experience/${slug}` : null
   const dates = formatDateRange(role.startDate, role.endDate, locale)
   const meta = [t(role.role, locale), dates].filter(Boolean).join(' · ')
   const summary = t(role.summary, locale)
-  const detail = roleDetail(role, locale)
-
-  if (compact) {
-    return (
-      <article className="exp-card exp-card-compact">
-        <h3>
-          {/* The link is stretched over the card in CSS rather than wrapping it, so the
-              card is one target without nesting the summary text inside an anchor. */}
-          {href ? (
-            <Link href={href} className="exp-card-stretch">
-              {role.company}
-            </Link>
-          ) : (
-            role.company
-          )}
-        </h3>
-        {meta && <p className="exp-meta">{meta}</p>}
-        {summary && <p className="exp-body">{summary}</p>}
-      </article>
-    )
-  }
+  const category = t(role.category, locale)
 
   return (
-    <article className="exp-card" data-open={detail.hasDetail && open}>
-      {t(role.category, locale) && <span className="exp-kicker">{t(role.category, locale)}</span>}
+    <article className={compact ? 'exp-card exp-card-compact' : 'exp-card'}>
+      {!compact && category && <span className="exp-kicker">{category}</span>}
 
-      <h3>{href ? <Link href={href}>{role.company}</Link> : role.company}</h3>
+      <h3>
+        {href ? (
+          <Link href={href} className="exp-card-stretch">
+            {role.company}
+          </Link>
+        ) : (
+          role.company
+        )}
+      </h3>
       {meta && <p className="exp-meta">{meta}</p>}
       {summary && <p className="exp-body">{summary}</p>}
 
-      {t(role.highlight, locale) && (
-        <div className="exp-highlight-wrap">
-          <span className="exp-highlight">{t(role.highlight, locale)}</span>
-        </div>
-      )}
-
-      {/* A role whose detail fields are still empty keeps the card and the link, and
-          simply never grows a control that would open onto nothing. */}
-      {detail.hasDetail && (
-        <>
-          <button
-            type="button"
-            className="exp-toggle"
-            aria-expanded={open}
-            aria-controls={panelId}
-            onClick={() => setOpen((wasOpen) => !wasOpen)}
-          >
-            {open ? c.collapse : c.expand}
-            <span className="exp-toggle-mark" aria-hidden>
-              ↓
-            </span>
-          </button>
-
-          {/* Rendered collapsed rather than unmounted so the panel can animate; `inert`
-              is what keeps its links and headings out of the tab order and off the
-              accessibility tree while it is shut. */}
-          <div className="exp-panel" id={panelId} inert={!open}>
-            <div className="exp-panel-inner">
-              {detail.secondary && (
-                <div className="detail-block">
-                  <p>{detail.secondary}</p>
-                </div>
-              )}
-
-              <MetricRow metrics={detail.metrics} />
-
-              <DetailList label={c.responsibilities} items={detail.responsibilities} />
-              <DetailList label={c.problemsSolved} items={detail.problems} />
-
-              {detail.skills.length > 0 && (
-                <div className="detail-block">
-                  <h2>{c.skills}</h2>
-                  <div className="detail-tags">
-                    {detail.skills.map((skill, i) => (
-                      <span key={i} className="detail-tag">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {href && (
-                <Link href={href} className="exp-panel-more">
-                  {c.fullPage}
-                  <span aria-hidden>→</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </>
+      {href && (
+        <span className="exp-more" aria-hidden>
+          {c.learnMore}
+          <span className="exp-more-mark">→</span>
+        </span>
       )}
     </article>
   )

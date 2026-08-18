@@ -107,6 +107,7 @@
   gap: 24px;
 }
 .exp-card {
+  position: relative;
   background: var(--paper);
   border: 1px solid var(--line);
   border-top: 3px solid var(--gold);
@@ -124,12 +125,6 @@
 .exp-meta { margin: 0; font-size: 14.5px; color: var(--muted); }
 .exp-body { margin: 18px 0 0; font-size: 15.5px; line-height: 1.65; }
 .exp-body-soft { margin-top: 14px; font-size: 15px; color: var(--body); }
-.exp-highlight-wrap { margin-top: auto; padding-top: 22px; }
-.exp-highlight {
-  display: inline-block; background: var(--cream); border-radius: 999px;
-  padding: 8px 16px; font-size: 12.5px; font-weight: 800;
-  letter-spacing: .06em; color: var(--navy);
-}
 
 .exp-list {
   margin-top: 24px; border: 1px solid var(--line);
@@ -162,89 +157,42 @@
   width: 12px; height: 12px; border-radius: 50%;
   background: var(--gold); box-shadow: 0 0 0 4px var(--paper);
 }
-.exp-timeline .exp-highlight-wrap { padding-top: 16px; }
 
-/* ---------- experience: the card that opens ---------- */
-/* Cards size to their own content. Without this, opening one stretches every empty
-   card beside it to match, and three quarters of the row becomes whitespace. */
-.exp-cards { align-items: start; }
-
-.exp-toggle {
-  align-self: flex-start;
-  margin-top: 22px;
+/* ---------- experience: the card that leads somewhere ---------- */
+/* Pinned to the bottom of the card so every card in the row ends on the same line,
+   whatever the paragraph above it does. */
+.exp-more {
+  margin-top: auto; padding-top: 24px;
   display: inline-flex; align-items: center; gap: 9px;
-  background: none; border: 0; padding: 0;
-  font: inherit; font-size: 12.5px; font-weight: 800;
+  font-size: 12.5px; font-weight: 800;
   letter-spacing: .12em; text-transform: uppercase;
-  color: var(--navy); cursor: pointer;
-  transition: color var(--t-fast);
+  color: var(--gold);
+  transition: gap var(--t-fast), color var(--t-fast);
 }
-.exp-toggle:hover { color: var(--gold); }
-.exp-toggle-mark {
+.exp-more-mark {
   display: grid; place-items: center;
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--cream); color: var(--navy);
-  font-size: 11px; line-height: 1;
+  font-size: 12px; line-height: 1;
   transition: transform var(--t-base), background var(--t-fast);
 }
-.exp-card[data-open='true'] .exp-toggle-mark { transform: rotate(180deg); background: var(--gold); }
-/* An open card stays put — a panel that slides out from under the pointer while the
-   card is also lifting is two movements fighting each other. */
-.exp-card[data-open='true']:hover { transform: none; box-shadow: var(--shadow); }
+.exp-card:hover .exp-more { gap: 13px; color: var(--navy); }
+.exp-card:hover .exp-more-mark { background: var(--gold); transform: translateX(2px); }
 
-/* 0fr → 1fr animates to a height the card does not have to know in advance, so the
-   panel opens smoothly whether it holds two bullets or fifteen. */
-.exp-panel {
-  display: grid; grid-template-rows: 0fr;
-  overflow: hidden; opacity: 0;
-  transition: grid-template-rows var(--t-slow), opacity var(--t-base);
-}
-.exp-panel-inner { min-height: 0; overflow: hidden; }
-.exp-card[data-open='true'] .exp-panel { grid-template-rows: 1fr; opacity: 1; }
-
-.exp-panel-inner > :first-child { margin-top: 24px; }
-.exp-panel .detail-block + .detail-block { margin-top: 22px; }
-.exp-panel .detail-block h2 { font-size: 11px; letter-spacing: .14em; margin-bottom: 10px; }
-.exp-panel .detail-block > p { font-size: 15.5px; line-height: 1.65; }
-.exp-panel .detail-list li { padding: 9px 0 9px 22px; font-size: 15px; }
-.exp-panel .detail-list li::before { top: 17px; width: 5px; height: 5px; }
-.exp-panel .detail-metrics {
-  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
-  gap: 16px; padding-bottom: 22px; margin-bottom: 22px;
-}
-.exp-panel .detail-metric-value { font-size: clamp(24px, 2.4vw, 30px); }
-.exp-panel .detail-metric-label { font-size: 13px; }
-.exp-panel .detail-tag { font-size: 12.5px; padding: 6px 13px; }
-.exp-panel-more {
-  margin-top: 24px;
-  display: inline-flex; align-items: center; gap: 9px;
-  font-size: 12.5px; font-weight: 800; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--gold);
-  transition: gap var(--t-fast), color var(--t-fast);
-}
-.exp-panel-more:hover { gap: 13px; color: var(--navy); }
-
-/* ---------- experience: the homepage card that does not ---------- */
+/* ---------- experience: the homepage card, one size down ---------- */
 .exp-cards[data-compact] { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-.exp-card-compact { position: relative; padding: 26px 26px 24px; }
+.exp-card-compact { padding: 26px 26px 24px; }
 .exp-card-compact h3 { margin: 0 0 4px; font-size: 21px; }
 .exp-card-compact .exp-body { margin-top: 12px; font-size: 15px; }
+.exp-card-compact .exp-more { padding-top: 18px; font-size: 12px; }
 /* One link, stretched over the whole tile: the card is a single target without
    nesting the summary text inside an anchor. */
 .exp-card-stretch { color: inherit; }
 .exp-card-stretch::after { content: ""; position: absolute; inset: 0; }
 
-.section[data-theme='dark'] .exp-toggle { color: rgba(255,255,255,.86); }
-.section[data-theme='dark'] .exp-toggle:hover { color: var(--gold); }
-.section[data-theme='dark'] .exp-toggle-mark { background: rgba(255,255,255,.1); color: #fff; }
-.section[data-theme='dark'] .exp-card[data-open='true'] .exp-toggle-mark { color: var(--navy-deep); }
-.section[data-theme='dark'] .exp-panel .detail-block > p { color: rgba(255,255,255,.82); }
-.section[data-theme='dark'] .exp-panel .detail-list li { border-color: var(--line-navy); color: rgba(255,255,255,.86); }
-.section[data-theme='dark'] .exp-panel .detail-metrics { border-color: var(--line-navy); }
-.section[data-theme='dark'] .exp-panel .detail-metric-value,
-.section[data-theme='dark'] .exp-panel .detail-metric-label { color: #fff; }
-.section[data-theme='dark'] .exp-panel .detail-tag { background: rgba(255,255,255,.08); color: #fff; }
-.section[data-theme='dark'] .exp-panel-more:hover { color: #fff; }
+.section[data-theme='dark'] .exp-more-mark { background: rgba(255,255,255,.1); color: #fff; }
+.section[data-theme='dark'] .exp-card:hover .exp-more { color: #fff; }
+.section[data-theme='dark'] .exp-card:hover .exp-more-mark { background: var(--gold); color: var(--navy-deep); }
 
 /* ---------- projects ---------- */
 .proj-list { display: flex; flex-direction: column; gap: 22px; }
@@ -647,6 +595,42 @@
   width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
 }
 
+/* Numbered because these are pieces of one role rather than a loose tag cloud: the
+   number carries the reading order, the rule down the left keeps the entry together
+   once it grows a picture. */
+.contrib-list {
+  margin: 0; padding: 0; list-style: none;
+  counter-reset: contrib;
+  display: grid; gap: clamp(26px, 3vw, 38px);
+}
+.contrib {
+  counter-increment: contrib;
+  position: relative; padding-left: clamp(34px, 4vw, 48px);
+}
+.contrib::before {
+  content: counter(contrib, decimal-leading-zero);
+  position: absolute; left: 0; top: 2px;
+  font-family: var(--mono); font-size: 12.5px; font-weight: 700;
+  letter-spacing: .08em; color: var(--gold);
+}
+.contrib::after {
+  content: ""; position: absolute; left: 7px; top: 24px; bottom: 4px;
+  width: 1px; background: var(--line);
+}
+.contrib:last-child::after { display: none; }
+.contrib-title {
+  margin: 0 0 8px; font-size: clamp(18px, 1.8vw, 21px);
+  letter-spacing: -.015em; line-height: 1.35;
+}
+.contrib > p { margin: 0; font-size: 16.5px; line-height: 1.7; color: var(--body); }
+.contrib-tags { margin-top: 14px; }
+.contrib-tags .detail-tag { font-size: 12.5px; padding: 6px 13px; }
+.contrib-figure { margin: 18px 0 0; }
+.contrib-figure img {
+  width: 100%; height: auto; border-radius: var(--r);
+  box-shadow: var(--shadow-sm);
+}
+
 .detail-tags { display: flex; flex-wrap: wrap; gap: 9px; }
 .detail-tag {
   background: var(--cream); border-radius: 999px; padding: 8px 15px;
@@ -882,28 +866,24 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 .video-wrap figcaption { margin-top: 10px; font-size: 13.5px; color: var(--muted); }
 .section[data-theme='dark'] .video-wrap figcaption { color: rgba(255,255,255,.6); }
 
-/* ---------- utility bar ---------- */
-.utility .wrap {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 14px 20px; padding-block: 8px; min-height: 0; flex-wrap: wrap;
+/* ---------- masthead meta (location clock + language) ---------- */
+/* Sits after the nav, separated by a hairline so it reads as chrome, not navigation. */
+.masthead-meta { position: relative; padding-left: 22px; }
+.masthead-meta::before {
+  content: ''; position: absolute; left: 0; top: 50%; translate: 0 -50%;
+  width: 1px; height: 22px; background: var(--line);
 }
-.utility-status {
-  display: inline-flex; align-items: center; gap: 10px;
-  color: rgba(255,255,255,.72); font-weight: 600; min-width: 0;
-}
-.utility-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex: none; }
-.utility-right { display: inline-flex; align-items: center; gap: 14px; flex: none; }
-.utility-clock {
-  font-family: var(--mono); letter-spacing: .06em;
-  color: rgba(255,255,255,.6); white-space: nowrap; text-transform: uppercase;
+.masthead-clock {
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em;
+  color: var(--muted); white-space: nowrap; text-transform: uppercase;
 }
 
 .lang-toggle {
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22);
-  color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .1em;
-  padding: 5px 14px; border-radius: 999px; transition: background .2s, color .2s;
+  background: transparent; border: 1px solid var(--line);
+  color: var(--navy); font-size: 12px; font-weight: 800; letter-spacing: .1em;
+  padding: 5px 14px; border-radius: 999px; transition: background .2s, color .2s, border-color .2s;
 }
-.lang-toggle:hover { background: var(--gold); color: var(--navy-deep); border-color: var(--gold); }
+.lang-toggle:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
 
 /* ---------- masthead ---------- */
 .brand { display: inline-flex; align-items: center; gap: 13px; flex: none; }
@@ -953,7 +933,13 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 
 @media (max-width: 900px) {
   .masthead .nav { display: none; }
-  .burger { display: grid; }
+  .masthead-meta { margin-left: auto; padding-left: 0; }
+  .masthead-meta::before { display: none; }
+  .burger { display: grid; margin-left: 0; }
+}
+
+@media (max-width: 560px) {
+  .masthead-clock { display: none; }
 }
 
 /* ---------- footer ---------- */

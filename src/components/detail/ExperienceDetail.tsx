@@ -6,8 +6,21 @@ import { urlFor } from '@/sanity/image'
 import { PortableBody } from '@/components/PortableBody'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import type { ProjectCardData, SanityImage } from '@/lib/project'
-import { DetailHeader, DetailList, MetricRow, copy } from './DetailChrome'
+import { DetailHeader, MetricRow, copy } from './DetailChrome'
 import { RelatedProject } from './ProjectDetail'
+
+/**
+ * One piece of work: what it was, what it took, and — when there is one — a picture
+ * of it. Skills are attached here rather than pooled at the bottom of the page, so a
+ * reader sees which part of the role each one came out of.
+ */
+export type Contribution = {
+  _key: string
+  title?: LocaleString
+  body?: LocaleText
+  skills?: LocaleString[] | null
+  image?: SanityImage | null
+}
 
 export type ExperienceDetailData = {
   _id: string
@@ -22,10 +35,9 @@ export type ExperienceDetailData = {
   summary?: LocaleText
   secondary?: LocaleText
   highlight?: LocaleString
-  skills?: string[] | null
+  contributions?: Contribution[] | null
   fullStory?: PortableTextBlock[] | null
-  responsibilities?: LocaleString[] | null
-  problemsSolved?: LocaleString[] | null
+  fullStoryZh?: PortableTextBlock[] | null
   metrics?: Array<{ _key: string; value?: string | null; label?: LocaleString }> | null
   images?: SanityImage[] | null
   documents?: Array<{ _key: string; url?: string | null; filename?: string | null }> | null
@@ -35,11 +47,11 @@ export type ExperienceDetailData = {
 /**
  * The role, at full length.
  *
- * Every field the Experience schema already had and nothing rendered — the full
- * story, responsibilities, problems solved, metrics, images and attachments — comes
- * out here. Projects are not listed on the role; they point at it, and the query
- * finds them by reverse lookup, so linking a side project to a job is one edit in
- * one document.
+ * This is where the work itself lives — the cards on /experience carry a paragraph
+ * and a link, and everything longer than that comes out here: the contributions with
+ * their skills and pictures, the write-up, the metrics, the gallery, the files.
+ * Projects are not listed on the role; they point at it, and the query finds them by
+ * reverse lookup, so linking a side project to a job is one edit in one document.
  */
 export function ExperienceDetail({
   experience,
@@ -56,8 +68,9 @@ export function ExperienceDetail({
     value: m.value,
     label: t(m.label, locale),
   }))
-  const responsibilities = (experience.responsibilities ?? []).map((r) => t(r, locale)).filter(Boolean)
-  const problems = (experience.problemsSolved ?? []).map((p) => t(p, locale)).filter(Boolean)
+  const contributions = (experience.contributions ?? []).filter(
+    (contribution) => t(contribution.title, locale) || t(contribution.body, locale)
+  )
   const images = (experience.images ?? []).filter((i) => i?.asset)
   const documents = (experience.documents ?? []).filter((d) => d.url)
   const projects = experience.projects ?? []
@@ -89,21 +102,43 @@ export function ExperienceDetail({
           </div>
         )}
 
-        <PortableBody value={experience.fullStory} locale={locale} />
+        <PortableBody value={experience.fullStory} valueZh={experience.fullStoryZh} locale={locale} />
 
-        <DetailList label={c.responsibilities} items={responsibilities} />
-        <DetailList label={c.problemsSolved} items={problems} />
-
-        {(experience.skills?.length ?? 0) > 0 && (
+        {contributions.length > 0 && (
           <div className="detail-block">
-            <h2>{c.skills}</h2>
-            <div className="detail-tags">
-              {experience.skills!.map((skill, i) => (
-                <span key={i} className="detail-tag">
-                  {skill}
-                </span>
+            <h2>{c.whatIDid}</h2>
+            <ol className="contrib-list">
+              {contributions.map((contribution) => (
+                <li key={contribution._key} className="contrib">
+                  {t(contribution.title, locale) && (
+                    <h3 className="contrib-title">{t(contribution.title, locale)}</h3>
+                  )}
+                  {t(contribution.body, locale) && <p>{t(contribution.body, locale)}</p>}
+
+                  {(contribution.skills ?? []).length > 0 && (
+                    <div className="detail-tags contrib-tags">
+                      {contribution.skills!.map((skill, i) => (
+                        <span key={i} className="detail-tag">
+                          {t(skill, locale)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {contribution.image?.asset && (
+                    <figure className="contrib-figure">
+                      <Image
+                        src={urlFor(contribution.image).width(1200).url()}
+                        alt={contribution.image.alt ? stegaClean(contribution.image.alt) : ''}
+                        width={700}
+                        height={440}
+                        sizes="(max-width: 800px) 100vw, 680px"
+                      />
+                    </figure>
+                  )}
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
         )}
 

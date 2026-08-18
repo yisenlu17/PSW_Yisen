@@ -85,6 +85,7 @@ knob an editor gets is one more way the design can drift.
 | `npm run typecheck` | TypeScript, no emit |
 | `npm run typegen` | Regenerate types after any schema change |
 | `npm run seed` | One-time content import (safe to re-run; won't overwrite) |
+| `npm run experience-detail` | Writes the CV write-up onto the five roles (`-- --dry-run` to preview) |
 
 Run `npm run typegen` after **every** schema change, or the query types go stale.
 

@@ -19,24 +19,7 @@ const EXPERIENCE_FIELDS = /* groq */ `
   featured,
   order,
   summary,
-  secondary,
-  highlight,
-  skills
-`
-
-/**
- * What an expandable Experience card needs on top of the card itself.
- *
- * Roles number in the handful, so this rides along with the section rather than
- * waiting for a click — a card that pauses before it opens reads as broken. The
- * portable-text story, the images and the attachments stay out of it: those are the
- * reason `/experience/<slug>` exists, and they are the expensive half.
- */
-const EXPERIENCE_EXPAND_FIELDS = /* groq */ `
-  ${EXPERIENCE_FIELDS},
-  responsibilities,
-  problemsSolved,
-  metrics[]{ _key, value, label }
+  highlight
 `
 
 /**
@@ -162,9 +145,9 @@ const SECTIONS = /* groq */ `
       // GROQ slice bounds must be literal, so the ceiling is fixed here and the
       // editor's own limit is applied when rendering.
       "roles": select(
-        source == "manual" => roles[]->{ ${EXPERIENCE_EXPAND_FIELDS} },
+        source == "manual" => roles[]->{ ${EXPERIENCE_FIELDS} },
         *[_type == "experience" && !(_id in path("drafts.**"))]
-          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ ${EXPERIENCE_EXPAND_FIELDS} }
+          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ ${EXPERIENCE_FIELDS} }
       )
     },
 
@@ -269,9 +252,9 @@ export const EXPERIENCE_QUERY = defineQuery(`
     ${EXPERIENCE_FIELDS},
     _type,
     secondary,
+    contributions[]{ _key, title, body, skills, image{ alt, asset } },
     fullStory,
-    responsibilities,
-    problemsSolved,
+    fullStoryZh,
     metrics[]{ _key, value, label },
     images[]{ _key, alt, asset },
     documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },

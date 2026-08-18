@@ -365,6 +365,25 @@ export type Experience = {
   order?: number;
   summary?: LocaleText;
   secondary?: LocaleText;
+  contributions?: Array<{
+    title: LocaleString;
+    body: LocaleText;
+    skills?: Array<
+      {
+        _key: string;
+      } & LocaleString
+    >;
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      alt?: string;
+      _type: "image";
+    };
+    _type: "contribution";
+    _key: string;
+  }>;
   fullStory?: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -372,7 +391,25 @@ export type Experience = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    style?: "normal" | "h3" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  fullStoryZh?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h3" | "blockquote";
     listItem?: "bullet" | "number";
     markDefs?: Array<{
       href?: string;
@@ -384,23 +421,12 @@ export type Experience = {
     _key: string;
   }>;
   highlight?: LocaleString;
-  responsibilities?: Array<
-    {
-      _key: string;
-    } & LocaleString
-  >;
-  problemsSolved?: Array<
-    {
-      _key: string;
-    } & LocaleString
-  >;
   metrics?: Array<{
     value?: string;
     label?: LocaleString;
     _type: "metric";
     _key: string;
   }>;
-  skills?: Array<string>;
   images?: Array<{
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -910,7 +936,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "quoteSection" => {      quote,      attribution,      context,      portrait,      variant    },    _type == "photoGallerySection" => {      eyebrow,      title,      lede,      variant,      photos[]{ _key, asset, hotspot, crop, alt, caption }    },    _type == "bentoGridSection" => {      eyebrow,      title,      lede,      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }    },    _type == "videoFeatureSection" => {      eyebrow,      title,      body,      variant,      video{        source,        url,        "file": file{ asset->{ url } },        poster,        title,        caption      }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, resumeLanguage, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      compact,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{     _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills,  responsibilities,  problemsSolved,  metrics[]{ _key, value, label } },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{     _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills,  responsibilities,  problemsSolved,  metrics[]{ _key, value, label } }      )    },    _type == "projectsSection" => {      eyebrow,      title,      lede,      source,      limit,      compact,      alsoLabel,      linkToDetail,      "projects": select(        source == "manual" => projects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },        *[_type == "project" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }      )    },    _type == "playgroundSection" => {      eyebrow,      title,      lede,      source,      statement{ label, body },      interestsLabel,      note,      primaryImage,      secondaryImage,      "items": select(        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, name asc)[0...60]{            _id, kind, name, nameLocal, note, prominent, order          }      )    }  }  }
+// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,      sections[]{    _key,    _type,    settings,    _type == "heroSection" => {      eyebrow,      headlineLine1,      headlineLine2,      rotatingWords,      lede,      ctas[]{ _key, label, href, style },      metaItems,      showPortrait,      portrait,      portraitBadge,      rotateHeadlineWord    },    _type == "editorialIntroSection" => {      eyebrow,      title,      lede,      note,      steps[]{ _key, title, body }    },    _type == "statsSection" => {      eyebrow,      title,      note,      feature{ source, value, description },      stats[]{ _key, value, suffix, countTo, label, source }    },    _type == "currentlySection" => {      eyebrow,      title,      updatedLabel,      items[]{ _key, label, body }    },    _type == "quoteSection" => {      quote,      attribution,      context,      portrait,      variant    },    _type == "photoGallerySection" => {      eyebrow,      title,      lede,      variant,      photos[]{ _key, asset, hotspot, crop, alt, caption }    },    _type == "bentoGridSection" => {      eyebrow,      title,      lede,      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }    },    _type == "videoFeatureSection" => {      eyebrow,      title,      body,      variant,      video{        source,        url,        "file": file{ asset->{ url } },        poster,        title,        caption      }    },    _type == "ctaSection" => {      eyebrow,      title,      body,      actions[]{ _key, label, intent, platform, resumeLanguage, href, style }    },    _type == "experienceSection" => {      eyebrow,      title,      lede,      variant,      compact,      source,      limit,      // GROQ slice bounds must be literal, so the ceiling is fixed here and the      // editor's own limit is applied when rendering.      "roles": select(        source == "manual" => roles[]->{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  highlight },        *[_type == "experience" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  highlight }      )    },    _type == "projectsSection" => {      eyebrow,      title,      lede,      source,      limit,      compact,      alsoLabel,      linkToDetail,      "projects": select(        source == "manual" => projects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },        *[_type == "project" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }      )    },    _type == "playgroundSection" => {      eyebrow,      title,      lede,      source,      statement{ label, body },      interestsLabel,      note,      primaryImage,      secondaryImage,      "items": select(        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]          | order(coalesce(order, 9999) asc, name asc)[0...60]{            _id, kind, name, nameLocal, note, prominent, order          }      )    }  }  }
 export type PAGE_QUERY_RESULT = {
   _id: string;
   _type: "page";
@@ -1028,24 +1054,7 @@ export type PAGE_QUERY_RESULT = {
           featured: boolean | null;
           order: number | null;
           summary: LocaleText | null;
-          secondary: LocaleText | null;
           highlight: LocaleString | null;
-          skills: Array<string> | null;
-          responsibilities: Array<
-            {
-              _key: string;
-            } & LocaleString
-          > | null;
-          problemsSolved: Array<
-            {
-              _key: string;
-            } & LocaleString
-          > | null;
-          metrics: Array<{
-            _key: string;
-            value: string | null;
-            label: LocaleString | null;
-          }> | null;
         }> | null;
       }
     | {
@@ -1429,7 +1438,7 @@ export type PROJECT_SLUGS_QUERY_RESULT = Array<string>;
 
 // Source: src/sanity/queries.ts
 // Variable: EXPERIENCE_QUERY
-// Query: *[_type == "experience" && slug.current == $slug][0]{      _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  secondary,  highlight,  skills,    _type,    secondary,    fullStory,    responsibilities,    problemsSolved,    metrics[]{ _key, value, label },    images[]{ _key, alt, asset },    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]      | order(coalesce(order, 9999) asc)[0...6]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }  }
+// Query: *[_type == "experience" && slug.current == $slug][0]{      _id,  company,  "slug": slug.current,  role,  category,  location,  logo,  startDate,  endDate,  featured,  order,  summary,  highlight,    _type,    secondary,    contributions[]{ _key, title, body, skills, image{ alt, asset } },    fullStory,    fullStoryZh,    metrics[]{ _key, value, label },    images[]{ _key, alt, asset },    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]      | order(coalesce(order, 9999) asc)[0...6]{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover }  }
 export type EXPERIENCE_QUERY_RESULT = {
   _id: string;
   company: string;
@@ -1450,10 +1459,23 @@ export type EXPERIENCE_QUERY_RESULT = {
   featured: boolean | null;
   order: number | null;
   summary: LocaleText | null;
-  secondary: LocaleText | null;
   highlight: LocaleString | null;
-  skills: Array<string> | null;
   _type: "experience";
+  secondary: LocaleText | null;
+  contributions: Array<{
+    _key: string;
+    title: LocaleString;
+    body: LocaleText;
+    skills: Array<
+      {
+        _key: string;
+      } & LocaleString
+    > | null;
+    image: {
+      alt: string | null;
+      asset: SanityImageAssetReference | null;
+    } | null;
+  }> | null;
   fullStory: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -1461,7 +1483,7 @@ export type EXPERIENCE_QUERY_RESULT = {
       _type: "span";
       _key: string;
     }>;
-    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    style?: "blockquote" | "h3" | "normal";
     listItem?: "bullet" | "number";
     markDefs?: Array<{
       href?: string;
@@ -1472,16 +1494,24 @@ export type EXPERIENCE_QUERY_RESULT = {
     _type: "block";
     _key: string;
   }> | null;
-  responsibilities: Array<
-    {
+  fullStoryZh: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
       _key: string;
-    } & LocaleString
-  > | null;
-  problemsSolved: Array<
-    {
+    }>;
+    style?: "blockquote" | "h3" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
       _key: string;
-    } & LocaleString
-  > | null;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
   metrics: Array<{
     _key: string;
     value: string | null;
@@ -1616,11 +1646,11 @@ export type NAVIGATION_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "quoteSection" => {\n      quote,\n      attribution,\n      context,\n      portrait,\n      variant\n    },\n\n    _type == "photoGallerySection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      photos[]{ _key, asset, hotspot, crop, alt, caption }\n    },\n\n    _type == "bentoGridSection" => {\n      eyebrow,\n      title,\n      lede,\n      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }\n    },\n\n    _type == "videoFeatureSection" => {\n      eyebrow,\n      title,\n      body,\n      variant,\n      video{\n        source,\n        url,\n        "file": file{ asset->{ url } },\n        poster,\n        title,\n        caption\n      }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, resumeLanguage, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      compact,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n,\n  responsibilities,\n  problemsSolved,\n  metrics[]{ _key, value, label }\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n,\n  responsibilities,\n  problemsSolved,\n  metrics[]{ _key, value, label }\n }\n      )\n    },\n\n    _type == "projectsSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      limit,\n      compact,\n      alsoLabel,\n      linkToDetail,\n      "projects": select(\n        source == "manual" => projects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n        *[_type == "project" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n      )\n    },\n\n    _type == "playgroundSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      statement{ label, body },\n      interestsLabel,\n      note,\n      primaryImage,\n      secondaryImage,\n      "items": select(\n        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },\n        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, name asc)[0...60]{\n            _id, kind, name, nameLocal, note, prominent, order\n          }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
+    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "quoteSection" => {\n      quote,\n      attribution,\n      context,\n      portrait,\n      variant\n    },\n\n    _type == "photoGallerySection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      photos[]{ _key, asset, hotspot, crop, alt, caption }\n    },\n\n    _type == "bentoGridSection" => {\n      eyebrow,\n      title,\n      lede,\n      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }\n    },\n\n    _type == "videoFeatureSection" => {\n      eyebrow,\n      title,\n      body,\n      variant,\n      video{\n        source,\n        url,\n        "file": file{ asset->{ url } },\n        poster,\n        title,\n        caption\n      }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, resumeLanguage, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      compact,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  highlight\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  highlight\n }\n      )\n    },\n\n    _type == "projectsSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      limit,\n      compact,\n      alsoLabel,\n      linkToDetail,\n      "projects": select(\n        source == "manual" => projects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n        *[_type == "project" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n      )\n    },\n\n    _type == "playgroundSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      statement{ label, body },\n      interestsLabel,\n      note,\n      primaryImage,\n      secondaryImage,\n      "items": select(\n        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },\n        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, name asc)[0...60]{\n            _id, kind, name, nameLocal, note, prominent, order\n          }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
     '\n  *[_type == "page" && defined(slug.current)].slug.current\n': PAGE_SLUGS_QUERY_RESULT;
     '\n  *[_type == "project" && slug.current == $slug][0]{\n    _id,\n    _type,\n    \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n,\n    problem,\n    approach,\n    outcome,\n    body,\n    bodyZh,\n    metrics[]{ _key, value, label, source },\n    features,\n    learnings,\n    stack,\n    gallery[]{ _key, alt, caption, asset },\n    links[]{ _key, kind, label, url },\n    relatedExperience->{ _id, company, "slug": slug.current, role, category },\n    relatedProjects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n    seoTitle,\n    seoDescription\n  }\n': PROJECT_QUERY_RESULT;
     '\n  *[_type == "project" && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT;
-    '\n  *[_type == "experience" && slug.current == $slug][0]{\n    \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  secondary,\n  highlight,\n  skills\n,\n    _type,\n    secondary,\n    fullStory,\n    responsibilities,\n    problemsSolved,\n    metrics[]{ _key, value, label },\n    images[]{ _key, alt, asset },\n    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },\n    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]\n      | order(coalesce(order, 9999) asc)[0...6]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n  }\n': EXPERIENCE_QUERY_RESULT;
+    '\n  *[_type == "experience" && slug.current == $slug][0]{\n    \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  highlight\n,\n    _type,\n    secondary,\n    contributions[]{ _key, title, body, skills, image{ alt, asset } },\n    fullStory,\n    fullStoryZh,\n    metrics[]{ _key, value, label },\n    images[]{ _key, alt, asset },\n    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },\n    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]\n      | order(coalesce(order, 9999) asc)[0...6]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n  }\n': EXPERIENCE_QUERY_RESULT;
     '\n  *[_type == "experience" && defined(slug.current)].slug.current\n': EXPERIENCE_SLUGS_QUERY_RESULT;
     '\n  *[_type == "globalSettings"][0]{\n    _id,\n    name,\n    nameLocal,\n    profileImage,\n    shortBio,\n    currentRole,\n    currentLocation,\n    availability,\n    email,\n    socialLinks[]{ _key, platform, label, url },\n    "resume": {\n      "en": resume.en.asset->{ url, originalFilename },\n      "zh": resume.zh.asset->{ url, originalFilename }\n    },\n    seoTitle,\n    seoDescription,\n    ogImage,\n    favicon\n  }\n': GLOBAL_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "navigation"][0]{\n    _id,\n    items[!hidden]{ _key, label, href, external, emphasis },\n    footerStatement,\n    footerNote,\n    copyright\n  }\n': NAVIGATION_QUERY_RESULT;

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "typegen": "sanity schema extract --enforce-required-fields --force --path ./schema.json && sanity typegen generate",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "experience-detail": "node scripts/experience-detail.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^7.0.1",
