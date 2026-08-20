@@ -88,12 +88,12 @@ export function Header({
           ))}
         </nav>
 
-        <span className="masthead-meta">
+        <div className="masthead-meta">
           <span className="masthead-clock">
             {t(site?.currentLocation, locale) || 'Singapore'} <Clock />
           </span>
           <LanguageToggle current={locale} />
-        </span>
+        </div>
 
         <MobileMenu links={menuLinks} name={stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()} />
       </div>

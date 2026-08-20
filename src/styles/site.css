@@ -878,12 +878,37 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
   color: var(--muted); white-space: nowrap; text-transform: uppercase;
 }
 
+.lang { position: relative; }
 .lang-toggle {
-  background: transparent; border: 1px solid var(--line);
-  color: var(--navy); font-size: 12px; font-weight: 800; letter-spacing: .1em;
-  padding: 5px 14px; border-radius: 999px; transition: background .2s, color .2s, border-color .2s;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: transparent; border: 1px solid var(--line); cursor: pointer;
+  color: var(--navy); font-family: inherit;
+  font-size: 12px; font-weight: 800; letter-spacing: .1em;
+  padding: 5px 12px 5px 14px; border-radius: 999px;
+  transition: background .2s, color .2s, border-color .2s;
 }
-.lang-toggle:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.lang-toggle:hover,
+.lang-toggle[aria-expanded='true'] { background: var(--navy); color: #fff; border-color: var(--navy); }
+.lang-caret { width: 10px; height: 7px; flex: none; transition: transform var(--t-fast); }
+.lang-toggle[aria-expanded='true'] .lang-caret { transform: rotate(180deg); }
+
+/* Right-aligned so it opens inwards from the corner it sits in. */
+.lang-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 10;
+  margin: 0; padding: 6px; list-style: none;
+  min-width: 148px;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--r-sm); box-shadow: var(--shadow);
+}
+.lang-option {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 9px 12px; border-radius: 6px;
+  font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.lang-option:hover { background: var(--cream); color: var(--navy); }
+.lang-option[aria-current='true'] { color: var(--navy); }
+.lang-check { width: 13px; height: 13px; flex: none; color: var(--gold); }
 
 /* ---------- masthead ---------- */
 .brand { display: inline-flex; align-items: center; gap: 13px; flex: none; }
