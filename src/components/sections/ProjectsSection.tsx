@@ -6,6 +6,7 @@ import { Section, type SectionSettings } from '@/components/Section'
 import { urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import { statusLabel, isShipped, projectTitle, type ProjectCardData } from '@/lib/project'
+import { detailHref } from '@/lib/href'
 
 export type ProjectsSectionData = {
   _key: string
@@ -94,7 +95,7 @@ export function ProjectsSection({
           <p className="proj-also-label">{alsoLabelText}</p>
           <div className="proj-also-grid">
             {also.map((project) => (
-              <AlsoRunning key={project._id} project={project} locale={locale} linked={linked} />
+              <AlsoRunning key={project._id} project={project} locale={locale} />
             ))}
           </div>
         </div>
@@ -114,8 +115,7 @@ function ProjectCard({
   linked: boolean
   flipped: boolean
 }) {
-  const slug = project.slug ? stegaClean(project.slug) : null
-  const href = linked && slug ? `/projects/${slug}` : null
+  const href = linked ? detailHref('projects', project.slug) : null
   const status = statusLabel(project.status, locale)
   const tags = (project.tags ?? []).map((tag) => t(tag, locale)).filter(Boolean)
 
@@ -201,8 +201,7 @@ function CompactProject({
   locale: Locale
   linked: boolean
 }) {
-  const slug = project.slug ? stegaClean(project.slug) : null
-  const href = linked && slug ? `/projects/${slug}` : null
+  const href = linked ? detailHref('projects', project.slug) : null
   const body = t(project.tagline, locale) || t(project.summary, locale)
 
   return (
@@ -224,28 +223,18 @@ function CompactProject({
   )
 }
 
-function AlsoRunning({
-  project,
-  locale,
-  linked,
-}: {
-  project: ProjectCardData
-  locale: Locale
-  linked: boolean
-}) {
-  const slug = project.slug ? stegaClean(project.slug) : null
-  const href = linked && slug ? `/projects/${slug}` : null
+/**
+ * The strip reads as a footnote to the featured work, so it stays plain text: a name
+ * and a line. These are accounts and a student venture with nothing behind them worth
+ * a page of their own, and a link that only ever lands on a thin one is worse than no
+ * link at all.
+ */
+function AlsoRunning({ project, locale }: { project: ProjectCardData; locale: Locale }) {
   const body = t(project.summary, locale) || t(project.tagline, locale)
 
   return (
     <div className="proj-also-item">
-      <h4>
-        {href ? (
-          <Link href={href}>{projectTitle(project, locale)}</Link>
-        ) : (
-          projectTitle(project, locale)
-        )}
-      </h4>
+      <h4>{projectTitle(project, locale)}</h4>
       {body && <p>{body}</p>}
     </div>
   )

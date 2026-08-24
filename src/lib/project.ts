@@ -38,7 +38,9 @@ export type ProjectCardData = {
 const STATUS: Record<string, { en: string; zh: string }> = {
   live: { en: 'Live', zh: '已上线' },
   inUse: { en: 'In daily use', zh: '每天在用' },
-  building: { en: 'In progress', zh: '进行中' },
+  comingSoon: { en: 'Launching soon', zh: '即将上线' },
+  building: { en: 'In development', zh: '开发中' },
+  validating: { en: 'In validation', zh: '验证阶段' },
   prototype: { en: 'Prototype', zh: '原型' },
   archived: { en: 'Archived', zh: '已归档' },
 }

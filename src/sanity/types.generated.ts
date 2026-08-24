@@ -204,8 +204,20 @@ export type Project = {
   titleLocal?: string;
   slug: Slug;
   category?: LocaleString;
-  status?: "live" | "inUse" | "building" | "prototype" | "archived";
+  status?:
+    | "live"
+    | "inUse"
+    | "comingSoon"
+    | "building"
+    | "validating"
+    | "prototype"
+    | "archived";
   role?: "solo" | "lead" | "contributor";
+  roleDetail?: Array<
+    {
+      _key: string;
+    } & LocaleString
+  >;
   startDate?: string;
   endDate?: string;
   featured?: boolean;
@@ -240,6 +252,9 @@ export type Project = {
         _type: "block";
         _key: string;
       }
+    | ({
+        _key: string;
+      } & FlowSteps)
     | {
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -270,6 +285,9 @@ export type Project = {
         _type: "block";
         _key: string;
       }
+    | ({
+        _key: string;
+      } & FlowSteps)
     | {
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -793,6 +811,13 @@ export type HeroSection = {
   settings?: SectionSettings;
 };
 
+export type FlowSteps = {
+  _type: "flowSteps";
+  label?: string;
+  variant?: "chain" | "set";
+  steps: Array<string>;
+};
+
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch";
   background?: string;
@@ -925,6 +950,7 @@ export type AllSanitySchemaTypes =
   | StatsSection
   | EditorialIntroSection
   | HeroSection
+  | FlowSteps
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -1169,7 +1195,14 @@ export type PAGE_QUERY_RESULT = {
           slug: string;
           category: LocaleString | null;
           status:
-            "archived" | "building" | "inUse" | "live" | "prototype" | null;
+            | "archived"
+            | "building"
+            | "comingSoon"
+            | "inUse"
+            | "live"
+            | "prototype"
+            | "validating"
+            | null;
           role: "contributor" | "lead" | "solo" | null;
           startDate: string | null;
           endDate: string | null;
@@ -1269,7 +1302,7 @@ export type PAGE_SLUGS_QUERY_RESULT = Array<string>;
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && slug.current == $slug][0]{    _id,    _type,      _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover,    problem,    approach,    outcome,    body,    bodyZh,    metrics[]{ _key, value, label, source },    features,    learnings,    stack,    gallery[]{ _key, alt, caption, asset },    links[]{ _key, kind, label, url },    relatedExperience->{ _id, company, "slug": slug.current, role, category },    relatedProjects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },    seoTitle,    seoDescription  }
+// Query: *[_type == "project" && slug.current == $slug][0]{    _id,    _type,      _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover,    roleDetail,    problem,    approach,    outcome,    body,    bodyZh,    metrics[]{ _key, value, label, source },    features,    learnings,    stack,    gallery[]{ _key, alt, caption, asset },    links[]{ _key, kind, label, url },    relatedExperience->{ _id, company, "slug": slug.current, role, category },    relatedProjects[]->{   _id,  title,  titleLocal,  "slug": slug.current,  category,  status,  role,  startDate,  endDate,  featured,  order,  tagline,  summary,  tags,  highlight,  cover },    seoTitle,    seoDescription  }
 export type PROJECT_QUERY_RESULT = {
   _id: string;
   _type: "project";
@@ -1277,7 +1310,15 @@ export type PROJECT_QUERY_RESULT = {
   titleLocal: string | null;
   slug: string;
   category: LocaleString | null;
-  status: "archived" | "building" | "inUse" | "live" | "prototype" | null;
+  status:
+    | "archived"
+    | "building"
+    | "comingSoon"
+    | "inUse"
+    | "live"
+    | "prototype"
+    | "validating"
+    | null;
   role: "contributor" | "lead" | "solo" | null;
   startDate: string | null;
   endDate: string | null;
@@ -1299,10 +1340,18 @@ export type PROJECT_QUERY_RESULT = {
     alt?: string;
     _type: "image";
   } | null;
+  roleDetail: Array<
+    {
+      _key: string;
+    } & LocaleString
+  > | null;
   problem: LocaleText | null;
   approach: LocaleText | null;
   outcome: LocaleText | null;
   body: Array<
+    | ({
+        _key: string;
+      } & FlowSteps)
     | {
         children?: Array<{
           marks?: Array<string>;
@@ -1333,6 +1382,9 @@ export type PROJECT_QUERY_RESULT = {
       }
   > | null;
   bodyZh: Array<
+    | ({
+        _key: string;
+      } & FlowSteps)
     | {
         children?: Array<{
           marks?: Array<string>;
@@ -1404,7 +1456,15 @@ export type PROJECT_QUERY_RESULT = {
     titleLocal: string | null;
     slug: string;
     category: LocaleString | null;
-    status: "archived" | "building" | "inUse" | "live" | "prototype" | null;
+    status:
+      | "archived"
+      | "building"
+      | "comingSoon"
+      | "inUse"
+      | "live"
+      | "prototype"
+      | "validating"
+      | null;
     role: "contributor" | "lead" | "solo" | null;
     startDate: string | null;
     endDate: string | null;
@@ -1533,7 +1593,15 @@ export type EXPERIENCE_QUERY_RESULT = {
     titleLocal: string | null;
     slug: string;
     category: LocaleString | null;
-    status: "archived" | "building" | "inUse" | "live" | "prototype" | null;
+    status:
+      | "archived"
+      | "building"
+      | "comingSoon"
+      | "inUse"
+      | "live"
+      | "prototype"
+      | "validating"
+      | null;
     role: "contributor" | "lead" | "solo" | null;
     startDate: string | null;
     endDate: string | null;
@@ -1648,7 +1716,7 @@ declare module "@sanity/client" {
   interface SanityQueries {
     '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    \n  sections[]{\n    _key,\n    _type,\n    settings,\n\n    _type == "heroSection" => {\n      eyebrow,\n      headlineLine1,\n      headlineLine2,\n      rotatingWords,\n      lede,\n      ctas[]{ _key, label, href, style },\n      metaItems,\n      showPortrait,\n      portrait,\n      portraitBadge,\n      rotateHeadlineWord\n    },\n\n    _type == "editorialIntroSection" => {\n      eyebrow,\n      title,\n      lede,\n      note,\n      steps[]{ _key, title, body }\n    },\n\n    _type == "statsSection" => {\n      eyebrow,\n      title,\n      note,\n      feature{ source, value, description },\n      stats[]{ _key, value, suffix, countTo, label, source }\n    },\n\n    _type == "currentlySection" => {\n      eyebrow,\n      title,\n      updatedLabel,\n      items[]{ _key, label, body }\n    },\n\n    _type == "quoteSection" => {\n      quote,\n      attribution,\n      context,\n      portrait,\n      variant\n    },\n\n    _type == "photoGallerySection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      photos[]{ _key, asset, hotspot, crop, alt, caption }\n    },\n\n    _type == "bentoGridSection" => {\n      eyebrow,\n      title,\n      lede,\n      tiles[]{ _key, size, tone, kicker, title, body, stat, image, href }\n    },\n\n    _type == "videoFeatureSection" => {\n      eyebrow,\n      title,\n      body,\n      variant,\n      video{\n        source,\n        url,\n        "file": file{ asset->{ url } },\n        poster,\n        title,\n        caption\n      }\n    },\n\n    _type == "ctaSection" => {\n      eyebrow,\n      title,\n      body,\n      actions[]{ _key, label, intent, platform, resumeLanguage, href, style }\n    },\n\n    _type == "experienceSection" => {\n      eyebrow,\n      title,\n      lede,\n      variant,\n      compact,\n      source,\n      limit,\n      // GROQ slice bounds must be literal, so the ceiling is fixed here and the\n      // editor\'s own limit is applied when rendering.\n      "roles": select(\n        source == "manual" => roles[]->{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  highlight\n },\n        *[_type == "experience" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  highlight\n }\n      )\n    },\n\n    _type == "projectsSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      limit,\n      compact,\n      alsoLabel,\n      linkToDetail,\n      "projects": select(\n        source == "manual" => projects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n        *[_type == "project" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, startDate desc)[0...50]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n      )\n    },\n\n    _type == "playgroundSection" => {\n      eyebrow,\n      title,\n      lede,\n      source,\n      statement{ label, body },\n      interestsLabel,\n      note,\n      primaryImage,\n      secondaryImage,\n      "items": select(\n        source == "manual" => items[]->{ _id, kind, name, nameLocal, note, prominent, order },\n        *[_type == "playgroundItem" && !(_id in path("drafts.**"))]\n          | order(coalesce(order, 9999) asc, name asc)[0...60]{\n            _id, kind, name, nameLocal, note, prominent, order\n          }\n      )\n    }\n  }\n\n  }\n': PAGE_QUERY_RESULT;
     '\n  *[_type == "page" && defined(slug.current)].slug.current\n': PAGE_SLUGS_QUERY_RESULT;
-    '\n  *[_type == "project" && slug.current == $slug][0]{\n    _id,\n    _type,\n    \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n,\n    problem,\n    approach,\n    outcome,\n    body,\n    bodyZh,\n    metrics[]{ _key, value, label, source },\n    features,\n    learnings,\n    stack,\n    gallery[]{ _key, alt, caption, asset },\n    links[]{ _key, kind, label, url },\n    relatedExperience->{ _id, company, "slug": slug.current, role, category },\n    relatedProjects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n    seoTitle,\n    seoDescription\n  }\n': PROJECT_QUERY_RESULT;
+    '\n  *[_type == "project" && slug.current == $slug][0]{\n    _id,\n    _type,\n    \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n,\n    roleDetail,\n    problem,\n    approach,\n    outcome,\n    body,\n    bodyZh,\n    metrics[]{ _key, value, label, source },\n    features,\n    learnings,\n    stack,\n    gallery[]{ _key, alt, caption, asset },\n    links[]{ _key, kind, label, url },\n    relatedExperience->{ _id, company, "slug": slug.current, role, category },\n    relatedProjects[]->{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n },\n    seoTitle,\n    seoDescription\n  }\n': PROJECT_QUERY_RESULT;
     '\n  *[_type == "project" && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT;
     '\n  *[_type == "experience" && slug.current == $slug][0]{\n    \n  _id,\n  company,\n  "slug": slug.current,\n  role,\n  category,\n  location,\n  logo,\n  startDate,\n  endDate,\n  featured,\n  order,\n  summary,\n  highlight\n,\n    _type,\n    secondary,\n    contributions[]{ _key, title, body, skills, image{ alt, asset } },\n    fullStory,\n    fullStoryZh,\n    metrics[]{ _key, value, label },\n    images[]{ _key, alt, asset },\n    documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },\n    "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]\n      | order(coalesce(order, 9999) asc)[0...6]{ \n  _id,\n  title,\n  titleLocal,\n  "slug": slug.current,\n  category,\n  status,\n  role,\n  startDate,\n  endDate,\n  featured,\n  order,\n  tagline,\n  summary,\n  tags,\n  highlight,\n  cover\n }\n  }\n': EXPERIENCE_QUERY_RESULT;
     '\n  *[_type == "experience" && defined(slug.current)].slug.current\n': EXPERIENCE_SLUGS_QUERY_RESULT;

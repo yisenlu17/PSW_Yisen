@@ -7,11 +7,46 @@ import { t, type Locale, type LocaleString } from '@/lib/locale'
 import type { SanityImage } from '@/lib/project'
 
 /**
+ * A chain of steps, as chips rather than a paragraph of arrows.
+ *
+ * The arrows belong here rather than to whoever typed the content, which is what
+ * lets `set` drop them for a group that has no order — and what stops a nine-step
+ * chain from wrapping into an unreadable line on a phone.
+ */
+function FlowSteps({ value }: { value: FlowStepsValue }) {
+  const steps = (value.steps ?? []).filter(Boolean)
+  if (steps.length === 0) return null
+
+  const label = value.label
+  const variant = value.variant ? stegaClean(value.variant) : 'chain'
+  const List = variant === 'set' ? 'ul' : 'ol'
+
+  return (
+    <div className="flow" data-variant={variant}>
+      {label && <p className="flow-label">{label}</p>}
+      <List className="flow-steps">
+        {steps.map((step, i) => (
+          <li key={i} className="flow-step">
+            <span>{step}</span>
+          </li>
+        ))}
+      </List>
+    </div>
+  )
+}
+
+type FlowStepsValue = {
+  label?: string | null
+  variant?: string | null
+  steps?: string[] | null
+}
+
+/**
  * Long-form copy, rendered with the site's own type rather than the browser's.
  *
- * The block schema offers exactly three styles and two lists, so this map is
- * complete: anything not listed here cannot be produced in the studio. Links get
- * `rel="noopener"` here rather than being trusted to whoever pasted them.
+ * The block schema offers exactly three styles, two lists and one step chain, so this
+ * map is complete: anything not listed here cannot be produced in the studio. Links
+ * get `rel="noopener"` here rather than being trusted to whoever pasted them.
  */
 function components(locale: Locale): PortableTextComponents {
   return {
@@ -38,6 +73,7 @@ function components(locale: Locale): PortableTextComponents {
       code: ({ children }) => <code>{children}</code>,
     },
     types: {
+      flowSteps: ({ value }) => <FlowSteps value={value as FlowStepsValue} />,
       image: ({ value }) => {
         const image = value as SanityImage
         if (!image?.asset) return null

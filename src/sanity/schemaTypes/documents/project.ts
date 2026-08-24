@@ -1,6 +1,47 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { RocketIcon } from '@sanity/icons/Rocket'
 
+import { slugFrom, slugRule } from '../slugOptions'
+
+/**
+ * What a write-up can contain, defined once and used by both languages.
+ *
+ * Headings below h3 have no design in this system, and a colour picker on text would
+ * let an editor undo the palette one paragraph at a time — so the list is short on
+ * purpose. `flowSteps` is the exception that earns its place: every case study here
+ * has a chain in it, and typing one as a sentence full of arrows wraps badly.
+ */
+const WRITE_UP = [
+  defineArrayMember({
+    type: 'block',
+    styles: [
+      { title: 'Paragraph', value: 'normal' },
+      { title: 'Heading', value: 'h3' },
+      { title: 'Quote', value: 'blockquote' },
+    ],
+    lists: [
+      { title: 'Bulleted', value: 'bullet' },
+      { title: 'Numbered', value: 'number' },
+    ],
+    marks: {
+      decorators: [
+        { title: 'Bold', value: 'strong' },
+        { title: 'Italic', value: 'em' },
+        { title: 'Code', value: 'code' },
+      ],
+    },
+  }),
+  defineArrayMember({ type: 'flowSteps' }),
+  defineArrayMember({
+    type: 'image',
+    options: { hotspot: true },
+    fields: [
+      defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
+      defineField({ name: 'caption', title: 'Caption', type: 'localeString' }),
+    ],
+  }),
+]
+
 /**
  * One project, entered once.
  *
@@ -52,8 +93,8 @@ export const project = defineType({
       description: 'Becomes /projects/<slug>. Changing it breaks any link already shared.',
       type: 'slug',
       group: 'essentials',
-      options: { source: 'title', maxLength: 96 },
-      validation: (rule) => rule.required(),
+      options: slugFrom('title'),
+      validation: (rule) => slugRule(rule),
     }),
     defineField({
       name: 'category',
@@ -72,7 +113,9 @@ export const project = defineType({
         list: [
           { title: 'Live — anyone can use it', value: 'live' },
           { title: 'In daily use — a real user depends on it', value: 'inUse' },
+          { title: 'Launching soon — finished, in final testing', value: 'comingSoon' },
           { title: 'In progress — being built now', value: 'building' },
+          { title: 'In validation — testing the need before building', value: 'validating' },
           { title: 'Prototype — proves one idea', value: 'prototype' },
           { title: 'Archived — finished or stopped', value: 'archived' },
         ],
@@ -94,6 +137,15 @@ export const project = defineType({
         layout: 'radio',
       },
       initialValue: 'solo',
+    }),
+    defineField({
+      name: 'roleDetail',
+      title: 'Role, in your words',
+      description:
+        'The hats you actually wore — Product Owner, Product Design, AI-assisted Development. Shown as chips on the detail page, replacing the Solo/Led chip above. Three is plenty.',
+      type: 'array',
+      group: 'essentials',
+      of: [defineArrayMember({ type: 'localeString' })],
     }),
     defineField({
       name: 'startDate',
@@ -188,37 +240,7 @@ export const project = defineType({
       description: 'Long form, detail page only. Leave empty and the page shows the three fields above.',
       type: 'array',
       group: 'story',
-      of: [
-        defineArrayMember({
-          type: 'block',
-          // Headings below h3 have no design in this system, and a colour picker on
-          // text would let an editor undo the palette one paragraph at a time.
-          styles: [
-            { title: 'Paragraph', value: 'normal' },
-            { title: 'Heading', value: 'h3' },
-            { title: 'Quote', value: 'blockquote' },
-          ],
-          lists: [
-            { title: 'Bulleted', value: 'bullet' },
-            { title: 'Numbered', value: 'number' },
-          ],
-          marks: {
-            decorators: [
-              { title: 'Bold', value: 'strong' },
-              { title: 'Italic', value: 'em' },
-              { title: 'Code', value: 'code' },
-            ],
-          },
-        }),
-        defineArrayMember({
-          type: 'image',
-          options: { hotspot: true },
-          fields: [
-            defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-            defineField({ name: 'caption', title: 'Caption', type: 'localeString' }),
-          ],
-        }),
-      ],
+      of: WRITE_UP,
     }),
     defineField({
       name: 'bodyZh',
@@ -226,35 +248,7 @@ export const project = defineType({
       description: 'Optional. Empty falls back to the English write-up, same as every other field.',
       type: 'array',
       group: 'story',
-      of: [
-        defineArrayMember({
-          type: 'block',
-          styles: [
-            { title: 'Paragraph', value: 'normal' },
-            { title: 'Heading', value: 'h3' },
-            { title: 'Quote', value: 'blockquote' },
-          ],
-          lists: [
-            { title: 'Bulleted', value: 'bullet' },
-            { title: 'Numbered', value: 'number' },
-          ],
-          marks: {
-            decorators: [
-              { title: 'Bold', value: 'strong' },
-              { title: 'Italic', value: 'em' },
-              { title: 'Code', value: 'code' },
-            ],
-          },
-        }),
-        defineArrayMember({
-          type: 'image',
-          options: { hotspot: true },
-          fields: [
-            defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-            defineField({ name: 'caption', title: 'Caption', type: 'localeString' }),
-          ],
-        }),
-      ],
+      of: WRITE_UP,
     }),
 
     /* ------------------------------------------------------------ evidence */

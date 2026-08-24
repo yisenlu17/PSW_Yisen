@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { stegaClean } from 'next-sanity'
 
 import { copy } from '@/components/detail/DetailChrome'
 import { t, formatDateRange, type Locale } from '@/lib/locale'
 import type { ExperienceRole } from '@/lib/experience'
+import { detailHref } from '@/lib/href'
 
 /**
  * One role, as a card that points at the role's own page.
@@ -32,8 +32,7 @@ export function ExperienceCard({
 }) {
   const c = copy(locale)
 
-  const slug = role.slug ? stegaClean(role.slug) : null
-  const href = slug ? `/experience/${slug}` : null
+  const href = detailHref('experience', role.slug)
   const dates = formatDateRange(role.startDate, role.endDate, locale)
   const meta = [t(role.role, locale), dates].filter(Boolean).join(' · ')
   const summary = t(role.summary, locale)

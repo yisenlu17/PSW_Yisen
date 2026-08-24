@@ -273,8 +273,6 @@
   display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 26px;
 }
 .proj-also-item h4 { font-size: 19px; margin: 0 0 7px; }
-.proj-also-item h4 a { color: inherit; transition: color .2s; }
-.proj-also-item h4 a:hover { color: var(--gold); }
 .proj-also-item p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--body); }
 
 /* The prototype ran this section on deep navy with a corner glow, and the dark
@@ -546,6 +544,13 @@
   letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.8);
 }
 .detail-chip[data-shipped='true'] { border-color: rgba(200,162,75,.65); color: var(--gold); }
+/* A role is a job title, not a state — small caps on "AI-assisted Development"
+   shouts, and there are up to three of them in the same row as the status. */
+.detail-chip-role {
+  text-transform: none; letter-spacing: .01em; font-weight: 600;
+  border-color: rgba(255,255,255,.16); color: rgba(255,255,255,.7);
+  background: rgba(255,255,255,.05);
+}
 .detail-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
 
 /* The cover straddles the dark header and the light body: half of it sits in each,
@@ -689,8 +694,12 @@ a.detail-related-card:hover {
   font-size: clamp(21px, 2vw, 25px); margin: 0;
   padding-top: clamp(16px, 2vw, 24px);
 }
-.rich-text ul, .rich-text ol { margin: 0; padding-left: 24px; }
-.rich-text li { font-size: 17px; line-height: 1.7; margin-bottom: 8px; }
+.rich-text ul, .rich-text ol { margin: 0; padding-left: 22px; }
+.rich-text li { font-size: 17px; line-height: 1.7; margin-bottom: 10px; }
+.rich-text li::marker { color: var(--gold); font-weight: 700; }
+/* A bolded lead-in is how a definition list is written in the studio — "Player
+   Side：…" — so it gets the heading colour to act as one. */
+.rich-text li strong { color: var(--ink); }
 .rich-text blockquote {
   margin: 0; padding: 6px 0 6px 24px; border-left: 3px solid var(--gold);
   font-size: 19px; line-height: 1.6; color: var(--ink);
@@ -701,6 +710,38 @@ a.detail-related-card:hover {
   font-family: var(--mono); font-size: .9em;
   background: var(--cream); border-radius: var(--r-sm); padding: 2px 6px;
 }
+/* The spine of a case study: 报名 → 匹配 → 组局 → 开赛 → 判罚. Chips rather than a
+   sentence, because a nine-step chain typed as prose wraps mid-arrow on a phone —
+   and because the arrows are then the code's to draw, which is what lets `set`
+   drop them for a group that has no running order. */
+.flow { margin: 0; }
+.rich-text > .flow { margin-top: 28px; }
+.rich-text > .flow + p, .rich-text > .flow + ul { margin-top: 28px; }
+.flow-label {
+  margin: 0 0 14px; font-size: 12px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+}
+.flow-steps {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 10px 12px; margin: 0; padding: 0; list-style: none;
+}
+.flow-steps li.flow-step {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin: 0; font-size: 14.5px; line-height: 1.35;
+}
+.flow-step > span {
+  background: var(--cream); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 9px 17px;
+  font-weight: 700; color: var(--ink);
+}
+.flow[data-variant='chain'] .flow-step + .flow-step::before {
+  content: "→"; color: var(--gold); font-weight: 800; font-size: 15px;
+}
+/* The last step of a chain is where it ends up, so it carries the accent. */
+.flow[data-variant='chain'] .flow-step:last-child > span {
+  background: var(--gold-soft); border-color: rgba(200,162,75,.45);
+}
+
 .rich-text .body-figure { margin: 0; }
 .rich-text .body-figure img {
   width: 100%; height: auto; border-radius: var(--r); box-shadow: var(--shadow-sm);

@@ -15,10 +15,12 @@ import {
   type ProjectCardData,
   type SanityImage,
 } from '@/lib/project'
+import { detailHref } from '@/lib/href'
 import { DetailHeader, DetailBlock, DetailList, MetricRow, copy } from './DetailChrome'
 
 export type ProjectDetailData = ProjectCardData & {
   _type: 'project'
+  roleDetail?: LocaleString[] | null
   problem?: LocaleText
   approach?: LocaleText
   outcome?: LocaleText
@@ -53,7 +55,11 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
   const c = copy(locale)
   const status = statusLabel(project.status, locale)
   const years = formatYears(project.startDate, project.endDate, locale)
-  const role = roleLabel(project.role, locale)
+
+  // The hats named on the document win over the closed list: "Product Owner ·
+  // Product Design · AI-assisted Development" says what "Solo" was trying to.
+  const roles = (project.roleDetail ?? []).map((r) => t(r, locale)).filter(Boolean)
+  const roleFallback = roleLabel(project.role, locale)
 
   const hasBody = Boolean((locale === 'zh' && project.bodyZh?.length) || project.body?.length)
   const metrics = (project.metrics ?? []).map((m) => ({
@@ -67,6 +73,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
   const links = (project.links ?? []).filter((l) => l.url && t(l.label, locale))
   const gallery = (project.gallery ?? []).filter((g) => g?.asset)
   const related = project.relatedProjects ?? []
+  const roleHref = detailHref('experience', project.relatedExperience?.slug)
 
   return (
     <main className="detail">
@@ -85,7 +92,13 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
               </span>
             )}
             {years && <span className="detail-chip">{years}</span>}
-            {role && <span className="detail-chip">{role}</span>}
+            {roles.length > 0
+              ? roles.map((item, i) => (
+                  <span key={i} className="detail-chip detail-chip-role">
+                    {item}
+                  </span>
+                ))
+              : roleFallback && <span className="detail-chip">{roleFallback}</span>}
           </>
         }
       >
@@ -170,11 +183,11 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
           </div>
         )}
 
-        {project.relatedExperience?.slug && (
+        {roleHref && project.relatedExperience && (
           <div className="detail-block">
             <h2>{c.fromThisRole}</h2>
             <Link
-              href={`/experience/${stegaClean(project.relatedExperience.slug)}`}
+              href={roleHref}
               className="detail-cross"
             >
               <span className="detail-cross-name">{project.relatedExperience.company}</span>
@@ -211,7 +224,7 @@ export function RelatedProject({
   project: ProjectCardData
   locale: Locale
 }) {
-  const slug = project.slug ? stegaClean(project.slug) : null
+  const href = detailHref('projects', project.slug)
   const body = t(project.summary, locale) || t(project.tagline, locale)
   const status = statusLabel(project.status, locale)
 
@@ -227,8 +240,8 @@ export function RelatedProject({
     </>
   )
 
-  return slug ? (
-    <Link href={`/projects/${slug}`} className="detail-related-card">
+  return href ? (
+    <Link href={href} className="detail-related-card">
       {inner}
     </Link>
   ) : (

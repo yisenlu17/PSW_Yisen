@@ -38,6 +38,9 @@ yarn-error.log*
 # local dataset snapshots taken before a reseed — content, not source
 /backups
 
+# rendered layout previews — regenerate with npm run preview-detail
+/.preview
+
 # vercel
 .vercel
 

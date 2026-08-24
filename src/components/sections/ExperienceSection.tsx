@@ -4,6 +4,7 @@ import { stegaClean } from 'next-sanity'
 import { Section, type SectionSettings } from '@/components/Section'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import { type ExperienceRole } from '@/lib/experience'
+import { detailHref } from '@/lib/href'
 import { ExperienceCard } from './ExperienceCard'
 
 export type { ExperienceRole }
@@ -81,8 +82,8 @@ export function ExperienceSection({
  * without one still renders — as plain text rather than a link to nowhere.
  */
 function RoleName({ role }: { role: ExperienceRole }) {
-  const slug = role.slug ? stegaClean(role.slug) : null
-  return slug ? <Link href={`/experience/${slug}`}>{role.company}</Link> : <>{role.company}</>
+  const href = detailHref('experience', role.slug)
+  return href ? <Link href={href}>{role.company}</Link> : <>{role.company}</>
 }
 
 function ExperienceRow({ role, locale }: { role: ExperienceRole; locale: Locale }) {

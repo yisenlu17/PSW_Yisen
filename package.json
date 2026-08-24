@@ -10,7 +10,10 @@
     "typecheck": "tsc --noEmit",
     "typegen": "sanity schema extract --enforce-required-fields --force --path ./schema.json && sanity typegen generate",
     "seed": "node scripts/seed.mjs",
-    "experience-detail": "node scripts/experience-detail.mjs"
+    "experience-detail": "node scripts/experience-detail.mjs",
+    "project-detail": "node scripts/project-detail.mjs",
+    "preview-detail": "node scripts/preview-detail.mjs",
+    "fix-slugs": "node scripts/fix-slugs.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^7.0.1",

@@ -1116,7 +1116,15 @@
             },
             {
               "type": "string",
+              "value": "comingSoon"
+            },
+            {
+              "type": "string",
               "value": "building"
+            },
+            {
+              "type": "string",
+              "value": "validating"
             },
             {
               "type": "string",
@@ -1148,6 +1156,28 @@
               "value": "contributor"
             }
           ]
+        },
+        "optional": true
+      },
+      "roleDetail": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "object",
+            "attributes": {
+              "_key": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "rest": {
+              "type": "inline",
+              "name": "localeString"
+            }
+          }
         },
         "optional": true
       },
@@ -1411,6 +1441,21 @@
               {
                 "type": "object",
                 "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "rest": {
+                  "type": "inline",
+                  "name": "flowSteps"
+                }
+              },
+              {
+                "type": "object",
+                "attributes": {
                   "asset": {
                     "type": "objectAttribute",
                     "value": {
@@ -1639,6 +1684,21 @@
                       }
                     }
                   }
+                }
+              },
+              {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "rest": {
+                  "type": "inline",
+                  "name": "flowSteps"
                 }
               },
               {
@@ -5296,6 +5356,56 @@
             "name": "sectionSettings"
           },
           "optional": true
+        }
+      }
+    }
+  },
+  {
+    "name": "flowSteps",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "flowSteps"
+          }
+        },
+        "label": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
+        "variant": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "chain"
+              },
+              {
+                "type": "string",
+                "value": "set"
+              }
+            ]
+          },
+          "optional": true
+        },
+        "steps": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "array",
+            "of": {
+              "type": "string"
+            }
+          },
+          "optional": false
         }
       }
     }

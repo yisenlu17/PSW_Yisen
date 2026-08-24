@@ -15,6 +15,7 @@ import { photoGallerySection } from './objects/sections/photoGallerySection'
 import { bentoGridSection } from './objects/sections/bentoGridSection'
 import { videoFeatureSection } from './objects/sections/videoFeatureSection'
 import { videoEmbed } from './objects/videoEmbed'
+import { flowSteps } from './objects/flowSteps'
 
 import { experience } from './documents/experience'
 import { project } from './documents/project'
@@ -53,6 +54,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     localeFile,
     sectionSettings,
     videoEmbed,
+    flowSteps,
     // sections
     ...sectionTypes,
     // documents

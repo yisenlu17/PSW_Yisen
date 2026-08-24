@@ -1,6 +1,8 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { CaseIcon } from '@sanity/icons/Case'
 
+import { slugFrom, slugRule } from '../slugOptions'
+
 /**
  * One role, entered once.
  *
@@ -38,8 +40,8 @@ export const experience = defineType({
       title: 'URL slug',
       type: 'slug',
       group: 'essentials',
-      options: { source: 'company', maxLength: 96 },
-      validation: (rule) => rule.required(),
+      options: slugFrom('company'),
+      validation: (rule) => slugRule(rule),
     }),
     defineField({
       name: 'role',

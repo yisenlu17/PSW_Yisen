@@ -218,6 +218,7 @@ export const PROJECT_QUERY = defineQuery(`
     _id,
     _type,
     ${PROJECT_CARD_FIELDS},
+    roleDetail,
     problem,
     approach,
     outcome,

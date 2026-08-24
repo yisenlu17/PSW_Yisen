@@ -1,6 +1,8 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 import { DocumentIcon } from '@sanity/icons/Document'
 
+import { slugFrom, slugRule } from '../slugOptions'
+
 /**
  * A page is an ordered list of sections and nothing else.
  *
@@ -33,8 +35,8 @@ export const page = defineType({
       description: 'Use "/" for the homepage.',
       type: 'slug',
       group: 'sections',
-      options: { source: 'title', maxLength: 96 },
-      validation: (rule) => rule.required(),
+      options: slugFrom('title'),
+      validation: (rule) => slugRule(rule, { allowRoot: true }),
     }),
     defineField({
       name: 'sections',
