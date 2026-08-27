@@ -152,3 +152,17 @@ photo" field on the Editorial intro.
 It is cropped to a square for the masthead and to 4:5 for the page, from the middle of
 the picture. If a crop lands badly, set the hotspot on the image in the Studio rather
 than re-cropping the file.
+
+`favicon.png` is the same face again, cut out of the portrait and set on the brand
+navy at 512×512. It goes up by hand too, in a different place:
+
+    Global settings → SEO → Favicon
+
+It is a second crop rather than a reference to the portrait because that field has no
+hotspot, and the code behind it fits the picture inside 32×32 without cropping — hand
+it the portrait whole and you get a 25×32 sliver of a letterboxed man. Square in,
+square out. The background is painted in for the same kind of reason: the shot has a
+white studio backdrop, and a white square disappears into a light browser tab.
+
+To recrop it, work from `有眼镜p.jpg` and keep the head filling the frame top to
+bottom — 32 pixels is not enough room to spend any of it on shoulders.
