@@ -7,8 +7,8 @@ import { LOCALES, type Locale } from '@/lib/locale'
 /** What each language calls itself — never "Chinese", never "英语". */
 const LABEL: Record<Locale, string> = { en: 'English', zh: '中文' }
 
-/** The button is narrow, so it shows the short form of whichever language is on. */
-const SHORT: Record<Locale, string> = { en: 'EN', zh: '中文' }
+/** The button names what it opens, in the language you are already reading. */
+const TRIGGER: Record<Locale, string> = { en: 'Language', zh: '语言' }
 
 /**
  * Picks a language from a menu of both, rather than flipping to the other one.
@@ -51,7 +51,7 @@ export function LanguageToggle({ current }: { current: Locale }) {
         aria-label={current === 'zh' ? '选择语言' : 'Choose language'}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
       >
-        {SHORT[current]}
+        {TRIGGER[current]}
         <svg className="lang-caret" viewBox="0 0 12 8" fill="none" aria-hidden>
           <path d="M1 1.5 6 6.5l5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
