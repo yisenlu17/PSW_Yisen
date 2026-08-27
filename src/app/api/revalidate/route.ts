@@ -36,8 +36,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ revalidated: false, message: 'Invalid signature' }, { status: 401 })
     }
 
-    if (!body?._type) {
-      return NextResponse.json({ revalidated: false, message: 'Bad payload' }, { status: 400 })
+    // Only that there is a body, not what is in it. A valid signature already means
+    // Sanity sent this and something changed, which is the whole question — and
+    // insisting on `_type` would let a payload that happens not to carry it, a
+    // deletion being the likely one, silently leave the cache holding a document
+    // that no longer exists.
+    if (!body) {
+      return NextResponse.json({ revalidated: false, message: 'Empty payload' }, { status: 400 })
     }
 
     // `expire: 0` rather than the recommended `'max'`. `'max'` marks the entry stale
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest) {
     // was paying before any of this was cached.
     revalidateTag(SANITY_TAG, { expire: 0 })
 
-    return NextResponse.json({ revalidated: true, type: body._type, now: Date.now() })
+    return NextResponse.json({ revalidated: true, type: body._type ?? null, now: Date.now() })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json({ revalidated: false, message }, { status: 500 })
