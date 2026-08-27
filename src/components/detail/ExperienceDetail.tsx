@@ -2,10 +2,11 @@ import Image from 'next/image'
 import { stegaClean } from 'next-sanity'
 import type { PortableTextBlock } from '@portabletext/react'
 
-import { urlFor } from '@/sanity/image'
+import { urlFor, imageSize } from '@/sanity/image'
 import { PortableBody } from '@/components/PortableBody'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import type { ProjectCardData, SanityImage } from '@/lib/project'
+import { roleCompany, roleLocation } from '@/lib/experience'
 import { DetailHeader, MetricRow, copy } from './DetailChrome'
 import { RelatedProject } from './ProjectDetail'
 
@@ -26,10 +27,12 @@ export type ExperienceDetailData = {
   _id: string
   _type: 'experience'
   company?: string | null
+  companyLocal?: string | null
   slug?: string | null
   role?: LocaleString
   category?: LocaleString
   location?: string | null
+  locationLocal?: string | null
   startDate?: string | null
   endDate?: string | null
   summary?: LocaleText
@@ -79,8 +82,10 @@ export function ExperienceDetail({
     <main className="detail">
       <DetailHeader
         eyebrow={t(experience.category, locale)}
-        title={experience.company ?? ''}
-        meta={[t(experience.role, locale), dates, experience.location].filter(Boolean).join(' · ')}
+        title={roleCompany(experience, locale)}
+        meta={[t(experience.role, locale), dates, roleLocation(experience, locale)]
+          .filter(Boolean)
+          .join(' · ')}
         lede={t(experience.summary, locale)}
         backHref="/experience"
         backLabel={c.backToExperience}
@@ -130,8 +135,7 @@ export function ExperienceDetail({
                       <Image
                         src={urlFor(contribution.image).width(1200).url()}
                         alt={contribution.image.alt ? stegaClean(contribution.image.alt) : ''}
-                        width={700}
-                        height={440}
+                        {...imageSize(contribution.image)}
                         sizes="(max-width: 800px) 100vw, 680px"
                       />
                     </figure>
@@ -151,8 +155,7 @@ export function ExperienceDetail({
                   <Image
                     src={urlFor(image).width(1200).url()}
                     alt={image.alt ? stegaClean(image.alt) : ''}
-                    width={600}
-                    height={400}
+                    {...imageSize(image)}
                     sizes="(max-width: 800px) 100vw, 560px"
                   />
                 </figure>

@@ -2,7 +2,7 @@
 
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
-import { presentationTool, defineLocations } from 'sanity/presentation'
+import { presentationTool, defineDocuments, defineLocations } from 'sanity/presentation'
 import { visionTool } from '@sanity/vision'
 
 import { apiVersion, dataset, projectId } from '@/sanity/env'
@@ -24,17 +24,42 @@ export default defineConfig({
         previewMode: { enable: '/api/draft-mode/enable' },
       },
       resolve: {
+        // The other half of `locations`: this maps a URL back to the document that
+        // produced it. Without it the editing pane keeps whatever document it was
+        // opened with, so navigating the preview to another page leaves the editor
+        // still pointed at the homepage — every page renders, but only one is
+        // editable. Routes are matched top to bottom; `/:slug` is last because it
+        // would otherwise swallow the detail routes' first segment.
+        mainDocuments: defineDocuments([
+          {
+            route: '/',
+            filter: '_type == "page" && slug.current == "/"',
+          },
+          {
+            route: '/experience/:slug',
+            filter: '_type == "experience" && slug.current == $slug',
+          },
+          {
+            route: '/projects/:slug',
+            filter: '_type == "project" && slug.current == $slug',
+          },
+          {
+            route: '/:slug',
+            filter: '_type == "page" && slug.current == $slug',
+          },
+        ]),
         locations: {
           // Editing a role tells the editor which pages that role turns up on.
           experience: defineLocations({
             select: { company: 'company', slug: 'slug.current' },
             resolve: (doc) => ({
               locations: [
-                { title: 'Homepage', href: '/' },
                 {
                   title: doc?.company || 'Experience',
                   href: `/experience/${doc?.slug}`,
                 },
+                { title: 'Experience', href: '/experience' },
+                { title: 'Homepage', href: '/' },
               ],
             }),
           }),
@@ -66,6 +91,14 @@ export default defineConfig({
                 },
               ],
             }),
+          }),
+          // Header, footer and site-wide text sit on every page, so the homepage
+          // stands in for "everywhere" rather than listing all six.
+          navigation: defineLocations({
+            locations: [{ title: 'Homepage', href: '/' }],
+          }),
+          globalSettings: defineLocations({
+            locations: [{ title: 'Homepage', href: '/' }],
           }),
         },
       },

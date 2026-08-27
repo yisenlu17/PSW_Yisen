@@ -24,6 +24,10 @@ export const globalSettings = defineType({
     defineField({
       name: 'profileImage',
       title: 'Profile image',
+      description:
+        'The mark in the top-left corner of every page, and the photo beside the intro ' +
+        'on About. Replaced here, it is replaced in both — there is no second copy. It ' +
+        'is cropped square for the corner, so set the hotspot if that crop lands badly.',
       type: 'image',
       group: 'identity',
       options: { hotspot: true },

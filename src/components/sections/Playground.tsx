@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
-import { urlFor } from '@/sanity/image'
+import { cropFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import type { SanityImage } from '@/lib/project'
 
@@ -35,10 +35,15 @@ export type PlaygroundSectionData = {
 const PROMINENT_TILES = 3
 
 /**
- * A tile shows both names stacked — that pairing is part of the design. A pill has
- * room for one, so it takes whichever matches the language being read.
+ * One name, in the language being read.
+ *
+ * These items carry both — `name` in English, `nameLocal` in 中文 — and showing the
+ * pair stacked is how this started. A visitor who has chosen a language should not
+ * have to read past the other one, so the pairing is gone and this picks the side
+ * that matches. An item with no Chinese name falls back to the English, the same way
+ * every other field on the site does.
  */
-function pillLabel(item: PlaygroundItem, locale: Locale): string {
+function itemLabel(item: PlaygroundItem, locale: Locale): string {
   if (locale === 'zh' && item.nameLocal && stegaClean(item.nameLocal).trim()) return item.nameLocal
   return item.name ?? ''
 }
@@ -76,7 +81,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
 
   return (
     <Section settings={data.settings}>
-      <div className="section-head play-head">
+      <div className="section-head">
         {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}
         {t(data.title, locale) && <h2 className="title">{t(data.title, locale)}</h2>}
         {t(data.lede, locale) && <p className="lede">{t(data.lede, locale)}</p>}
@@ -87,8 +92,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
           <div className="play-tiles">
             {tiled.map((sport) => (
               <div key={sport._id} className="play-tile">
-                <span className="play-tile-name">{sport.name}</span>
-                {sport.nameLocal && <span className="play-tile-local">{sport.nameLocal}</span>}
+                <span className="play-tile-name">{itemLabel(sport, locale)}</span>
                 {t(sport.note, locale) && <p>{t(sport.note, locale)}</p>}
               </div>
             ))}
@@ -97,8 +101,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
               <div className="play-tile play-tile-stack">
                 {stacked.map((sport) => (
                   <div key={sport._id}>
-                    <span className="play-stack-name">{sport.name}</span>
-                    {sport.nameLocal && <span className="play-stack-local">{sport.nameLocal}</span>}
+                    <span className="play-stack-name">{itemLabel(sport, locale)}</span>
                   </div>
                 ))}
               </div>
@@ -111,7 +114,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
             {data.primaryImage && (
               <div className="play-media play-media-43">
                 <Image
-                  src={urlFor(data.primaryImage).width(900).height(675).url()}
+                  src={cropFor(data.primaryImage, 900, 675).url()}
                   alt={data.primaryImage.alt ? stegaClean(data.primaryImage.alt) : ''}
                   width={450}
                   height={338}
@@ -137,7 +140,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
                   <div className="play-pills">
                     {interests.map((interest) => (
                       <span key={interest._id} className="play-pill">
-                        {pillLabel(interest, locale)}
+                        {itemLabel(interest, locale)}
                       </span>
                     ))}
                   </div>
@@ -148,7 +151,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
             {data.secondaryImage && (
               <div className="play-media play-media-square">
                 <Image
-                  src={urlFor(data.secondaryImage).width(800).height(800).url()}
+                  src={cropFor(data.secondaryImage, 800, 800).url()}
                   alt={data.secondaryImage.alt ? stegaClean(data.secondaryImage.alt) : ''}
                   width={400}
                   height={400}

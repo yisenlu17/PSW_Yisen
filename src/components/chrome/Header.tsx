@@ -1,10 +1,15 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString } from '@/lib/locale'
+import { urlFor } from '@/sanity/image'
+import { projectTitle } from '@/lib/project'
+import { roleCompany } from '@/lib/experience'
 import type { SiteSettings } from '@/lib/site'
 import { Clock } from './Clock'
 import { NavLink } from './NavLink'
+import { NavGroup, type NavChild } from './NavGroup'
 import { MobileMenu, type MenuLink } from './MobileMenu'
 import { LanguageToggle } from './LanguageToggle'
 
@@ -23,31 +28,106 @@ export type NavigationData = {
   }> | null
 } | null
 
+/** The documents behind `/experience/<slug>` and `/projects/<slug>`, named only. */
+export type NavChildrenData = {
+  experience?: Array<{
+    _id: string
+    company?: string | null
+    companyLocal?: string | null
+    role?: LocaleString | null
+    slug?: string | null
+  }> | null
+  projects?: Array<{
+    _id: string
+    title?: string | null
+    titleLocal?: string | null
+    tagline?: LocaleString | null
+    category?: LocaleString | null
+    featured?: boolean | null
+    slug?: string | null
+  }> | null
+} | null
+
+/** Trailing slashes are an authoring accident, not a different destination. */
+function normalise(href: string): string {
+  return href.length > 1 ? href.replace(/\/+$/, '') : href
+}
+
 export function Header({
   nav,
+  subpages,
   site,
   locale,
 }: {
   nav: NavigationData
+  subpages: NavChildrenData
   site: SiteSettings | null
   locale: Locale
 }) {
-  const items = (nav?.items ?? [])
-    .map((i) => ({
-      key: i._key,
-      label: t(i.label, locale),
-      href: i.href ? stegaClean(i.href) : '',
-      external: Boolean(i.external),
-      emphasis: stegaClean(i.emphasis ?? 'plain'),
+  // Which menu item owns which subpages is decided by where the item points, not by
+  // a field an editor would have to keep in sync with the routes. Renaming
+  // "Experience" to "Where I've worked" therefore keeps its drop-down; pointing it
+  // somewhere else drops it, which is the right answer both times.
+  const byHref = new Map<string, NavChild[]>()
+
+  const roles = (subpages?.experience ?? [])
+    .filter((role) => role.slug && role.company)
+    .map((role) => ({
+      key: role._id,
+      href: `/experience/${stegaClean(role.slug!)}`,
+      label: roleCompany(role, locale),
+      note: t(role.role, locale) || undefined,
     }))
+  if (roles.length > 0) byHref.set('/experience', roles)
+
+  // Only the projects that have a page. The accounts in "Also running" are set as
+  // plain text on the Projects page for the good reason that there is nothing behind
+  // them worth opening, so the menu must not offer a door the page itself withholds.
+  // Same rule as `ProjectsSection`, tickbox and fallback both: nothing featured means
+  // nothing has been sorted yet, and everything shows.
+  const projects = (subpages?.projects ?? []).filter((project) => project.slug && project.title)
+  const hasPage = projects.some((project) => project.featured)
+
+  const work = (hasPage ? projects.filter((project) => project.featured) : projects)
+    .map((project) => ({
+      key: project._id,
+      href: `/projects/${stegaClean(project.slug!)}`,
+      label: projectTitle(project, locale),
+      note: t(project.tagline, locale) || t(project.category, locale) || undefined,
+    }))
+  if (work.length > 0) byHref.set('/projects', work)
+
+  const items = (nav?.items ?? [])
+    .map((i) => {
+      const href = i.href ? stegaClean(i.href) : ''
+      const external = Boolean(i.external)
+      return {
+        key: i._key,
+        label: t(i.label, locale),
+        href,
+        external,
+        emphasis: stegaClean(i.emphasis ?? 'plain'),
+        // An external link is somebody else's site, and has no subpages here.
+        children: external ? [] : (byHref.get(normalise(href)) ?? []),
+      }
+    })
     .filter((i) => i.label && i.href)
 
-  const menuLinks: MenuLink[] = items.map(({ key, label, href, external }) => ({
+  const menuLinks: MenuLink[] = items.map(({ key, label, href, external, children: sub }) => ({
     key,
     label,
     href,
     external,
+    children: sub,
   }))
+
+  // 卢一森 in 中文, YISEN LU in English. Upper-casing is a Latin idea and does
+  // nothing to Chinese characters, so it is applied only where it means something.
+  const localName = site?.nameLocal ? stegaClean(site.nameLocal).trim() : ''
+  const brandName =
+    locale === 'zh' && localName
+      ? localName
+      : stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()
 
   const initials =
     (site?.name ?? 'Yisen Lu')
@@ -58,34 +138,61 @@ export function Header({
       .join('')
       .toUpperCase() || 'YL'
 
+  // The mark is the profile photo once one is uploaded, and the initials until then —
+  // so the corner of every page is never empty, and never a broken image either. The
+  // photo is cropped square to a hotspot an editor can set, because a portrait
+  // centred on nothing lands on a chin as often as on a face.
+  const photo = site?.profileImage?.asset ? site.profileImage : null
+
   return (
     <header className="masthead">
       <div className="wrap">
         <Link href="/" className="brand">
-          <span className="brand-mark">{initials}</span>
+          <span className="brand-mark">
+            {photo ? (
+              <Image
+                src={urlFor(photo).width(96).height(96).fit('crop').url()}
+                alt=""
+                width={48}
+                height={48}
+                priority
+              />
+            ) : (
+              initials
+            )}
+          </span>
+          {/* One name, in the language being read. The pair stacked was the
+              prototype's masthead, and it means whichever language you chose, you
+              read past the other one every time you look at the header. */}
           <span className="brand-text">
-            <span className="brand-name">{stegaClean(site?.name ?? 'Yisen Lu').toUpperCase()}</span>
-            {site?.nameLocal && <span className="brand-local">{stegaClean(site.nameLocal)}</span>}
+            <span className="brand-name">{brandName}</span>
           </span>
         </Link>
 
         <nav className="nav">
-          {items.map((i) => (
-            <NavLink
-              key={i.key}
-              href={i.href}
-              external={i.external}
-              className={
-                i.emphasis === 'gold'
-                  ? 'btn btn-gold nav-cta'
-                  : i.emphasis === 'navy'
-                    ? 'btn btn-navy nav-cta'
-                    : undefined
-              }
-            >
-              {i.label}
-            </NavLink>
-          ))}
+          {items.map((i) => {
+            const className =
+              i.emphasis === 'gold'
+                ? 'btn btn-gold nav-cta'
+                : i.emphasis === 'navy'
+                  ? 'btn btn-navy nav-cta'
+                  : undefined
+
+            return i.children.length > 0 ? (
+              <NavGroup
+                key={i.key}
+                href={i.href}
+                label={i.label}
+                items={i.children}
+                locale={locale}
+                className={className}
+              />
+            ) : (
+              <NavLink key={i.key} href={i.href} external={i.external} className={className}>
+                {i.label}
+              </NavLink>
+            )
+          })}
         </nav>
 
         <div className="masthead-meta">

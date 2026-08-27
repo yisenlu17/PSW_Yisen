@@ -111,7 +111,9 @@ export const heroSection = defineType({
     defineField({
       name: 'portrait',
       title: 'Portrait image',
-      description: 'Editorial crop, not a passport photo.',
+      description:
+        'Editorial crop, not a passport photo. Left empty, the Profile image from ' +
+        'Global settings → Identity is used.',
       type: 'image',
       group: 'portrait',
       options: { hotspot: true },

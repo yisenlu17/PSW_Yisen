@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { stegaClean } from 'next-sanity'
 
-import { sanityFetch } from '@/sanity/live'
+import { sanityFetch } from '@/sanity/fetch'
 import { PAGE_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { SectionRenderer, type SectionData } from '@/components/sections'
 import { getLocale } from '@/lib/locale-server'

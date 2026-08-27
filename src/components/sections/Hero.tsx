@@ -4,6 +4,7 @@ import { stegaClean } from 'next-sanity'
 import { urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import type { SectionSettings } from '@/components/Section'
+import type { SiteSettings } from '@/lib/site'
 import { RotatingWord } from './RotatingWord'
 
 export type HeroSectionData = {
@@ -23,15 +24,27 @@ export type HeroSectionData = {
   metaItems?: LocaleString[] | null
   showPortrait?: boolean | null
   // Sanity image shape; `urlFor` needs the asset ref, `alt` is authored alongside it.
+  // Left empty, the profile image from Global settings stands in.
   portrait?: (Parameters<typeof urlFor>[0] & { alt?: string | null }) | null
   portraitBadge?: LocaleString
   rotateHeadlineWord?: boolean | null
   settings?: SectionSettings | null
 }
 
-export function Hero({ data, locale }: { data: HeroSectionData; locale: Locale }) {
+export function Hero({
+  data,
+  locale,
+  site,
+}: {
+  data: HeroSectionData
+  locale: Locale
+  site: SiteSettings | null
+}) {
   const words = (data.rotatingWords ?? []).map((w) => t(w, locale)).filter(Boolean)
-  const showPortrait = data.showPortrait !== false && Boolean(data.portrait)
+  // Falling back to Global settings means turning the portrait on is one switch here
+  // rather than a switch and a second upload of a photo the site already has.
+  const portrait = data.portrait?.asset ? data.portrait : (site?.profileImage ?? null)
+  const showPortrait = data.showPortrait !== false && Boolean(portrait?.asset)
   const noMotion = stegaClean(data.settings?.animation ?? 'default') === 'none'
 
   return (
@@ -92,8 +105,8 @@ export function Hero({ data, locale }: { data: HeroSectionData; locale: Locale }
               <div className="hero-portrait-frame" aria-hidden />
               <div className="hero-portrait-media">
                 <Image
-                  src={urlFor(data.portrait!).width(840).height(1050).url()}
-                  alt={data.portrait?.alt ? stegaClean(data.portrait.alt) : ''}
+                  src={urlFor(portrait!).width(840).height(1050).fit('crop').url()}
+                  alt={portrait?.alt ? stegaClean(portrait.alt) : ''}
                   width={420}
                   height={525}
                   priority

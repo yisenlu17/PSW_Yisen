@@ -14,6 +14,7 @@ export const editorialIntroSection = defineType({
   icon: BlockquoteIcon,
   groups: [
     { name: 'content', title: 'Content', default: true },
+    { name: 'portrait', title: 'Portrait' },
     { name: 'settings', title: 'Settings' },
   ],
   fields: [
@@ -27,6 +28,36 @@ export const editorialIntroSection = defineType({
       type: 'localeText',
       group: 'content',
     }),
+    defineField({
+      name: 'showPortrait',
+      title: 'Show the portrait',
+      description: 'The photo sits beside the intro, on the right.',
+      type: 'boolean',
+      group: 'portrait',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'portrait',
+      title: 'A different photo',
+      description:
+        'Leave this empty and the Profile image from Global settings → Identity is used — ' +
+        'which is the one to change when the photo is out of date, because the masthead ' +
+        'reads it too. Upload here only to give this one section a different picture.',
+      type: 'image',
+      group: 'portrait',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.showPortrait === false,
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+    }),
+    defineField({
+      name: 'portraitCaption',
+      title: 'Caption',
+      description: 'The small line under the photo. Optional.',
+      type: 'localeString',
+      group: 'portrait',
+      hidden: ({ parent }) => parent?.showPortrait === false,
+    }),
+
     defineField({
       name: 'steps',
       title: 'Steps',

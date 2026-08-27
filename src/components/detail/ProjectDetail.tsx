@@ -3,18 +3,21 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 import type { PortableTextBlock } from '@portabletext/react'
 
-import { urlFor } from '@/sanity/image'
+import { urlFor, imageSize } from '@/sanity/image'
 import { PortableBody } from '@/components/PortableBody'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import {
   statusLabel,
   roleLabel,
   isShipped,
+  isInProgress,
   formatYears,
   projectTitle,
+  handleLines,
   type ProjectCardData,
   type SanityImage,
 } from '@/lib/project'
+import { roleCompany } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
 import { DetailHeader, DetailBlock, DetailList, MetricRow, copy } from './DetailChrome'
 
@@ -32,9 +35,11 @@ export type ProjectDetailData = ProjectCardData & {
   stack?: string[] | null
   gallery?: SanityImage[] | null
   links?: Array<{ _key: string; kind?: string | null; label?: LocaleString; url?: string | null }> | null
+  // `handles` comes in with the card fields — the "Also running" strip shows it too.
   relatedExperience?: {
     _id: string
     company?: string | null
+    companyLocal?: string | null
     slug?: string | null
     role?: LocaleString
     category?: LocaleString
@@ -71,6 +76,11 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
   const features = (project.features ?? []).map((f) => t(f, locale)).filter(Boolean)
   const learnings = (project.learnings ?? []).map((l) => t(l, locale)).filter(Boolean)
   const links = (project.links ?? []).filter((l) => l.url && t(l.label, locale))
+  const handles = handleLines(project.handles, locale)
+  // A project still being built has nowhere to send anyone, and the row of buttons
+  // going missing reads as an oversight. Said once, in the place the button would
+  // have been, it reads as the answer instead.
+  const noDoorYet = links.length === 0 && handles.length === 0 && isInProgress(project.status)
   const gallery = (project.gallery ?? []).filter((g) => g?.asset)
   const related = project.relatedProjects ?? []
   const roleHref = detailHref('experience', project.relatedExperience?.slug)
@@ -102,7 +112,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
           </>
         }
       >
-        {links.length > 0 && (
+        {(links.length > 0 || handles.length > 0 || noDoorYet) && (
           <div className="detail-links">
             {links.map((link) => (
               <a
@@ -115,6 +125,14 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
                 {t(link.label, locale)}
               </a>
             ))}
+            {/* An account, not an address: a 抖音号 is searched for in the app, so it
+                is set as text to copy rather than as a button that opens nothing. */}
+            {handles.map((handle) => (
+              <span key={handle} className="detail-handle">
+                {handle}
+              </span>
+            ))}
+            {noDoorYet && <span className="detail-handle">{c.notPublicYet}</span>}
           </div>
         )}
       </DetailHeader>
@@ -122,11 +140,12 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
       {project.cover && (
         <div className="detail-cover">
           <div className="wrap">
+            {/* Asked for by width alone, and given the screenshot's own height: the
+                cover is the whole capture rather than a 16:9 slice of it. */}
             <Image
-              src={urlFor(project.cover).width(1800).height(1013).url()}
+              src={urlFor(project.cover).width(1800).url()}
               alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
-              width={1200}
-              height={675}
+              {...imageSize(project.cover)}
               sizes="(max-width: 1220px) 100vw, 1160px"
               priority
             />
@@ -172,8 +191,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
                   <Image
                     src={urlFor(shot).width(1200).url()}
                     alt={shot.alt ? stegaClean(shot.alt) : ''}
-                    width={600}
-                    height={400}
+                    {...imageSize(shot)}
                     sizes="(max-width: 800px) 100vw, 560px"
                   />
                   {t(shot.caption, locale) && <figcaption>{t(shot.caption, locale)}</figcaption>}
@@ -190,7 +208,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
               href={roleHref}
               className="detail-cross"
             >
-              <span className="detail-cross-name">{project.relatedExperience.company}</span>
+              <span className="detail-cross-name">{roleCompany(project.relatedExperience, locale)}</span>
               {t(project.relatedExperience.role, locale) && (
                 <span className="detail-cross-meta">
                   {t(project.relatedExperience.role, locale)}

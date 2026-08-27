@@ -13,6 +13,8 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
+import { INTRO, BIO, SEO_TITLE, SEO_DESCRIPTION } from './intro-content.mjs'
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 const REPLACE = process.argv.includes('--replace')
@@ -45,12 +47,20 @@ const litT = (en, zh) => ({ _type: 'localeText', en, zh })
 const settings = (label, extra = {}) => ({ _type: 'sectionSettings', label, ...extra })
 
 /**
- * The prototype left the English hero paragraph holding the Chinese text, so
- * English visitors read Chinese. Translated here rather than shipping the bug —
- * review the wording, it is a translation, not your words.
+ * The paragraphs that introduce me come from `intro-content.mjs`, not from the
+ * prototype's JSON.
+ *
+ * Two reasons. The prototype left the English hero paragraph holding the Chinese
+ * text, so an English visitor read Chinese — a bug that had to be fixed somewhere,
+ * and fixing it in the JSON would have meant writing English into a file the
+ * prototype owns. And the same sentences land in five places across three
+ * documents, so they need one home; `npm run intro` rewrites them there without a
+ * reseed. Seeding from the same file is what keeps a fresh dataset saying what the
+ * live one says.
  */
-const HERO_LEDE_EN =
-  "I'm Yisen Lu — a Japanese major who moved into product. Six enterprise website projects running in parallel at Orfeostory, community football operations at Stranger Soccer, 20+ financial process documents written solo at Ernst & Young. In my own time I built an NBA prediction platform, and a scheduling system for my mother's business."
+const introText = (copy, type) => ({ _type: type, en: copy.en, zh: copy.zh })
+const introS = (copy) => introText(copy, 'localeString')
+const introT = (copy) => introText(copy, 'localeText')
 
 /* ------------------------------------------------------------------ experience */
 
@@ -61,6 +71,7 @@ const EXPERIENCES = [
     slug: 'orfeostory',
     category: lit('Digital product · Singapore', '数字产品 · 新加坡'),
     location: 'Singapore',
+    locationLocal: '新加坡',
     startDate: '2026-07-01',
     endDate: null,
     featured: true,
@@ -73,6 +84,7 @@ const EXPERIENCES = [
     slug: 'stranger-soccer',
     category: lit('Operations & growth · Singapore', '运营与增长 · 新加坡'),
     location: 'Singapore',
+    locationLocal: '新加坡',
     startDate: '2025-08-01',
     endDate: '2025-11-01',
     featured: true,
@@ -82,9 +94,11 @@ const EXPERIENCES = [
   {
     _id: 'experience.ernst-young',
     company: 'Ernst & Young',
+    companyLocal: '安永（中国）企业咨询有限公司',
     slug: 'ernst-young',
     category: lit('Financial services · Shanghai', '金融服务 · 上海'),
     location: 'Shanghai',
+    locationLocal: '上海',
     startDate: '2024-07-01',
     endDate: '2024-09-01',
     featured: true,
@@ -94,9 +108,11 @@ const EXPERIENCES = [
   {
     _id: 'experience.suoao',
     company: 'Shanghai Suoao Information Technology',
+    companyLocal: '上海梭翱信息技术有限公司',
     slug: 'shanghai-suoao',
     category: lit('Project operations · Shanghai', '项目运营 · 上海'),
     location: 'Shanghai',
+    locationLocal: '上海',
     startDate: '2024-01-01',
     endDate: '2024-03-01',
     featured: false,
@@ -107,9 +123,11 @@ const EXPERIENCES = [
   {
     _id: 'experience.zhifeng',
     company: 'Zhifeng Sports Culture',
+    companyLocal: '上海智烽体育文化传播有限公司',
     slug: 'zhifeng-sports',
     category: lit('Sports marketing · Changzhou', '体育营销 · 常州'),
     location: 'Changzhou',
+    locationLocal: '常州',
     startDate: '2023-07-01',
     endDate: '2023-09-01',
     featured: false,
@@ -123,10 +141,13 @@ const experienceDocs = EXPERIENCES.map((e, i) => ({
   _id: e._id,
   _type: 'experience',
   company: e.company,
+  // A second name only where the company has one — see scripts/zh-names.mjs.
+  ...(e.companyLocal ? { companyLocal: e.companyLocal } : {}),
   slug: { _type: 'slug', current: e.slug },
   role: L(e.keys.role),
   category: e.category,
   location: e.location,
+  ...(e.locationLocal ? { locationLocal: e.locationLocal } : {}),
   startDate: e.startDate,
   ...(e.endDate ? { endDate: e.endDate } : {}),
   featured: e.featured,
@@ -181,7 +202,7 @@ const PROJECTS = [
     role: 'solo',
     startDate: '2026-03-01',
     featured: true,
-    tagline: lit('Offline basketball, remote officiating', '线下篮球,远程执裁'),
+    tagline: lit('Offline basketball, remote officiating', '线下篮球，远程执裁'),
     summaryKey: 'pr2b',
     tags: [lit('Operations design', '运营设计')],
   },
@@ -221,20 +242,14 @@ const PROJECTS = [
     featured: false,
     summaryKey: 'al2',
   },
-  {
-    _id: 'project.uir-hunter',
-    title: 'UIR Hunter',
-    slug: 'uir-hunter',
-    category: lit('Student venture · 2023', '学生创业项目 · 2023'),
-    status: 'archived',
-    role: 'lead',
-    startDate: '2023-01-01',
-    endDate: '2023-12-01',
-    featured: false,
-    summaryKey: 'al3',
-    highlight: lit('Best Creativity Award, 2023', '2023 年最佳创意奖'),
-  },
 ]
+
+// UIR Hunter, the 2023 student venture, used to sit here as a third line in the
+// "Also running" strip. It came out: an archived campus project with no page behind
+// it was the one item in that strip a reader could do nothing with, and it made the
+// strip a list of three unequal things rather than what it now is — the two accounts
+// that are actually still running. Its copy is `al3` in content.en-zh.json if it is
+// ever wanted back.
 
 const projectDocs = PROJECTS.map((p, i) => ({
   _id: p._id,
@@ -294,10 +309,13 @@ const heroSection = {
   headlineLine1: L('h1a'),
   headlineLine2: L('h1b'),
   rotatingWords: [lit('built', '做出来'), lit('shipped', '交付'), lit('used', '被用起来')],
-  lede: { _type: 'localeText', en: HERO_LEDE_EN, zh: C.heroLede?.zh ?? '' },
+  lede: introT(INTRO),
   ctas: [
-    { _key: 'cta1', label: L('ctaWork'), href: '/experience', style: 'gold' },
-    { _key: 'cta2', label: L('ctaStory'), href: '/about', style: 'ghost' },
+    // "See the work" is the projects; "Start with the story" is the roles they came
+    // out of. The pair pointed the other way round in the prototype, which sent
+    // anyone reading the label to the page the other button was for.
+    { _key: 'cta1', label: L('ctaWork'), href: '/projects', style: 'gold' },
+    { _key: 'cta2', label: L('ctaStory'), href: '/experience', style: 'ghost' },
   ],
   metaItems: [
     lit('1.29°N 103.85°E', '1.29°N 103.85°E'),
@@ -322,12 +340,12 @@ const statsSection = {
     description: LT('nu0'),
   },
   stats: [
-    { v: '20,000', s: '+', c: 20000, k: 'nu1', src: lit('Shanghai Suoao, 2024', '上海梭翱,2024') },
-    { v: '5,000', s: '+', c: 5000, k: 'nu2', src: lit('Shanghai Suoao, 2024', '上海梭翱,2024') },
-    { v: '6', s: '', c: 6, k: 'nu3', src: lit('Orfeostory, 2026', 'Orfeostory,2026') },
-    { v: '20', s: '+', c: 20, k: 'nu4', src: lit('Ernst & Young, 2024', '安永,2024') },
-    { v: '10,000', s: '+', c: 10000, k: 'nu5', src: lit('Zhifeng Sports, 2023', '致峰体育,2023') },
-    { v: '6,000', s: '+', c: 6000, k: 'nu6', src: lit('Zhifeng Sports, 2023', '致峰体育,2023') },
+    { v: '20,000', s: '+', c: 20000, k: 'nu1', src: lit('Shanghai Suoao, 2024', '上海梭翱，2024') },
+    { v: '5,000', s: '+', c: 5000, k: 'nu2', src: lit('Shanghai Suoao, 2024', '上海梭翱，2024') },
+    { v: '6', s: '', c: 6, k: 'nu3', src: lit('Orfeostory, 2026', 'Orfeostory, 2026') },
+    { v: '20', s: '+', c: 20, k: 'nu4', src: lit('Ernst & Young, 2024', '安永，2024') },
+    { v: '10,000', s: '+', c: 10000, k: 'nu5', src: lit('Zhifeng Sports, 2023', '致峰体育，2023') },
+    { v: '6,000', s: '+', c: 6000, k: 'nu6', src: lit('Zhifeng Sports, 2023', '致峰体育，2023') },
     { v: '3', s: '', c: null, k: 'nu7', src: lit('中文 · English · 日本語', '中文 · English · 日本語') },
   ].map((s, i) => ({
     _key: `stat${i + 1}`,
@@ -345,7 +363,7 @@ const introSection = {
   _type: 'editorialIntroSection',
   eyebrow: L('thBrow'),
   title: L('thTitle'),
-  lede: LT('thLede'),
+  lede: introT(BIO),
   note: LT('thNote'),
   steps: [1, 2, 3, 4].map((n) => ({ _key: `step${n}`, title: L(`s${n}t`), body: LT(`s${n}b`) })),
   settings: settings('The thread', { anchorId: 'story', theme: 'light' }),
@@ -446,7 +464,7 @@ const weekendBento = {
       size: 'wide',
       tone: 'cream',
       kicker: lit('Football · 足球', '足球'),
-      title: lit('Organised, not just played', '不只是参加,是组织'),
+      title: lit('Organised, not just played', '不只是参加，是组织'),
       body: LT('sp1'),
     },
     {
@@ -462,7 +480,7 @@ const weekendBento = {
       size: 'sm',
       tone: 'paper',
       kicker: lit('Badminton · 羽毛球', '羽毛球'),
-      title: lit('China Open, Changzhou', '中国公开赛,常州'),
+      title: lit('China Open, Changzhou', '中国公开赛，常州'),
       body: LT('sp3'),
     },
     {
@@ -484,11 +502,8 @@ const pages = [
     _id: 'page.home',
     title: 'Homepage',
     slug: '/',
-    seoTitle: lit(
-      'Yisen Lu — Product, business and the part where things get built',
-      '卢一森 —— 产品、商业,以及把东西真正做出来的那部分'
-    ),
-    seoDescription: LT('nuNote'),
+    seoTitle: introS(SEO_TITLE),
+    seoDescription: introT(SEO_DESCRIPTION),
     // The homepage is a trailer, not the whole film: an opening, proof, three
     // featured roles, and a way to get in touch. Depth lives on the subpages.
     sections: [
@@ -513,7 +528,7 @@ const pages = [
     title: 'About',
     slug: 'about',
     seoTitle: lit('About — Yisen Lu', '关于 —— 卢一森'),
-    seoDescription: LT('thLede'),
+    seoDescription: introT(BIO),
     sections: [introSection, currentlySection, ctaSection('contact')],
   },
   {
@@ -526,7 +541,7 @@ const pages = [
       experienceSection('experience-full', {
         lede: litT(
           'Five roles across consulting, sports marketing, operations and digital product. Different rooms, the same job.',
-          '五段经历,横跨咨询、体育营销、运营和数字产品。房间不一样,做的事情是同一件。'
+          '五段经历，横跨咨询、体育营销、运营和数字产品。房间不一样，做的事情是同一件。'
         ),
       }),
       statsSection,
@@ -579,12 +594,9 @@ const globalSettings = {
   currentRole: L('ex1r'),
   currentLocation: lit('Singapore', '新加坡'),
   availability: L('uAvail'),
-  shortBio: LT('thLede'),
-  seoTitle: lit(
-    'Yisen Lu — Product, business and the part where things get built',
-    '卢一森 —— 产品、商业,以及把东西真正做出来的那部分'
-  ),
-  seoDescription: LT('nuNote'),
+  shortBio: introT(BIO),
+  seoTitle: introS(SEO_TITLE),
+  seoDescription: introT(SEO_DESCRIPTION),
   // Email and social links stay empty: the prototype had them as [NEED CONTENT]
   // placeholders, and inventing them would be worse than a gap.
   socialLinks: [],

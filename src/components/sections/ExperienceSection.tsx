@@ -3,7 +3,7 @@ import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
-import { type ExperienceRole } from '@/lib/experience'
+import { roleCompany, type ExperienceRole } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
 import { ExperienceCard } from './ExperienceCard'
 
@@ -81,9 +81,10 @@ export function ExperienceSection({
  * Company names link to the role's own page when it has a slug. A role created
  * without one still renders — as plain text rather than a link to nowhere.
  */
-function RoleName({ role }: { role: ExperienceRole }) {
+function RoleName({ role, locale }: { role: ExperienceRole; locale: Locale }) {
   const href = detailHref('experience', role.slug)
-  return href ? <Link href={href}>{role.company}</Link> : <>{role.company}</>
+  const company = roleCompany(role, locale)
+  return href ? <Link href={href}>{company}</Link> : <>{company}</>
 }
 
 function ExperienceRow({ role, locale }: { role: ExperienceRole; locale: Locale }) {
@@ -91,7 +92,7 @@ function ExperienceRow({ role, locale }: { role: ExperienceRole; locale: Locale 
   return (
     <div className="exp-row">
       <div>
-        <h3><RoleName role={role} /></h3>
+        <h3><RoleName role={role} locale={locale} /></h3>
         <p className="exp-meta">{[t(role.role, locale), dates].filter(Boolean).join(' · ')}</p>
       </div>
       {t(role.summary, locale) && <p className="exp-row-body">{t(role.summary, locale)}</p>}

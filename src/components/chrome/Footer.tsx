@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
-import { resumeFor, type SiteSettings } from '@/lib/site'
+import { resumeSet, type SiteSettings } from '@/lib/site'
 import type { NavigationData } from './Header'
 
 /**
@@ -35,8 +35,18 @@ export function Footer({
   site: SiteSettings | null
   locale: Locale
 }) {
+  // `external` comes along because the footer lists the same items as the masthead,
+  // and one of them may well be somebody else's site. Handing an absolute URL to
+  // `<Link>` gets an anchor that works but opens in this tab and has Next trying to
+  // prefetch a route that is not one — so the two kinds are told apart here, the way
+  // the header already tells them apart.
   const links = (nav?.items ?? [])
-    .map((i) => ({ key: i._key, label: t(i.label, locale), href: i.href ? stegaClean(i.href) : '' }))
+    .map((i) => ({
+      key: i._key,
+      label: t(i.label, locale),
+      href: i.href ? stegaClean(i.href) : '',
+      external: Boolean(i.external),
+    }))
     .filter((i) => i.label && i.href)
 
   // Only real, filled-in ways to reach someone. An empty column beats a dead link.
@@ -58,8 +68,7 @@ export function Footer({
   // language may well want the CV in the other. With one uploaded it stays a single
   // unlabelled link, because "Résumé (English)" next to nothing else invites a hunt
   // for a Chinese version that does not exist.
-  const resumeZh = site?.resume?.zh?.url ? resumeFor(site, locale, 'zh') : null
-  const resumeEn = site?.resume?.en?.url ? resumeFor(site, locale, 'en') : null
+  const { zh: resumeZh, en: resumeEn } = resumeSet(site)
 
   if (resumeZh && resumeEn) {
     connect.push({
@@ -97,11 +106,17 @@ export function Footer({
           {links.length > 0 && (
             <div className="foot-col">
               <h4>{locale === 'zh' ? '探索' : 'Explore'}</h4>
-              {links.map((l) => (
-                <Link key={l.key} href={l.href}>
-                  {l.label}
-                </Link>
-              ))}
+              {links.map((l) =>
+                l.external || /^(https?:|mailto:|tel:)/.test(l.href) ? (
+                  <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer">
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link key={l.key} href={l.href}>
+                    {l.label}
+                  </Link>
+                )
+              )}
             </div>
           )}
 

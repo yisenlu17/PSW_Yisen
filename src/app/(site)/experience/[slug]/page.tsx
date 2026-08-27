@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
 import { client } from '@/sanity/client'
-import { sanityFetch } from '@/sanity/live'
+import { sanityFetch } from '@/sanity/fetch'
 import { EXPERIENCE_QUERY, EXPERIENCE_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ExperienceDetail, type ExperienceDetailData } from '@/components/detail/ExperienceDetail'
 import { getLocale } from '@/lib/locale-server'

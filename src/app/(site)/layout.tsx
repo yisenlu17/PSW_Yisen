@@ -7,8 +7,8 @@ import { DisableDraftMode } from '@/components/DisableDraftMode'
 import { Header } from '@/components/chrome/Header'
 import { Footer } from '@/components/chrome/Footer'
 import { SanityLive } from '@/sanity/live'
-import { sanityFetch } from '@/sanity/live'
-import { GLOBAL_SETTINGS_QUERY, NAVIGATION_QUERY } from '@/sanity/queries'
+import { sanityFetch } from '@/sanity/fetch'
+import { GLOBAL_SETTINGS_QUERY, NAV_CHILDREN_QUERY, NAVIGATION_QUERY } from '@/sanity/queries'
 import { getLocale } from '@/lib/locale-server'
 import type { SiteSettings } from '@/lib/site'
 
@@ -43,24 +43,32 @@ export async function generateMetadata(): Promise<Metadata> {
  * and footer from the same two documents, rather than each page re-fetching them.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [{ isEnabled: isDraft }, locale, { data: settings }, { data: nav }] = await Promise.all([
-    draftMode(),
-    getLocale(),
-    sanityFetch({ query: GLOBAL_SETTINGS_QUERY }),
-    sanityFetch({ query: NAVIGATION_QUERY }),
-  ])
+  const [{ isEnabled: isDraft }, locale, { data: settings }, { data: nav }, { data: subpages }] =
+    await Promise.all([
+      draftMode(),
+      getLocale(),
+      sanityFetch({ query: GLOBAL_SETTINGS_QUERY }),
+      sanityFetch({ query: NAVIGATION_QUERY }),
+      sanityFetch({ query: NAV_CHILDREN_QUERY }),
+    ])
 
   const site = (settings ?? null) as SiteSettings | null
 
   return (
     <>
-      <Header nav={nav} site={site} locale={locale} />
+      <Header nav={nav} subpages={subpages} site={site} locale={locale} />
       {children}
       <Footer nav={nav} site={site} locale={locale} />
 
-      <SanityLive />
+      {/* Only for the editor. `<SanityLive />` holds an EventSource open to Sanity
+          for the lifetime of the tab and posts a server action every time content
+          moves; that is worth it inside Presentation, where the point is watching an
+          edit land. A visitor reading published content gets nothing from it — the
+          reads behind this page are cached and expired by `/api/revalidate` — beyond
+          a connection to keep alive and a reason for the page to re-render. */}
       {isDraft && (
         <>
+          <SanityLive />
           <VisualEditing />
           <DisableDraftMode />
         </>

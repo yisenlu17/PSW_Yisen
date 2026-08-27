@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
-import { urlFor } from '@/sanity/image'
+import { urlFor, imageSize } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
-import { statusLabel, isShipped, projectTitle, type ProjectCardData } from '@/lib/project'
+import { statusLabel, isShipped, projectTitle, handleLines, type ProjectCardData } from '@/lib/project'
 import { detailHref } from '@/lib/href'
 
 export type ProjectsSectionData = {
@@ -121,21 +121,18 @@ function ProjectCard({
 
   return (
     <article className="proj-card" data-flipped={flipped}>
-      <div className="proj-media">
-        {project.cover ? (
+      {/* No picture, no column: the card goes full width rather than holding a grey
+          rectangle open for one that was never given. */}
+      {project.cover && (
+        <div className="proj-media">
           <Image
-            src={urlFor(project.cover).width(1120).height(700).url()}
+            src={urlFor(project.cover).width(1120).url()}
             alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
-            width={560}
-            height={350}
+            {...imageSize(project.cover)}
             sizes="(max-width: 900px) 100vw, 46vw"
           />
-        ) : (
-          // A card with no image keeps its frame rather than collapsing, so a
-          // half-filled project still sits in the rhythm of the ones around it.
-          <div className="proj-media-empty" aria-hidden />
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="proj-body">
         <div className="proj-kickers">
@@ -228,14 +225,49 @@ function CompactProject({
  * and a line. These are accounts and a student venture with nothing behind them worth
  * a page of their own, and a link that only ever lands on a thin one is worse than no
  * link at all.
+ *
+ * The one thing that does get added is where to find an account — "抖音 94617971040".
+ * That is the whole point of listing a channel here, and since a 抖音号 opens nothing
+ * in a browser it is set as text to copy rather than dressed up as a link.
  */
 function AlsoRunning({ project, locale }: { project: ProjectCardData; locale: Locale }) {
   const body = t(project.summary, locale) || t(project.tagline, locale)
+  const handles = handleLines(project.handles, locale)
+  const covers = (project.covers ?? []).filter((c) => c?.asset)
 
   return (
     <div className="proj-also-item">
+      {/* Whole, never cropped and never behind type: an account's cover is already a
+          finished piece of artwork with its own headline on it. */}
+      {covers.length > 0 && (
+        <div className="proj-also-covers">
+          {covers.map((cover, i) => (
+            <Image
+              key={i}
+              src={urlFor(cover).width(560).url()}
+              alt={cover.alt ? stegaClean(cover.alt) : ''}
+              {...imageSize(cover)}
+              // 240px is the widest a cover gets: the strip holds them to a height,
+              // and a landscape cover 168px tall is about 224px across. This has to
+              // be the rendered width rather than a guess under it — the browser
+              // picks the smallest source that satisfies it, and a hint of 150px
+              // fetched a 150px-wide file, which then became the limit on how big
+              // the picture could be drawn. The landscape pair sat two thirds the
+              // height of the portrait pair for exactly that reason.
+              sizes="(max-width: 700px) 45vw, 240px"
+            />
+          ))}
+        </div>
+      )}
       <h4>{projectTitle(project, locale)}</h4>
       {body && <p>{body}</p>}
+      {handles.length > 0 && (
+        <p className="proj-also-handles">
+          {handles.map((handle) => (
+            <span key={handle}>{handle}</span>
+          ))}
+        </p>
+      )}
     </div>
   )
 }

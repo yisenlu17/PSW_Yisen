@@ -2,7 +2,7 @@ import NextImage from 'next/image'
 import { stegaClean } from 'next-sanity'
 import { PortableText, type PortableTextBlock, type PortableTextComponents } from '@portabletext/react'
 
-import { urlFor } from '@/sanity/image'
+import { urlFor, imageSize } from '@/sanity/image'
 import { t, type Locale, type LocaleString } from '@/lib/locale'
 import type { SanityImage } from '@/lib/project'
 
@@ -78,14 +78,18 @@ function components(locale: Locale): PortableTextComponents {
         const image = value as SanityImage
         if (!image?.asset) return null
         const caption = t(image.caption as LocaleString, locale)
+        const size = imageSize(image)
+        // A phone screenshot run to the full width of the column is a picture the
+        // reader has to scroll past rather than look at, so a tall one is held to a
+        // phone's width and centred. Anything squarer keeps the whole column.
+        const portrait = size.height > size.width * 1.25
         return (
-          <figure className="body-figure">
+          <figure className="body-figure" data-shape={portrait ? 'portrait' : 'wide'}>
             <NextImage
-              src={urlFor(image).width(1400).url()}
+              src={urlFor(image).width(portrait ? 800 : 1400).url()}
               alt={image.alt ? stegaClean(image.alt) : ''}
-              width={700}
-              height={470}
-              sizes="(max-width: 800px) 100vw, 720px"
+              {...size}
+              sizes={portrait ? '(max-width: 460px) 100vw, 400px' : '(max-width: 800px) 100vw, 720px'}
             />
             {caption && <figcaption>{caption}</figcaption>}
           </figure>

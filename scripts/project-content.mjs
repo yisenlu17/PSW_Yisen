@@ -8,12 +8,30 @@
  * The write-up is authored once as bilingual pairs and split into `body` (English)
  * and `bodyZh` at the end, which is what keeps the two languages structurally
  * identical — same sections, same chains, same order.
+ *
+ * The screenshots are named here too, by filename rather than by asset id: a cover per
+ * project and an `IMG` wherever a picture belongs in the argument. `media.mjs` uploads
+ * what this file asks for and nothing else.
+ *
+ * So are the links a project offers — the entrances to 智排, the site 我是懂球王 runs
+ * on — and, at the foot, the two accounts in the "Also running" strip, which are a
+ * 抖音号 each and nothing more.
  */
 
 /* ------------------------------------------------------------------ authoring */
 
 const S = (en, zh) => ({ _type: 'localeString', en, zh })
 const T = (en, zh) => ({ _type: 'localeText', en, zh })
+
+/**
+ * A link, rendered as a button at the top of the detail page.
+ *
+ * Named by who the door is for rather than by what is behind it: 智排 has two of
+ * them, and "Centre console" and "Student & teacher portal" is the distinction a
+ * visitor needs — the two URLs on their own say nothing. A project with no public
+ * address gets no link at all rather than a dead one, and the page says so itself.
+ */
+const LINK = (kind, en, zh, url) => ({ _type: 'projectLink', kind, label: S(en, zh), url })
 
 /** The write-up, written once as bilingual pairs and split into two at the end. */
 const H = (en, zh) => ({ kind: 'block', style: 'h3', en, zh })
@@ -23,6 +41,17 @@ const Q = (en, zh) => ({ kind: 'block', style: 'blockquote', en, zh })
 const UL = (...items) => ({ kind: 'list', items })
 const CHAIN = (label, en, zh) => ({ kind: 'flow', variant: 'chain', label, en, zh })
 const SET = (label, en, zh) => ({ kind: 'flow', variant: 'set', label, en, zh })
+
+/**
+ * A screenshot, placed in the write-up rather than collected at the foot of the page.
+ *
+ * `file` names a file under `media/project/` and not a Sanity asset, so the picture is chosen
+ * next to the paragraph it belongs under and neither script here needs the dataset to
+ * be able to read this file. `media.mjs` puts the file in the dataset;
+ * `project-detail.mjs` looks the asset up by that filename as it writes. An image
+ * with nothing uploaded behind it is left out rather than written as a hole.
+ */
+const IMG = (file, alt, en, zh) => ({ kind: 'image', file, alt, en, zh })
 
 /**
  * `**bold**` is the only inline mark these write-ups need — a bulleted definition
@@ -50,8 +79,14 @@ const block = (key, style, text, listItem) => ({
   children: spans(text, key),
 })
 
-/** Turns the bilingual outline into one language's Portable Text array. */
-function writeUp(nodes, lang) {
+/**
+ * Turns the bilingual outline into one language's Portable Text array.
+ *
+ * `assets` maps a filename to the id of the image asset that came from it. Both
+ * languages are given the same map, so a screenshot lands at the same point in the
+ * English and the Chinese write-up or in neither.
+ */
+function writeUp(nodes, lang, assets = {}) {
   const out = []
   nodes.forEach((node, i) => {
     const key = `b${i}`
@@ -60,6 +95,21 @@ function writeUp(nodes, lang) {
     } else if (node.kind === 'list') {
       node.items.forEach((item, j) => {
         out.push(block(`${key}i${j}`, 'normal', lang === 'zh' ? item[1] : item[0], 'bullet'))
+      })
+    } else if (node.kind === 'image') {
+      // Skipped rather than written empty: an image block with no asset renders as a
+      // gap on the page and reads as a bug in the studio.
+      const asset = assets[node.file]
+      if (!asset) return
+      out.push({
+        _type: 'image',
+        _key: key,
+        // Read by the preview, which has the files but not the dataset, and stripped
+        // by the script that writes — the studio would show it as an unknown field.
+        _file: node.file,
+        asset: { _type: 'reference', _ref: asset },
+        alt: node.alt,
+        caption: { _type: 'localeString', en: node.en, zh: node.zh },
       })
     } else if (node.kind === 'flow') {
       out.push({
@@ -93,6 +143,13 @@ const DONGQIUWANG = [
   P(
     'You take a side and call the game before tip-off, the system settles it afterwards, and the score, hit rate, streak, level and leaderboard position keep accumulating. "I know ball" stops being an opinion and becomes a digital identity that can be recorded, compared and shared.',
     '用户可以在赛前完成比赛站队和预测，赛后系统自动结算，并持续积累懂王分、命中率、连胜、等级和排行榜，让「我懂球」从一句观点变成可记录、可比较、可分享的数字身份。'
+  ),
+
+  IMG(
+    'dongqiuwang-news-poll.png',
+    'A news item on 我是懂球王 with its interactive question underneath — two sides, a split bar and a deadline.',
+    'A call has a side and a deadline. The question hangs under the news item it came out of, the bar moves as people take their side, and when it closes the side that drew the crowd scores a point each.',
+    '一次判断有一个立场，也有一个截止时间。互动题就挂在它来自的那条新闻下面，站队的人越多进度条越偏，截止时人多的一方每人 +1 懂王分。'
   ),
 
   H('Taking it from 0 to 1', '从 0 到 1 搭建产品'),
@@ -129,6 +186,12 @@ const DONGQIUWANG = [
       'Points & leaderboard update',
     ],
     ['比赛同步', '自动生成比赛房间', '用户预测', '比赛封盘', '自动结算', '积分与排行榜更新']
+  ),
+  IMG(
+    'dongqiuwang-card.png',
+    'The 懂球卡 on 我是懂球王: 懂王 score, career honour, badges, hit rate, games played, current and best streak, and the last five games.',
+    'Where the loop puts what it produces. Score, honour, badges, hit rate, streak, the last five games — the thing a fan is actually accumulating, and the thing they screenshot and send to the group chat.',
+    '闭环最后落在这张卡上：懂王分、生涯荣誉值、徽章、命中率、当前与最高连胜、最近 5 场。球迷真正在积累的是它，会截图发到群里的也是它。'
   ),
   P(
     'From there I used Claude and Codex to generate the first pass of the design and the code, then went through it feature by feature — checking the business logic, reworking the interactions, finishing the build.',
@@ -238,6 +301,13 @@ const JUST_HOOP = [
     '为了让不同水平的玩家长期形成竞技体系，我还设计了不同模式独立计算的 Elo Rating System，并针对 1V1、3V3 和多人擂台不断迭代比赛规则。'
   ),
 
+  IMG(
+    'just-hoop-matchmaking.png',
+    'The Just Hoop player side mid-search: ranked or casual, 1v1 or 3v3, filters for date, time, place and tier, and the rooms still open.',
+    'The player side, mid-search: ranked or casual, 1v1 or 3v3, filtered by date, time, place and tier, with same-or-adjacent tier left on. Nothing open that fits is a state of its own — it offers to hold the same terms, open a waiting room on them, and put a referee on it once the room fills.',
+    '球员端的找局界面：排位或匹配、1V1 或 3V3，按日期、时段、地点和段位筛选，默认只看同段或相邻段位。一个都不合适也是一种状态——系统会保留刚才的条件开一个等待房，人满后自动派裁判。'
+  ),
+
   H(
     'The decision that mattered most: what if the AI referee cannot be built yet?',
     '最关键的产品决策：AI 裁判做不了怎么办？'
@@ -263,6 +333,13 @@ const JUST_HOOP = [
     'For now a remote human referee handles scoring, possession and disputed calls from the video feed. That is human-in-the-loop, and it puts the real question first: can a remote match official actually solve pick-up basketball’s officiating problem?',
     '现阶段由远程真人裁判通过视频画面完成计分、球权和争议判定，用 Human-in-the-Loop 的方式先验证「远程数字比赛官」是否能够真正解决野球判罚问题。'
   ),
+  IMG(
+    'just-hoop-referee-console.png',
+    'The Just Hoop referee console: score for either side, the game clock, a 12-second reset, fouls, attendance and a running feed.',
+    'What that referee actually works from. Scoring, fouls and possession are one key each, the 12-second clock resets itself after every event so nobody has to run it, and the feed down the right is what an appeal gets argued from afterwards.',
+    '远程裁判真正在用的执裁台：得分、犯规、球权各有快捷键，12 秒进攻计时在每次事件后自动重置，不需要裁判去管；右侧的实况流就是之后申诉时用来复盘的依据。'
+  ),
+
   P(
     'Meanwhile the architecture has had room for what comes next from the start: computer vision, player and ball tracking, event detection, a rules engine and multi-camera calls.',
     '与此同时，产品架构从一开始就为未来的计算机视觉、球员/篮球追踪、事件检测、规则引擎和多机位 AI 判罚保留升级空间。'
@@ -337,6 +414,54 @@ const ZHIPAI = [
     'Because a real business is not served by a black-box "AI schedules it for you" button. Whoever runs the centre has to be able to understand the result, control it and change it.',
     '因为我发现，真实业务并不适合做一个完全黑盒的「AI 自动排课按钮」，管理者必须能够理解、控制和修改系统结果。'
   ),
+  IMG(
+    'zhipai-scheduling.png',
+    'The 智排 scheduling workbench: the preferences a run is given — whose time to favour, which parts of the day to use, teaching rhythm and load, profit and room fit — with presets across the top, and a result saved as a draft or applied to the real timetable.',
+    'What "not a black box" looks like on screen. A run is given preferences rather than a button — whose time to favour, which parts of the day to fill, how much back-to-back teaching a teacher can take, how full a room should be — and what comes back is a draft on the same timetable, kept as an option until somebody applies it.',
+    '「不是黑盒」在界面上就是这个样子：排课不是一个按钮，而是一组可以勾选的偏好——优先照顾谁的时间、先填哪些时段、老师能连堂到什么程度、教室要坐得多满。生成的结果落在同一张草稿课表上，先当作备选留着，确认之后才写进真实课表。'
+  ),
+
+  H('Two doors, one timetable', '两个入口，同一张课表'),
+  P(
+    'The centre is not the only one who needs the schedule. A student wants to know when the next class is; a teacher has to say when they are free — and that availability is half of what the scheduler runs on. Collecting it message by message is how the spreadsheet went out of date in the first place.',
+    '需要课表的不只是机构。学生想知道下一节课在什么时候；老师则必须报出自己什么时候有空——而这份可用时间正是排课算法一半的输入。靠微信一条条去问，正是当初那张 Excel 会过期的原因。'
+  ),
+  P(
+    'So the product has two doors. The centre console is the whole timetable and everything behind it. The portal is where one person signs in, joins a centre with its code, and sees their own side of that same timetable and nothing else.',
+    '所以产品做了两个入口。机构入口是整张课表以及它背后的一切；学生 / 教师入口则是个人登录的地方：用机构码加入一家机构，只看到同一张课表里属于自己的那一部分。'
+  ),
+  IMG(
+    'zhipai-portal.png',
+    'The 智排 portal: the centres this account has joined, each with its code and an Enter button, and a search box for applying to a new one.',
+    'Getting in is a code and an approval, not an account somebody opens by hand. One person can hold more than one — the normal case for a teacher taking classes at two centres.',
+    '进来靠的是一串机构码加一次审核，而不是管理员手动开号。一个人可以同时加入多家机构——这对同时在两家机构带课的老师本来就是常态。'
+  ),
+  P(
+    'The teacher side asks for exactly what scheduling needs, and hands back what a teacher actually wants to see: available hours and subjects taught, leave and swap requests, post-class feedback, and the hours and fee this month comes to.',
+    '老师端向老师要的，正好是排课需要的东西；给回去的，也正好是老师自己关心的：可用时间与可授科目、请假与调课、课后反馈，以及这个月已上、待上多少课时和大概多少课时费。'
+  ),
+  IMG(
+    'zhipai-teacher.png',
+    'The 智排 teacher home on a phone: the next class, a prompt to fill in available hours, seven actions, and this month’s hours taught, hours to come and fee.',
+    'The line under the next class is the point of the whole screen. A teacher who has not filled in their available hours is a teacher the scheduler cannot place, so that is what it asks for before anything else.',
+    '这一屏真正重要的是「下一节课」下面那句提醒。没有填可用时间的老师，系统根本没法给他排课——所以它先要的就是这个，其他都排在后面。'
+  ),
+  P(
+    'The student side is the other end of the same thing: sign up, ask for leave, book a make-up, register the times that suit — and see the hours paid for, taken and left.',
+    '学生端是同一件事的另一头：报名、请假、约补课、登记自己方便的时间，以及看到自己买了多少课时、上了多少、还剩多少。'
+  ),
+  IMG(
+    'zhipai-student.png',
+    'The 智排 student home on a phone: four actions, hours pending, taken and total, and today’s three classes with subject, teacher and room.',
+    'Everything a family rings the front desk to ask — when is the class, who is teaching it, which room, how many hours are left — answered on one screen without anybody being asked.',
+    '家长平时打电话到前台问的那些——今天几点上课、哪个老师、哪间教室、还剩几节——都在这一屏上，不用再问人。'
+  ),
+  IMG(
+    'zhipai-student-schedule.png',
+    'The 智排 student timetable: a week of classes with one day selected, and that day’s three sessions listed underneath with time, subject, teacher and room.',
+    'And this is where the console’s work comes out. Whatever the scheduling run decided, one student sees it as a week and a day — the same timetable, cut down to the part that is theirs.',
+    '总控台排出来的东西，最后就落在这里。不管排课那一步做了什么决定，学生看到的只是一周和一天——同一张课表，只留下与他有关的那部分。'
+  ),
 
   H('The hardest part: what if there is no perfect answer?', '最大的问题：没有完美解怎么办？'),
   P(
@@ -366,8 +491,8 @@ const ZHIPAI = [
     '智排目前已经进入 Validation Stage，正在通过真实教培场景继续验证需求优先级、排课规则和管理端工作流。'
   ),
   P(
-    'Rather than going straight into building it, I wanted three things confirmed first: whether the problem hurts enough, where the existing Excel workflow wastes the most time, and which features people would genuinely use.',
-    '相比直接进入开发，我选择先确认：这个问题是否足够痛、现有 Excel 工作流哪里最浪费时间、哪些功能用户真正愿意使用。'
+    'The system itself is deployed — a centre console, and the portal the students and teachers under it sign in to. What is still open is not whether it can be built. It is whether the problem hurts enough, where the old Excel workflow really wastes the time, and which of these features a centre keeps using once the novelty has worn off.',
+    '系统本身已经部署上线：一个机构总控台，以及机构里的学生和老师登录的入口。还没确定的不是「能不能做出来」，而是这个问题是否足够痛、原来的 Excel 工作流到底是哪一步最浪费时间，以及新鲜感过去之后，机构还会继续用哪些功能。'
   ),
   Q(
     'Understand how the real world runs first. Then decide how the software should.',
@@ -427,6 +552,11 @@ const PROJECTS = [
       ),
     ],
     stack: ['PostgreSQL', 'Prisma', 'BallDontLie API', 'Vercel', 'Cron jobs', 'Claude', 'Codex'],
+    links: [LINK('live', 'Live site', '访问网站', 'https://woshidongqiuwang.com/')],
+    cover: {
+      file: 'dongqiuwang-home.png',
+      alt: 'The 我是懂球王 home screen: the day rail across the top, the fixtures for that day, and the 懂王 news feed under them.',
+    },
     nodes: DONGQIUWANG,
     related: ['project.just-hoop', 'project.zhipai'],
   },
@@ -474,6 +604,12 @@ const PROJECTS = [
         'Human-in-the-Loop 不是妥协，而是在技术成熟之前先把问题验证掉的办法。'
       ),
     ],
+    // No link on purpose: there is nothing public to open yet. The detail page says
+    // so where the buttons would be, rather than pointing at a holding page.
+    cover: {
+      file: 'just-hoop-lobby.png',
+      alt: 'The Just Hoop lobby: tonight’s venue, ranked or casual, the conditions for a game, and the friends already playing.',
+    },
     nodes: JUST_HOOP,
     related: ['project.dongqiuwang', 'project.zhipai'],
   },
@@ -489,8 +625,8 @@ const PROJECTS = [
     ],
     tagline: S('Class scheduling for tutoring centres', '教培机构排课与管理系统'),
     summary: T(
-      'A scheduling and admin system for tutoring centres. It began as a family member’s Excel workbook and turned out to be a constraint problem: students, teachers, subjects, rooms and time slots that all have to hold at once. It is in validation with a real centre rather than in build, on purpose.',
-      '面向教培机构的排课与管理系统。起点是家人手里的一份 Excel，拆开之后才发现它其实是一个约束优化问题：学生、老师、科目、教室和时间必须同时成立。目前刻意停在验证阶段，用真实场景继续确认需求，而不是先进入开发。'
+      'A scheduling and admin system for tutoring centres. It began as a family member’s Excel workbook and turned out to be a constraint problem: students, teachers, subjects, rooms and time slots that all have to hold at once. It runs as a console for the centre plus a portal the students and teachers sign in to, and is being validated against a real one.',
+      '面向教培机构的排课与管理系统。起点是家人手里的一份 Excel，拆开之后才发现它其实是一个约束优化问题：学生、老师、科目、教室和时间必须同时成立。现在由一个机构总控台加上学生与老师登录的入口组成，正在一家真实机构里验证。'
     ),
     tags: [
       S('Constraint modelling', '约束建模'),
@@ -504,6 +640,14 @@ const PROJECTS = [
       S('Students, teachers, courses and classrooms as records', '学生、教师、课程与教室档案'),
       S('Absences, make-up classes and session credits', '请假、补课与课消管理'),
       S('When it cannot schedule, it names the constraint that blocked it', '排不出来时，指出是哪一条约束卡住了'),
+      S(
+        'A portal for students and teachers, joined with the centre’s code',
+        '学生与老师的独立入口，用机构码加入'
+      ),
+      S(
+        'Available hours and subjects, entered by the teachers themselves',
+        '可用时间与可授科目，由老师自己填'
+      ),
     ],
     learnings: [
       S(
@@ -519,9 +663,69 @@ const PROJECTS = [
         '告诉用户「改哪个条件成本最低」，远比只返回一个「排不出来」有用。'
       ),
     ],
+    links: [
+      LINK('live', 'Student & teacher portal', '学生 · 老师入口', 'https://zhipai.vercel.app/portal'),
+      LINK('live', 'Centre console', '机构入口', 'https://zhipai.vercel.app/admin/login'),
+    ],
+    cover: {
+      file: 'zhipai-console.png',
+      alt: 'The 智排 home console: today’s classes, conflicts, expected revenue and room and teacher utilisation across the top, a week of the timetable under them, and the queue of things waiting to be dealt with down the right.',
+    },
     nodes: ZHIPAI,
     related: ['project.dongqiuwang', 'project.just-hoop'],
   },
 ]
 
-export { PROJECTS, writeUp, keyed, refs }
+/* --------------------------------------------------------------------- accounts */
+
+/**
+ * The two accounts in the "Also running" strip.
+ *
+ * They are not case studies and do not want a page of their own — what there is to
+ * say about them is where to find them. A 抖音号 is an ID rather than an address:
+ * there is no web URL that reliably opens an account from one, so it is written as a
+ * handle to search for in the app and rendered as text, not as a link that would not
+ * open.
+ */
+const ACCOUNTS = [
+  {
+    _id: 'project.dongwang-brothers',
+    summary: T(
+      'A basketball commentary account, and where the opinions go before they turn into products.',
+      '一个篮球评论账号。观点先在这里出现，然后才变成产品。'
+    ),
+    handles: [{ _type: 'projectHandle', platform: 'douyin', id: '94617971040' }],
+  },
+  {
+    _id: 'project.life-channel',
+    summary: T(
+      'My own account, on studying, building things and living abroad.',
+      '我自己的账号，关于读书、做东西和在国外生活。'
+    ),
+    handles: [{ _type: 'projectHandle', platform: 'douyin', id: '75824206077' }],
+  },
+]
+
+/**
+ * Every screenshot the projects above name, with what it is for.
+ *
+ * The list is derived rather than kept by hand: a cover added to a project or an
+ * `IMG` dropped into a write-up is a file to upload from that moment, with no second
+ * place to remember to add it.
+ */
+function mediaFiles(projects = PROJECTS) {
+  const files = []
+  for (const project of projects) {
+    if (project.cover) {
+      files.push({ file: project.cover.file, alt: project.cover.alt, project: project._id, role: 'cover' })
+    }
+    for (const node of project.nodes) {
+      if (node.kind === 'image') {
+        files.push({ file: node.file, alt: node.alt, project: project._id, role: 'body' })
+      }
+    }
+  }
+  return files
+}
+
+export { PROJECTS, ACCOUNTS, writeUp, keyed, refs, mediaFiles }

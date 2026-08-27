@@ -36,6 +36,16 @@ export const experience = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'companyLocal',
+      title: 'Company (中文)',
+      description:
+        'Only where the company genuinely has a Chinese name — 安永 for Ernst & Young. ' +
+        'Orfeostory is Orfeostory in both languages and belongs in the field above and ' +
+        'nowhere else; left empty, the name above is what the Chinese pages show.',
+      type: 'string',
+      group: 'essentials',
+    }),
+    defineField({
       name: 'slug',
       title: 'URL slug',
       type: 'slug',
@@ -60,6 +70,13 @@ export const experience = defineType({
     defineField({
       name: 'location',
       title: 'Location',
+      type: 'string',
+      group: 'essentials',
+    }),
+    defineField({
+      name: 'locationLocal',
+      title: 'Location (中文)',
+      description: '常州, 上海, 新加坡. Empty falls back to the line above.',
       type: 'string',
       group: 'essentials',
     }),

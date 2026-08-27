@@ -14,6 +14,8 @@ export type SiteSettings = {
   _id?: string
   name?: string | null
   nameLocal?: string | null
+  /** The one portrait, read by the masthead mark and by any section wanting a photo. */
+  profileImage?: (SanityImage & { alt?: string | null }) | null
   shortBio?: LocaleText
   currentRole?: LocaleString
   currentLocation?: LocaleString
@@ -31,8 +33,17 @@ export type SiteSettings = {
   favicon?: SanityImage | null
 }
 
-/** Which of the two résumé PDFs a button should hand over. */
-export type ResumeChoice = 'auto' | 'en' | 'zh'
+/**
+ * Which of the two résumé PDFs a button should hand over.
+ *
+ * `ask` is the one that does not decide: it asks the visitor instead, and only a
+ * button that can open a menu understands it. Anything reading a single URL treats
+ * it like `auto`, so an undecided button still downloads something.
+ */
+export type ResumeChoice = 'ask' | 'auto' | 'en' | 'zh'
+
+/** A résumé PDF, ready to hang off an `href`. */
+export type ResumeLink = { url: string; filename: string }
 
 /**
  * Picks a résumé and turns it into a link that downloads rather than opens.
@@ -50,8 +61,8 @@ export function resumeFor(
   site: SiteSettings | null,
   locale: Locale,
   choice: ResumeChoice = 'auto'
-): { url: string; filename: string } | null {
-  const wanted = choice === 'auto' ? locale : choice
+): ResumeLink | null {
+  const wanted = choice === 'en' || choice === 'zh' ? choice : locale
   const other = wanted === 'en' ? 'zh' : 'en'
   const file = site?.resume?.[wanted]?.url ? site.resume[wanted] : site?.resume?.[other]
 
@@ -63,5 +74,19 @@ export function resumeFor(
   return {
     url: filename ? `${url}?dl=${encodeURIComponent(filename)}` : `${url}?dl=`,
     filename,
+  }
+}
+
+/**
+ * Both résumés, each present only when its own file has been uploaded.
+ *
+ * Deliberately without `resumeFor`'s fallback to the other language: this is what a
+ * chooser lists, and a menu item reading 中文 that hands over the English PDF is
+ * worse than an item that was never offered.
+ */
+export function resumeSet(site: SiteSettings | null): { en: ResumeLink | null; zh: ResumeLink | null } {
+  return {
+    en: site?.resume?.en?.url ? resumeFor(site, 'en', 'en') : null,
+    zh: site?.resume?.zh?.url ? resumeFor(site, 'zh', 'zh') : null,
   }
 }

@@ -4,7 +4,14 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
-export type MenuLink = { key: string; label: string; href: string; external?: boolean }
+export type MenuLink = {
+  key: string
+  label: string
+  href: string
+  external?: boolean
+  /** The pages under this one — Experience's roles, Projects' case studies. */
+  children?: Array<{ key: string; href: string; label: string }>
+}
 
 export function MobileMenu({ links, name }: { links: MenuLink[]; name: string }) {
   const [open, setOpen] = useState(false)
@@ -66,9 +73,22 @@ export function MobileMenu({ links, name }: { links: MenuLink[]; name: string })
                   {l.label}
                 </a>
               ) : (
-                <Link key={l.key} href={l.href} onClick={() => setOpen(false)}>
-                  {l.label}
-                </Link>
+                // The drawer has room the masthead does not, so the subpages are
+                // simply listed rather than hidden behind a second tap.
+                <div key={l.key} className="mobile-menu-item">
+                  <Link href={l.href} onClick={() => setOpen(false)}>
+                    {l.label}
+                  </Link>
+                  {(l.children?.length ?? 0) > 0 && (
+                    <div className="mobile-menu-sub">
+                      {l.children!.map((c) => (
+                        <Link key={c.key} href={c.href} onClick={() => setOpen(false)}>
+                          {c.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )
             )}
           </nav>

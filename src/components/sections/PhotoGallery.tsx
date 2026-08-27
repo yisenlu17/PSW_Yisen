@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
-import { urlFor } from '@/sanity/image'
+import { cropFor, imageSize, urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 
 type Photo = Parameters<typeof urlFor>[0] & {
@@ -47,23 +47,24 @@ export function PhotoGallery({
       <div className="gallery" data-variant={variant}>
         {photos.map((photo, i) => {
           const caption = t(photo.caption, locale)
-          // Masonry keeps natural proportions; the other two crop to a fixed shape so
-          // rows line up. Cropping is done by the image service, not by CSS, so the
-          // browser never downloads pixels it then hides.
-          const img =
-            variant === 'masonry'
-              ? urlFor(photo).width(800).url()
-              : urlFor(photo).width(800).height(600).url()
+          // Masonry keeps natural proportions, so the picture's own dimensions are
+          // what reserve its space — a column of photographs that all settle a
+          // different amount as they load is the thing masonry is worst at. The other
+          // two crop to a fixed shape so rows line up, done by the image service
+          // rather than by CSS: the hotspot is honoured, and the browser never
+          // downloads pixels it is about to hide.
+          const masonry = variant === 'masonry'
+          const size = masonry ? imageSize(photo, { width: 800, height: 600 }) : { width: 800, height: 600 }
+          const img = masonry ? urlFor(photo).width(800).url() : cropFor(photo, 800, 600).url()
 
           return (
             <figure key={photo._key} className="gallery-item">
               <Image
                 src={img}
                 alt={photo.alt ? stegaClean(photo.alt) : ''}
-                width={800}
-                height={variant === 'masonry' ? 0 : 600}
+                {...size}
                 sizes="(max-width: 700px) 100vw, 33vw"
-                style={variant === 'masonry' ? { height: 'auto' } : undefined}
+                style={masonry ? { height: 'auto' } : undefined}
                 // The first couple are likely above the fold on a gallery page.
                 loading={i < 2 ? 'eager' : 'lazy'}
               />

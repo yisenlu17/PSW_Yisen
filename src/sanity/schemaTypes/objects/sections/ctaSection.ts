@@ -78,18 +78,19 @@ export const ctaSection = defineType({
               name: 'resumeLanguage',
               title: 'Which résumé',
               description:
-                'Following the site language is usually right. Pin a language to offer both files as two buttons side by side.',
+                'With both PDFs uploaded, letting the visitor choose turns the button into a short menu — 中文, English, or both at once. Pin a language to hand over one file with no menu; with only one PDF uploaded there is nothing to ask, and every setting gives that file.',
               type: 'string',
               hidden: ({ parent }) => parent?.intent !== 'resume',
               options: {
                 list: [
+                  { title: 'Let the visitor choose', value: 'ask' },
                   { title: 'Follow the site language', value: 'auto' },
                   { title: 'Always the English PDF', value: 'en' },
                   { title: 'Always the Chinese PDF', value: 'zh' },
                 ],
                 layout: 'radio',
               },
-              initialValue: 'auto',
+              initialValue: 'ask',
             }),
             defineField({
               name: 'href',

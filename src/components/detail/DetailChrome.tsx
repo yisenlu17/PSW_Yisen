@@ -119,6 +119,7 @@ export const DETAIL_COPY = {
     fromThisRole: 'From this role',
     documents: 'Documents',
     links: 'Links',
+    notPublicYet: 'In development — nothing public to open yet',
   },
   zh: {
     backToProjects: '全部项目',
@@ -137,6 +138,7 @@ export const DETAIL_COPY = {
     fromThisRole: '来自这段经历',
     documents: '文件',
     links: '链接',
+    notPublicYet: '开发中 · 暂无公开入口',
   },
 } as const
 

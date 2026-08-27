@@ -5,15 +5,19 @@
  * paragraph — so everything longer lives on the role's own page instead. This is
  * that content: for each role, the job title as the CV writes it, and four
  * contributions, each with its lead-in, its detail, and the one or two skills that
- * piece of work actually took. Pictures are left for the studio: every contribution
- * has an image field, and adding one there needs no code and no second run of this.
+ * piece of work actually took — and, where there is one, the photograph of that
+ * piece of work. The pictures are named in `photo-content.mjs` and uploaded by
+ * `npm run media`; they are attached here rather than in a script of their own
+ * because this one owns the whole contributions list, and anything written into it
+ * from somewhere else would be replaced the next time this runs.
  *
  * Run it with an Editor token:
  *   SANITY_API_WRITE_TOKEN=... npm run experience-detail
  *   npm run experience-detail -- --dry-run    # print, change nothing
  *
- * The token can also live in .env.local as SANITY_API_WRITE_TOKEN, which is read
- * here the same way the seed reads it.
+ * The token can also live in .env.local as SANITY_API_WRITE_TOKEN, or come from
+ * `npx sanity login` — see sanity-write.mjs, which is where every script here gets
+ * the same answer to what counts as a credential.
  *
  * It sets `role` and `contributions` on the published documents and leaves every
  * other field alone — dates included, which stay as the dataset has them. Re-running
@@ -22,44 +26,11 @@
  * wins on screen until it is published — publish it first, or this looks like it did
  * nothing.
  */
-import { createClient } from '@sanity/client'
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
+import { writeClient } from './sanity-write.mjs'
+import { PHOTOS, EXPERIENCE_PHOTOS } from './photo-content.mjs'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const root = join(__dirname, '..')
 const DRY_RUN = process.argv.includes('--dry-run')
-
-for (const line of readFileSync(join(root, '.env.local'), 'utf8').split('\n')) {
-  const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/)
-  if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim()
-}
-
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
-const token = process.env.SANITY_API_WRITE_TOKEN
-
-if (!projectId || projectId === 'placeholder') {
-  console.error('✗ Set NEXT_PUBLIC_SANITY_PROJECT_ID in .env.local first.')
-  process.exit(1)
-}
-// Writing needs an Editor token; the dry run only reads, so the Viewer token does.
-if (!token && !DRY_RUN) {
-  console.error('✗ SANITY_API_WRITE_TOKEN is required (an Editor token).')
-  console.error('  Create one at https://www.sanity.io/manage → API → Tokens, then either')
-  console.error('  add it to .env.local, or:')
-  console.error('  SANITY_API_WRITE_TOKEN=<token> npm run experience-detail')
-  process.exit(1)
-}
-
-const client = createClient({
-  projectId,
-  dataset,
-  token: token || process.env.SANITY_API_READ_TOKEN,
-  apiVersion: '2026-08-07',
-  useCdn: false,
-})
+const client = writeClient('npm run experience-detail', { needsWrite: !DRY_RUN })
 
 /**
  * Job titles as the CV writes them, replacing the ones the prototype carried.
@@ -313,30 +284,74 @@ const ROLES = [
 const localeString = (value) => ({ _type: 'localeString', en: value.en, zh: value.zh })
 const localeText = (value) => ({ _type: 'localeText', en: value.en, zh: value.zh })
 
+/**
+ * The photographs, looked up by filename rather than held as asset ids.
+ *
+ * Same arrangement as the project screenshots: the file is the thing that is chosen
+ * and replaced, and the id is whatever the dataset gave it. A picture that has not
+ * been uploaded yet is left out — the contribution reads perfectly well without one.
+ */
+const assets = new Map(
+  (
+    await client.fetch(
+      `*[_type == "sanity.imageAsset" && originalFilename in $files]
+        | order(_createdAt asc)
+        { _id, originalFilename }`,
+      { files: EXPERIENCE_PHOTOS.map((p) => p.file) }
+    )
+  ).map((asset) => [asset.originalFilename, asset._id])
+)
+
+/** The picture for one contribution, by the position it sits at on that role. */
+function pictureFor(roleId, index) {
+  const spot = EXPERIENCE_PHOTOS.find((p) => p._id === roleId && p.contribution === index)
+  if (!spot) return null
+  const asset = assets.get(spot.file)
+  if (!asset) {
+    console.warn(`  ⚠ ${spot.file} is not uploaded yet — run \`npm run media\`.`)
+    return null
+  }
+  const photo = PHOTOS[spot.file]
+  return {
+    _type: 'image',
+    asset: { _type: 'reference', _ref: asset },
+    ...(photo.alt ? { alt: photo.alt } : {}),
+    ...(photo.hotspot ? { hotspot: { _type: 'sanity.imageHotspot', ...photo.hotspot } } : {}),
+  }
+}
+
 /** Keys are derived from position, so re-running replaces rather than duplicates. */
 const contributions = (role) =>
-  role.contributions.map((contribution, i) => ({
-    _type: 'contribution',
-    _key: `c${i}`,
-    title: localeString(contribution.title),
-    body: localeText(contribution.body),
-    skills: contribution.skills.map((skill, j) => ({
-      ...localeString(skill),
-      _key: `c${i}s${j}`,
-    })),
-  }))
+  role.contributions.map((contribution, i) => {
+    const picture = pictureFor(role._id, i)
+    return {
+      _type: 'contribution',
+      _key: `c${i}`,
+      title: localeString(contribution.title),
+      body: localeText(contribution.body),
+      skills: contribution.skills.map((skill, j) => ({
+        ...localeString(skill),
+        _key: `c${i}s${j}`,
+      })),
+      ...(picture ? { image: picture } : {}),
+    }
+  })
 
 const existing = await client.fetch('*[_id in $ids]{_id}', { ids: ROLES.map((r) => r._id) })
 const found = new Set(existing.map((d) => d._id))
 
 for (const role of ROLES) {
   if (!found.has(role._id)) {
-    console.warn(`⚠ ${role._id} is not in the ${dataset} dataset — skipped.`)
+    console.warn(`⚠ ${role._id} is not in the ${client.config().dataset} dataset — skipped.`)
     continue
   }
 
+  const written = contributions(role)
   const skillCount = role.contributions.reduce((n, c) => n + c.skills.length, 0)
-  const summary = `${role.contributions.length} contributions, ${skillCount} skills, en + zh`
+  const pictures = written.filter((c) => c.image).length
+  const summary =
+    `${role.contributions.length} contributions, ${skillCount} skills, en + zh` +
+    (pictures > 0 ? `, ${pictures} picture${pictures > 1 ? 's' : ''}` : '')
 
   if (DRY_RUN) {
     console.log(`· ${role._id}: ${summary} (dry run)`)
@@ -345,7 +360,7 @@ for (const role of ROLES) {
 
   await client
     .patch(role._id)
-    .set({ role: localeString(role.role), contributions: contributions(role) })
+    .set({ role: localeString(role.role), contributions: written })
     .commit()
   console.log(`✓ ${role._id}: ${summary}`)
 }

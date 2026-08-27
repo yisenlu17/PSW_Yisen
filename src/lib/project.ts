@@ -1,6 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
-import type { Locale, LocaleString, LocaleText } from './locale'
+import { t, type Locale, type LocaleString, type LocaleText } from './locale'
 import type { urlFor } from '@/sanity/image'
 
 /** A Sanity image as the components receive it — asset ref plus authored alt text. */
@@ -27,6 +27,17 @@ export type ProjectCardData = {
   tags?: LocaleString[] | null
   highlight?: LocaleString
   cover?: SanityImage | null
+  handles?: ProjectHandle[] | null
+  /** Artwork an account puts out, shown whole as thumbnails. Not a cover for the card. */
+  covers?: SanityImage[] | null
+}
+
+/** An account named by its ID: a 抖音号 has no address, only a number to search for. */
+export type ProjectHandle = {
+  _key: string
+  platform?: string | null
+  id?: string | null
+  label?: LocaleString
 }
 
 /**
@@ -43,6 +54,17 @@ const STATUS: Record<string, { en: string; zh: string }> = {
   validating: { en: 'In validation', zh: '验证阶段' },
   prototype: { en: 'Prototype', zh: '原型' },
   archived: { en: 'Archived', zh: '已归档' },
+}
+
+/**
+ * The platform's own name, in both languages, so "抖音 94617971040" reads the same
+ * everywhere it appears. A platform not listed falls back to the value as typed.
+ */
+const HANDLE_PLATFORM: Record<string, { en: string; zh: string }> = {
+  douyin: { en: 'Douyin', zh: '抖音' },
+  xiaohongshu: { en: 'Xiaohongshu', zh: '小红书' },
+  bilibili: { en: 'Bilibili', zh: '哔哩哔哩' },
+  wechat: { en: 'WeChat', zh: '微信公众号' },
 }
 
 const ROLE: Record<string, { en: string; zh: string }> = {
@@ -62,6 +84,29 @@ export const statusLabel = lookup(STATUS)
 export const roleLabel = lookup(ROLE)
 
 /**
+ * "抖音 94617971040" — a platform and the number you type into it.
+ *
+ * Deliberately not a link: a 抖音号 identifies an account inside the app and there is
+ * no web address that opens it, so this is text to read and copy rather than
+ * something that looks clickable and is not.
+ */
+export function handleLines(
+  handles: ProjectHandle[] | null | undefined,
+  locale: Locale
+): string[] {
+  return (handles ?? [])
+    .map((handle) => {
+      const id = handle.id ? stegaClean(handle.id).trim() : ''
+      if (!id) return ''
+      const platform = handle.platform ? stegaClean(handle.platform) : ''
+      const name =
+        t(handle.label, locale) || HANDLE_PLATFORM[platform]?.[locale] || HANDLE_PLATFORM[platform]?.en || platform
+      return name ? `${name} ${id}` : id
+    })
+    .filter(Boolean)
+}
+
+/**
  * Most project names are proper nouns and stay as typed — 我是懂球王 is 我是懂球王 in
  * both languages. `titleLocal` is for the few that really do have two names.
  */
@@ -79,6 +124,18 @@ export function projectTitle(
 export function isShipped(status: string | null | undefined): boolean {
   const key = status ? stegaClean(status) : ''
   return key === 'live' || key === 'inUse'
+}
+
+/**
+ * Still being worked on — as opposed to shipped, or stopped.
+ *
+ * Read by the detail page to explain an empty row of buttons: a project being built
+ * has no address to give out yet, which is worth saying once where the link would be
+ * rather than leaving a visitor to hunt for one.
+ */
+export function isInProgress(status: string | null | undefined): boolean {
+  const key = status ? stegaClean(status) : ''
+  return key === 'building' || key === 'validating' || key === 'prototype'
 }
 
 /** A project's year span — "2026" when it started and finished in one, "2024 — 2026" otherwise. */

@@ -9,10 +9,12 @@ import { defineQuery } from 'next-sanity'
 const EXPERIENCE_FIELDS = /* groq */ `
   _id,
   company,
+  companyLocal,
   "slug": slug.current,
   role,
   category,
   location,
+  locationLocal,
   logo,
   startDate,
   endDate,
@@ -43,7 +45,9 @@ const PROJECT_CARD_FIELDS = /* groq */ `
   summary,
   tags,
   highlight,
-  cover
+  cover,
+  handles[]{ _key, platform, id, label },
+  "covers": gallery[0...2]{ _key, alt, asset }
 `
 
 const SECTIONS = /* groq */ `
@@ -71,6 +75,9 @@ const SECTIONS = /* groq */ `
       title,
       lede,
       note,
+      showPortrait,
+      portrait,
+      portraitCaption,
       steps[]{ _key, title, body }
     },
 
@@ -230,7 +237,7 @@ export const PROJECT_QUERY = defineQuery(`
     stack,
     gallery[]{ _key, alt, caption, asset },
     links[]{ _key, kind, label, url },
-    relatedExperience->{ _id, company, "slug": slug.current, role, category },
+    relatedExperience->{ _id, company, companyLocal, "slug": slug.current, role, category },
     relatedProjects[]->{ ${PROJECT_CARD_FIELDS} },
     seoTitle,
     seoDescription
@@ -288,6 +295,40 @@ export const GLOBAL_SETTINGS_QUERY = defineQuery(`
     seoDescription,
     ogImage,
     favicon
+  }
+`)
+
+/**
+ * The pages that sit under Experience and Projects, for the header's drop-downs.
+ *
+ * Card fields are deliberately absent: the menu shows a name and one line under it,
+ * so pulling covers and summaries would drag a homepage's worth of content into
+ * every request for the chrome. The ceiling is a menu that still reads as a menu
+ * rather than a page of its own — past a dozen, the index page is the better answer.
+ *
+ * `featured` comes along because the Projects section uses it to decide what gets a
+ * page and what is only a line in "Also running"; the menu has to make the same call.
+ */
+export const NAV_CHILDREN_QUERY = defineQuery(`
+  {
+    "experience": *[_type == "experience" && defined(slug.current) && !(_id in path("drafts.**"))]
+      | order(coalesce(order, 9999) asc, startDate desc)[0...12]{
+        _id,
+        company,
+        companyLocal,
+        role,
+        "slug": slug.current
+      },
+    "projects": *[_type == "project" && defined(slug.current) && !(_id in path("drafts.**"))]
+      | order(coalesce(order, 9999) asc, startDate desc)[0...12]{
+        _id,
+        title,
+        titleLocal,
+        tagline,
+        category,
+        featured,
+        "slug": slug.current
+      }
   }
 `)
 

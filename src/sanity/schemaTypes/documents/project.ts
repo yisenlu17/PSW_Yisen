@@ -299,7 +299,8 @@ export const project = defineType({
     defineField({
       name: 'cover',
       title: 'Cover image',
-      description: 'The 16:10 image on the card and at the top of the detail page.',
+      description:
+        'Shown whole, in whatever shape it was captured — on the card and at the top of the detail page. A full-page screenshot is fine; nothing is cropped.',
       type: 'image',
       group: 'media',
       options: { hotspot: true },
@@ -358,6 +359,52 @@ export const project = defineType({
             }),
           ],
           preview: { select: { title: 'label.en', subtitle: 'url' } },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'handles',
+      title: 'Accounts',
+      description:
+        'An account named by its ID rather than by an address — a 抖音号 is how somebody finds the account in the app, and no web URL opens one reliably. Shown as text to copy, not as a link that would not work.',
+      type: 'array',
+      group: 'links',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'projectHandle',
+          fields: [
+            defineField({
+              name: 'platform',
+              title: 'Platform',
+              type: 'string',
+              options: {
+                list: [
+                  { title: '抖音', value: 'douyin' },
+                  { title: '小红书', value: 'xiaohongshu' },
+                  { title: '哔哩哔哩', value: 'bilibili' },
+                  { title: '微信公众号', value: 'wechat' },
+                  { title: 'Other', value: 'other' },
+                ],
+              },
+              initialValue: 'douyin',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'id',
+              title: 'ID',
+              description: 'As it is typed into the app’s search — 抖音号 94617971040.',
+              type: 'string',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'label',
+              title: 'Label override',
+              description: 'Only when the platform’s own name is not what should be read.',
+              type: 'localeString',
+            }),
+          ],
+          preview: { select: { title: 'id', subtitle: 'platform' } },
         }),
       ],
     }),

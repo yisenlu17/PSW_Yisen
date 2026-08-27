@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { copy } from '@/components/detail/DetailChrome'
 import { t, formatDateRange, type Locale } from '@/lib/locale'
-import type { ExperienceRole } from '@/lib/experience'
+import { roleCompany, type ExperienceRole } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
 
 /**
@@ -37,6 +37,7 @@ export function ExperienceCard({
   const meta = [t(role.role, locale), dates].filter(Boolean).join(' · ')
   const summary = t(role.summary, locale)
   const category = t(role.category, locale)
+  const company = roleCompany(role, locale)
 
   return (
     <article className={compact ? 'exp-card exp-card-compact' : 'exp-card'}>
@@ -45,10 +46,10 @@ export function ExperienceCard({
       <h3>
         {href ? (
           <Link href={href} className="exp-card-stretch">
-            {role.company}
+            {company}
           </Link>
         ) : (
-          role.company
+          company
         )}
       </h3>
       {meta && <p className="exp-meta">{meta}</p>}

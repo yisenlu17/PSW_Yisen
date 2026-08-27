@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { stegaClean } from 'next-sanity'
 
 import { Section, type SectionSettings } from '@/components/Section'
-import { urlFor } from '@/sanity/image'
+import { cropFor, urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 
 type Tile = {
@@ -31,6 +31,22 @@ export type BentoGridSectionData = {
 const SIZES = ['sm', 'wide', 'tall', 'lg'] as const
 const TONES = ['paper', 'cream', 'navy', 'gold'] as const
 
+/**
+ * Roughly the shape each tile ends up on a wide screen — a 1×1 is a little wider
+ * than tall, a wide is a band, a large is close to 3:2.
+ *
+ * Asked for at its own shape, a photograph is cropped by the image service with the
+ * hotspot honoured, rather than by `object-fit` from the middle. It matters most on
+ * the band: a face sits high in a group shot, and a centre crop of a 3:1 slot takes
+ * the shirts instead.
+ */
+const TILE_SHAPE: Record<(typeof SIZES)[number], [number, number]> = {
+  sm: [900, 620],
+  wide: [1200, 400],
+  tall: [700, 1000],
+  lg: [1200, 840],
+}
+
 export function BentoGrid({ data, locale }: { data: BentoGridSectionData; locale: Locale }) {
   const tiles = data.tiles ?? []
   if (tiles.length === 0) return null
@@ -51,15 +67,18 @@ export function BentoGrid({ data, locale }: { data: BentoGridSectionData; locale
           const tone = one(tile.tone, TONES, 'paper')
           const href = tile.href ? stegaClean(tile.href) : null
 
+          const [shotWidth, shotHeight] = TILE_SHAPE[size]
+
           const inner = (
             <>
               {tile.image && (
                 <Image
                   className="bento-image"
-                  src={urlFor(tile.image).width(900).height(900).url()}
+                  src={cropFor(tile.image, shotWidth, shotHeight).url()}
                   alt={tile.image.alt ? stegaClean(tile.image.alt) : ''}
-                  width={450}
-                  height={450}
+                  width={shotWidth}
+                  height={shotHeight}
+                  sizes="(max-width: 1100px) 100vw, 50vw"
                 />
               )}
               <div className="bento-content">

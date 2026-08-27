@@ -86,6 +86,16 @@ knob an editor gets is one more way the design can drift.
 | `npm run typegen` | Regenerate types after any schema change |
 | `npm run seed` | One-time content import (safe to re-run; won't overwrite) |
 | `npm run experience-detail` | Writes the CV write-up onto the five roles (`-- --dry-run` to preview) |
+| `npm run project-detail` | Writes the case studies, and the two accounts' 抖音号 and covers |
+| `npm run playground` | Writes the Playground bento grid and photo gallery |
+| `npm run media` | Uploads every picture in `media/` that the content modules name |
+| `npm run intro` | Writes the paragraphs that introduce me — hero, About lede, site bio, SEO |
+| `npm run zh-punctuation` | Repunctuates Chinese copy full-width; run after editing 中文 in the studio |
+
+Every writer takes `-- --dry-run` and prints what it would change without writing.
+The words they write live beside them in `*-content.mjs`, so copy can be reworded
+without touching the transport — see [`media/README.md`](media/README.md) for the
+pictures and `scripts/intro-content.mjs` for the self-description.
 
 Run `npm run typegen` after **every** schema change, or the query types go stale.
 

@@ -12,11 +12,11 @@
  * It is a preview, not a second renderer: if the components change, this drifts. The
  * page it produces says so.
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join, resolve } from 'node:path'
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { dirname, join, resolve, extname } from 'node:path'
 
-import { PROJECTS, writeUp } from './project-content.mjs'
+import { PROJECTS, writeUp, mediaFiles } from './project-content.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 // A published Artifact is wrapped in its own document skeleton, so that mode emits
@@ -32,14 +32,16 @@ const out = resolve(
  * be told what they already are.
  */
 const DATASET = {
-  'project.dongqiuwang': {
-    title: '我是懂球王',
-    slug: 'woshidongqiuwang',
-    startDate: '2026-01-01',
-    links: [{ en: 'Live site', zh: '访问网站' }],
-  },
-  'project.just-hoop': { title: 'Just Hoop', slug: 'just-hoop', startDate: '2026-03-01', links: [] },
-  'project.zhipai': { title: '智排', slug: 'zhipai', startDate: '2025-01-01', links: [] },
+  'project.dongqiuwang': { title: '我是懂球王', slug: 'woshidongqiuwang', startDate: '2026-01-01' },
+  'project.just-hoop': { title: 'Just Hoop', slug: 'just-hoop', startDate: '2026-03-01' },
+  'project.zhipai': { title: '智排', slug: 'zhipai', startDate: '2025-01-01' },
+}
+
+/** Mirrors isInProgress in src/lib/project.ts — what "no link yet" is allowed to mean. */
+const IN_PROGRESS = ['building', 'validating', 'prototype']
+const NO_DOOR = {
+  en: 'In development — nothing public to open yet',
+  zh: '开发中 · 暂无公开入口',
 }
 
 /** Mirrors STATUS in src/lib/project.ts. */
@@ -71,6 +73,48 @@ const COPY = {
   },
 }
 
+/* --------------------------------------------------------------------- media */
+
+/**
+ * The screenshots, read off the disk rather than out of the dataset.
+ *
+ * This is the point of previewing at all: a picture can be looked at under the
+ * paragraph it was chosen for before anything is uploaded, and a file that is not
+ * there yet simply does not appear — the same thing the write script does.
+ */
+const MEDIA = join(root, 'media', 'project')
+const onDisk = Object.fromEntries(
+  [...new Set(mediaFiles().map((m) => m.file))]
+    .filter((file) => existsSync(join(MEDIA, file)))
+    .map((file) => [file, 'on disk'])
+)
+
+const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' }
+
+/**
+ * A published artifact cannot reach the disk, so that mode carries the bytes; a file
+ * opened locally points at them instead, which keeps the page small enough to reload
+ * without thinking about it.
+ */
+function imgSrc(file) {
+  const path = join(MEDIA, file)
+  if (!ARTIFACT) return pathToFileURL(path).href
+  const type = MIME[extname(file).toLowerCase()] ?? 'image/png'
+  return `data:${type};base64,${readFileSync(path).toString('base64')}`
+}
+
+/**
+ * Portrait or wide, from the file itself — the same call the page makes from the
+ * asset id, so a phone screenshot is held to a phone's width here too.
+ */
+function shape(file) {
+  const png = readFileSync(join(MEDIA, file))
+  if (png.slice(1, 4).toString() !== 'PNG') return 'wide'
+  const width = png.readUInt32BE(16)
+  const height = png.readUInt32BE(20)
+  return height > width * 1.25 ? 'portrait' : 'wide'
+}
+
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -96,7 +140,7 @@ function flow(node) {
 }
 
 /** Consecutive list items become one `<ul>`, exactly as @portabletext/react groups them. */
-function richText(blocks) {
+function richText(blocks, lang) {
   const html = []
   let list = null
 
@@ -111,6 +155,17 @@ function richText(blocks) {
     if (b._type === 'flowSteps') {
       closeList()
       html.push(flow(b))
+      continue
+    }
+    if (b._type === 'image') {
+      closeList()
+      const caption = b.caption?.[lang]
+      html.push(
+        `<figure class="body-figure" data-shape="${shape(b._file)}">` +
+          `<img src="${imgSrc(b._file)}" alt="${esc(b.alt ?? '')}">` +
+          (caption ? `<figcaption>${esc(caption)}</figcaption>` : '') +
+          '</figure>'
+      )
       continue
     }
     if (b.listItem) {
@@ -146,11 +201,13 @@ function detail(project, lang) {
     ...project.roleDetail.map((r) => `<span class="detail-chip detail-chip-role">${esc(r[lang])}</span>`),
   ].join('')
 
-  const links = meta.links.length
-    ? `<div class="detail-links">${meta.links
-        .map((l) => `<a class="btn btn-ghost" href="#">${esc(l[lang])}</a>`)
-        .join('')}</div>`
-    : ''
+  const buttons = (project.links ?? []).map(
+    (l) => `<a class="btn btn-ghost" href="${esc(l.url)}">${esc(l.label[lang])}</a>`
+  )
+  if (buttons.length === 0 && IN_PROGRESS.includes(project.status)) {
+    buttons.push(`<span class="detail-handle">${esc(NO_DOOR[lang])}</span>`)
+  }
+  const links = buttons.length ? `<div class="detail-links">${buttons.join('')}</div>` : ''
 
   const stack = project.stack?.length
     ? `<div class="detail-block"><h2>${esc(c.builtWith)}</h2><div class="detail-tags">` +
@@ -169,6 +226,15 @@ function detail(project, lang) {
     })
     .join('')
 
+  // The cover is cropped by Sanity on the real page; here it is the whole screenshot,
+  // which is the more useful thing to look at while choosing one.
+  const cover =
+    project.cover && onDisk[project.cover.file]
+      ? '<div class="detail-cover"><div class="wrap">' +
+        `<img src="${imgSrc(project.cover.file)}" alt="${esc(project.cover.alt ?? '')}">` +
+        '</div></div>'
+      : ''
+
   return (
     `<main class="detail" data-project="${project._id}" data-lang="${lang}" hidden>` +
     '<header class="detail-head"><div class="wrap">' +
@@ -179,8 +245,9 @@ function detail(project, lang) {
     `<p class="detail-lede">${esc(project.summary[lang])}</p>` +
     `<div class="detail-chips">${chips}</div>${links}` +
     '</div></header>' +
+    cover +
     '<div class="wrap detail-body">' +
-    richText(writeUp(project.nodes, lang)) +
+    richText(writeUp(project.nodes, lang, onDisk), lang) +
     list(c.features, project.features, lang) +
     list(c.learnings, project.learnings, lang) +
     stack +
@@ -261,7 +328,7 @@ ${ARTIFACT ? '' : '</head><body>'}
 <div class="pv-bar"><span class="pv-mark">Preview</span>${tabs}
 <div class="pv-langs"><button class="pv-lang" data-lang="en" aria-current="true">EN</button><button class="pv-lang" data-lang="zh">中文</button></div>
 </div>
-<p class="pv-note">Static preview of <code>/projects/&lt;slug&gt;</code> rendered from <code>scripts/project-content.mjs</code> with the site's own stylesheets. Cover images, the gallery and the header/footer are omitted — everything else is the markup the components emit.</p>
+<p class="pv-note">Static preview of <code>/projects/&lt;slug&gt;</code> rendered from <code>scripts/project-content.mjs</code> with the site's own stylesheets, and the screenshots from <code>media/project/</code>. The site header and footer are omitted — everything else is the markup the components emit.</p>
 ${pages}
 <script>
 const state = { project: ${JSON.stringify(PROJECTS[0]._id)}, lang: 'en' }

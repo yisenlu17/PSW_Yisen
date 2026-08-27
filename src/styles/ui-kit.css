@@ -59,13 +59,15 @@ h2.title em{font-style:normal;color:var(--blue)}
 .masthead-meta{display:inline-flex;align-items:center;gap:14px;flex:none}
 .brand img{height:50px;width:auto}
 .nav{display:flex;align-items:center;gap:4px;margin-left:auto}
-.nav>a{position:relative;padding:10px 14px;font-size:15px;font-weight:700;color:var(--ink);border-radius:8px;transition:color .15s;cursor:pointer}
-.nav>a::after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .2s}
-.nav>a:hover{color:var(--navy)}
-.nav>a:hover::after{transform:scaleX(1)}
+/* `.nav-group` is a menu item that carries a drop-down, so its link is a grandchild
+   of `.nav` rather than a child and has to be named alongside it. */
+:is(.nav,.nav-group)>a{position:relative;padding:10px 14px;font-size:15px;font-weight:700;color:var(--ink);border-radius:8px;transition:color .15s;cursor:pointer}
+:is(.nav,.nav-group)>a::after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .2s}
+:is(.nav,.nav-group)>a:hover{color:var(--navy)}
+:is(.nav,.nav-group)>a:hover::after{transform:scaleX(1)}
 .nav-cta{margin-left:10px}
-.nav>a.nav-cta{color:#fff}
-.nav>a.nav-cta::after{display:none}
+:is(.nav,.nav-group)>a.nav-cta{color:#fff}
+:is(.nav,.nav-group)>a.nav-cta::after{display:none}
 .burger{display:none}
 
 /* HERO */
