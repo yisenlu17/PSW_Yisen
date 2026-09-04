@@ -7,6 +7,7 @@ import { PROJECT_QUERY, PROJECT_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/san
 import { ProjectDetail, type ProjectDetailData } from '@/components/detail/ProjectDetail'
 import { LOCALES, localeParam, t } from '@/lib/locale'
 import { localeAlternates } from '@/lib/site-url'
+import { NotFoundPage, NOT_FOUND_METADATA } from '@/components/NotFoundPage'
 import { PageTransition } from '@/components/transitions'
 
 /**
@@ -36,7 +37,7 @@ export async function generateMetadata({
     sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false }),
   ])
 
-  if (!project) return {}
+  if (!project) return NOT_FOUND_METADATA
 
   const name = settings?.name || 'Yisen Lu'
   const title = t(project.seoTitle, locale) || `${project.title} — ${name}`
@@ -61,7 +62,13 @@ export default async function ProjectPage({
   if (!locale) notFound()
 
   const { data: project } = await sanityFetch({ query: PROJECT_QUERY, params: { slug } })
-  if (!project) notFound()
+  if (!project) {
+    return (
+      <PageTransition>
+        <NotFoundPage locale={locale} />
+      </PageTransition>
+    )
+  }
 
   return (
     <PageTransition>

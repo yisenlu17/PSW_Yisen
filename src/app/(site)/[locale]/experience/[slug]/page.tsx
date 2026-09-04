@@ -7,6 +7,7 @@ import { EXPERIENCE_QUERY, EXPERIENCE_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from 
 import { ExperienceDetail, type ExperienceDetailData } from '@/components/detail/ExperienceDetail'
 import { LOCALES, localeParam, t } from '@/lib/locale'
 import { localeAlternates } from '@/lib/site-url'
+import { NotFoundPage, NOT_FOUND_METADATA } from '@/components/NotFoundPage'
 import { PageTransition } from '@/components/transitions'
 
 /**
@@ -36,7 +37,7 @@ export async function generateMetadata({
     sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false }),
   ])
 
-  if (!role) return {}
+  if (!role) return NOT_FOUND_METADATA
 
   const name = settings?.name || 'Yisen Lu'
   const title = [t(role.role, locale), role.company].filter(Boolean).join(' — ') || name
@@ -60,7 +61,13 @@ export default async function ExperiencePage({
   if (!locale) notFound()
 
   const { data: role } = await sanityFetch({ query: EXPERIENCE_QUERY, params: { slug } })
-  if (!role) notFound()
+  if (!role) {
+    return (
+      <PageTransition>
+        <NotFoundPage locale={locale} />
+      </PageTransition>
+    )
+  }
 
   return (
     <PageTransition>

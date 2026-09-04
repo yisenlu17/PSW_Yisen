@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { stegaClean } from 'next-sanity'
 
@@ -7,6 +6,7 @@ import { PAGE_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { SectionRenderer, type SectionData } from '@/components/sections'
 import { t, type Locale } from '@/lib/locale'
 import { localeAlternates } from '@/lib/site-url'
+import { NotFoundPage, NOT_FOUND_METADATA } from '@/components/NotFoundPage'
 import type { SiteSettings } from '@/lib/site'
 
 /**
@@ -23,7 +23,7 @@ export async function renderPage(slug: string, locale: Locale) {
     sanityFetch({ query: GLOBAL_SETTINGS_QUERY }),
   ])
 
-  if (!page) notFound()
+  if (!page) return <NotFoundPage locale={locale} />
 
   return (
     <SectionRenderer
@@ -42,9 +42,14 @@ export async function pageMetadata(slug: string, locale: Locale): Promise<Metada
     sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false }),
   ])
 
+  // A slug with nothing behind it is answered by the route rather than thrown, so
+  // the metadata has to say so too — this is the `noindex` that keeps a dead link
+  // out of the index.
+  if (!page) return NOT_FOUND_METADATA
+
   const title =
-    t(page?.seoTitle, locale) || t(settings?.seoTitle, locale) || settings?.name || 'Yisen Lu'
-  const description = t(page?.seoDescription, locale) || t(settings?.seoDescription, locale)
+    t(page.seoTitle, locale) || t(settings?.seoTitle, locale) || settings?.name || 'Yisen Lu'
+  const description = t(page.seoDescription, locale) || t(settings?.seoDescription, locale)
 
   return {
     title,

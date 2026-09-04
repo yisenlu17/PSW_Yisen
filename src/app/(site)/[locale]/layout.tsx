@@ -8,6 +8,8 @@ import { Header } from '@/components/chrome/Header'
 import { Footer } from '@/components/chrome/Footer'
 import { ScrollReveal } from '@/components/ScrollReveal'
 import { PersonSchema } from '@/components/PersonSchema'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { SanityLive } from '@/sanity/live'
 import { sanityFetch } from '@/sanity/fetch'
 import { GLOBAL_SETTINGS_QUERY, NAV_CHILDREN_QUERY, NAVIGATION_QUERY } from '@/sanity/queries'
@@ -90,6 +92,11 @@ export default async function SiteLayout({
         <Footer nav={nav} site={site} locale={locale} />
         <ScrollReveal />
         <PersonSchema site={site} locale={locale} />
+
+        {/* Which project a recruiter opened, and how the page performed while they
+            were on it. Both are cookieless and neither reads anything identifying. */}
+        <Analytics />
+        <SpeedInsights />
 
         {/* Only for the editor. `<SanityLive />` holds an EventSource open to Sanity
             for the lifetime of the tab and posts a server action every time content
