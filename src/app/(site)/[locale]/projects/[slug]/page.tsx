@@ -6,6 +6,7 @@ import { sanityFetch } from '@/sanity/fetch'
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ProjectDetail, type ProjectDetailData } from '@/components/detail/ProjectDetail'
 import { LOCALES, localeParam, t } from '@/lib/locale'
+import { PageTransition } from '@/components/transitions'
 
 /**
  * `/<locale>/projects/<slug>` exists for every Project document — creating one in the
@@ -60,5 +61,9 @@ export default async function ProjectPage({
   const { data: project } = await sanityFetch({ query: PROJECT_QUERY, params: { slug } })
   if (!project) notFound()
 
-  return <ProjectDetail project={project as unknown as ProjectDetailData} locale={locale} />
+  return (
+    <PageTransition>
+      <ProjectDetail project={project as unknown as ProjectDetailData} locale={locale} />
+    </PageTransition>
+  )
 }

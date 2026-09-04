@@ -4,6 +4,7 @@ import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString } from '@/lib/locale'
 import { detailHref, homeHref, localizeHref } from '@/lib/href'
+import { NAV_LATERAL } from '@/components/transitions'
 import { urlFor } from '@/sanity/image'
 import { projectTitle } from '@/lib/project'
 import { roleCompany } from '@/lib/experience'
@@ -163,9 +164,13 @@ export function Header({
   const photo = site?.profileImage?.asset ? site.profileImage : null
 
   return (
-    <header className="masthead">
+    // Named so the browser treats the masthead as one persistent thing rather than
+    // as content that left and content that arrived. During a directional slide it is
+    // the fixed point the eye holds on to; without it the whole viewport appears to
+    // move, which is disorienting rather than expressive.
+    <header className="masthead" style={{ viewTransitionName: 'site-header' }}>
       <div className="wrap">
-        <Link href={homeHref(locale)} className="brand">
+        <Link href={homeHref(locale)} className="brand" transitionTypes={NAV_LATERAL}>
           <span className="brand-mark">
             {photo ? (
               <Image

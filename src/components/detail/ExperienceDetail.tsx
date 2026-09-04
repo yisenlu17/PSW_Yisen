@@ -6,6 +6,7 @@ import { urlFor, imageSize } from '@/sanity/image'
 import { PortableBody } from '@/components/PortableBody'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import type { ProjectCardData, SanityImage } from '@/lib/project'
+import { morphName } from '@/lib/view-transition'
 import { roleCompany, roleLocation } from '@/lib/experience'
 import { DetailHeader, MetricRow, copy } from './DetailChrome'
 import { RelatedProject } from './ProjectDetail'
@@ -89,6 +90,7 @@ export function ExperienceDetail({
         lede={t(experience.summary, locale)}
         backHref={`/${locale}/experience`}
         backLabel={c.backToExperience}
+        titleName={morphName('experience', 'title', experience.slug)}
         chips={
           t(experience.highlight, locale) ? (
             <span className="detail-chip" data-shipped>

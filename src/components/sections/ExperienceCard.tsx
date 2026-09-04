@@ -4,6 +4,8 @@ import { copy } from '@/components/detail/DetailChrome'
 import { t, formatDateRange, type Locale } from '@/lib/locale'
 import { roleCompany, type ExperienceRole } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
+import { morphName } from '@/lib/view-transition'
+import { Morph, NAV_FORWARD } from '@/components/transitions'
 
 /**
  * One role, as a card that points at the role's own page.
@@ -43,15 +45,17 @@ export function ExperienceCard({
     <article className={compact ? 'exp-card exp-card-compact' : 'exp-card'}>
       {!compact && category && <span className="exp-kicker">{category}</span>}
 
-      <h3>
-        {href ? (
-          <Link href={href} className="exp-card-stretch">
-            {company}
-          </Link>
-        ) : (
-          company
-        )}
-      </h3>
+      <Morph name={morphName('experience', 'title', role.slug)}>
+        <h3>
+          {href ? (
+            <Link href={href} className="exp-card-stretch" transitionTypes={NAV_FORWARD}>
+              {company}
+            </Link>
+          ) : (
+            company
+          )}
+        </h3>
+      </Morph>
       {meta && <p className="exp-meta">{meta}</p>}
       {summary && <p className="exp-body">{summary}</p>}
 

@@ -1326,3 +1326,114 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 @media (prefers-reduced-motion: reduce) {
   .skeleton-bar { animation: none; background: var(--tone); }
 }
+
+/* ------------------------------------------------------- page transitions */
+/* Navigating used to be a hard cut: the old page vanished, the new one appeared,
+   and nothing on screen said the two were related. These rules are the browser's
+   own View Transitions, driven by React's <ViewTransition> — no library, and no
+   animation running on the main thread.
+
+   Three vocabularies, because three different things happen. A card opening into
+   its own page moves forward; the back link moves back; everything else — nav,
+   footer, language — is the same depth and only fades. Anything arriving without
+   a type animates not at all, which covers the browser's back button, where the
+   browser is already doing its own thing and a second animation on top reads as a
+   glitch. */
+
+/* The overlay sits above the live page for the length of the transition and would
+   otherwise swallow any click that lands during it. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* The two fixed points. Without this the masthead is treated as content that left
+   and content that arrived, so it slides with everything else and the whole
+   viewport appears to move. `display: none` on the outgoing snapshot stops the
+   moment where both are painted at once. */
+::view-transition-group(site-header),
+::view-transition-group(site-footer) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header),
+::view-transition-old(site-footer) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(site-footer) {
+  animation: none;
+}
+
+/* Going deeper: the page you leave slides out to the left, the one you open
+   arrives from the right. */
+::view-transition-old(.nav-forward) {
+  --vt-offset: calc(var(--vt-travel) * -1);
+  animation:
+    var(--vt-exit) ease-in both vt-fade reverse,
+    var(--vt-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --vt-offset: var(--vt-travel);
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    var(--vt-move) ease-in-out both vt-slide;
+}
+
+/* Coming back out: the same movement, mirrored. */
+::view-transition-old(.nav-back) {
+  --vt-offset: var(--vt-travel);
+  animation:
+    var(--vt-exit) ease-in both vt-fade reverse,
+    var(--vt-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --vt-offset: calc(var(--vt-travel) * -1);
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    var(--vt-move) ease-in-out both vt-slide;
+}
+
+/* Sideways: no travel at all. Projects and About are not in front of or behind
+   each other, and moving between them should not claim they are. */
+::view-transition-old(.nav-lateral) {
+  animation: var(--vt-exit) ease-in both vt-fade reverse;
+}
+::view-transition-new(.nav-lateral) {
+  animation: var(--vt-enter) ease-out var(--vt-exit) both vt-fade;
+}
+
+/* The shared elements: a card's cover and its heading, growing into the ones on
+   the page they open. The browser interpolates between two bitmaps, which on a
+   photograph changing size is visible as a shimmer — the blur at the midpoint is
+   there to cover it, not for its own sake. */
+::view-transition-group(.morph) {
+  animation-duration: var(--vt-morph);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: vt-via-blur;
+}
+
+@keyframes vt-fade {
+  from { opacity: 0; filter: blur(3px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+@keyframes vt-slide {
+  from { translate: var(--vt-offset); }
+  to   { translate: 0; }
+}
+@keyframes vt-via-blur {
+  30% { filter: blur(3px); }
+}
+
+/* Sliding a whole page across the viewport is the single most common trigger for
+   motion sensitivity, and the blanket rule earlier in this file does not reach
+   these pseudo-elements — `*` does not match them. Stated explicitly, so the
+   pages simply swap, which is what the browser does with no transition at all. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

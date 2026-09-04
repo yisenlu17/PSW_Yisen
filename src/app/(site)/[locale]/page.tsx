@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { renderPage, pageMetadata } from '@/lib/render-page'
 import { LOCALES, localeParam } from '@/lib/locale'
+import { PageTransition } from '@/components/transitions'
 
 /** There are two languages and there is one homepage, so this is the whole set. */
 export function generateStaticParams() {
@@ -24,5 +25,5 @@ export async function generateMetadata({
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = localeParam((await params).locale)
   if (!locale) notFound()
-  return renderPage('/', locale)
+  return <PageTransition>{await renderPage('/', locale)}</PageTransition>
 }

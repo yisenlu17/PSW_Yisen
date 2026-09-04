@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { LOCALES, LOCALE_COOKIE, type Locale } from '@/lib/locale'
 import { swapLocale } from '@/lib/href'
+import { NAV_LATERAL } from '@/components/transitions'
 
 /** What each language calls itself — never "Chinese", never "英语". */
 const LABEL: Record<Locale, string> = { en: 'English', zh: '中文' }
@@ -79,6 +80,7 @@ export function LanguageToggle({ current }: { current: Locale }) {
                 role="menuitem"
                 className="lang-option"
                 href={swapLocale(pathname, locale)}
+                transitionTypes={NAV_LATERAL}
                 aria-current={locale === current}
                 onClick={() => {
                   remember(locale)

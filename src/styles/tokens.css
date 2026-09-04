@@ -99,6 +99,18 @@
   --t-fast: .18s;
   --t-base: .25s;
   --t-slow: .5s;
+
+  /* Page transitions. Asymmetric on purpose: what is leaving should go quickly so
+     it stops competing for attention, and what is arriving should take its time so
+     there is a moment to register it. The enter fade waits out the exit rather than
+     crossing it, so the two are never both half-visible. */
+  --vt-exit: 150ms;
+  --vt-enter: 210ms;
+  --vt-move: 400ms;
+  --vt-morph: 400ms;
+  /* Far enough to read as direction, near enough that the eye is not asked to
+     track something across the screen. */
+  --vt-travel: 60px;
 }
 
 /* ───────────────────────── SEMANTIC ELEMENT DEFAULTS ─────────────────────────

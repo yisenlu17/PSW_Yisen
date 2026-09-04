@@ -5,6 +5,7 @@ import { Section, type SectionSettings } from '@/components/Section'
 import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import { roleCompany, type ExperienceRole } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
+import { NAV_FORWARD } from '@/components/transitions'
 import { ExperienceCard } from './ExperienceCard'
 
 export type { ExperienceRole }
@@ -84,7 +85,13 @@ export function ExperienceSection({
 function RoleName({ role, locale }: { role: ExperienceRole; locale: Locale }) {
   const href = detailHref('experience', role.slug, locale)
   const company = roleCompany(role, locale)
-  return href ? <Link href={href}>{company}</Link> : <>{company}</>
+  return href ? (
+    <Link href={href} transitionTypes={NAV_FORWARD}>
+      {company}
+    </Link>
+  ) : (
+    <>{company}</>
+  )
 }
 
 function ExperienceRow({ role, locale }: { role: ExperienceRole; locale: Locale }) {

@@ -5,6 +5,7 @@ import { renderPage, pageMetadata } from '@/lib/render-page'
 import { client } from '@/sanity/client'
 import { PAGE_SLUGS_QUERY } from '@/sanity/queries'
 import { LOCALES, localeParam } from '@/lib/locale'
+import { PageTransition } from '@/components/transitions'
 
 /**
  * Every page other than the homepage, in every language.
@@ -40,5 +41,5 @@ export default async function SubPage({
   const { locale: param, slug } = await params
   const locale = localeParam(param)
   if (!locale) notFound()
-  return renderPage(slug, locale)
+  return <PageTransition>{await renderPage(slug, locale)}</PageTransition>
 }

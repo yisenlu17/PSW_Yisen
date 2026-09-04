@@ -6,6 +6,7 @@ import { sanityFetch } from '@/sanity/fetch'
 import { EXPERIENCE_QUERY, EXPERIENCE_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ExperienceDetail, type ExperienceDetailData } from '@/components/detail/ExperienceDetail'
 import { LOCALES, localeParam, t } from '@/lib/locale'
+import { PageTransition } from '@/components/transitions'
 
 /**
  * `/<locale>/experience/<slug>`. The studio's Presentation config has pointed at this
@@ -59,5 +60,9 @@ export default async function ExperiencePage({
   const { data: role } = await sanityFetch({ query: EXPERIENCE_QUERY, params: { slug } })
   if (!role) notFound()
 
-  return <ExperienceDetail experience={role as unknown as ExperienceDetailData} locale={locale} />
+  return (
+    <PageTransition>
+      <ExperienceDetail experience={role as unknown as ExperienceDetailData} locale={locale} />
+    </PageTransition>
+  )
 }

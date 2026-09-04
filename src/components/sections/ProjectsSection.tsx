@@ -7,6 +7,8 @@ import { urlFor, imageSize } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import { statusLabel, isShipped, projectTitle, handleLines, type ProjectCardData } from '@/lib/project'
 import { detailHref } from '@/lib/href'
+import { morphName } from '@/lib/view-transition'
+import { Morph, NAV_FORWARD } from '@/components/transitions'
 
 export type ProjectsSectionData = {
   _key: string
@@ -125,12 +127,14 @@ function ProjectCard({
           rectangle open for one that was never given. */}
       {project.cover && (
         <div className="proj-media">
-          <Image
-            src={urlFor(project.cover).width(1120).url()}
-            alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
-            {...imageSize(project.cover)}
-            sizes="(max-width: 900px) 100vw, 46vw"
-          />
+          <Morph name={morphName('project', 'cover', project.slug)}>
+            <Image
+              src={urlFor(project.cover).width(1120).url()}
+              alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
+              {...imageSize(project.cover)}
+              sizes="(max-width: 900px) 100vw, 46vw"
+            />
+          </Morph>
         </div>
       )}
 
@@ -146,13 +150,17 @@ function ProjectCard({
           )}
         </div>
 
-        <h3>
-          {href ? (
-            <Link href={href}>{projectTitle(project, locale)}</Link>
-          ) : (
-            projectTitle(project, locale)
-          )}
-        </h3>
+        <Morph name={morphName('project', 'title', project.slug)}>
+          <h3>
+            {href ? (
+              <Link href={href} transitionTypes={NAV_FORWARD}>
+                {projectTitle(project, locale)}
+              </Link>
+            ) : (
+              projectTitle(project, locale)
+            )}
+          </h3>
+        </Morph>
 
         {t(project.tagline, locale) && (
           <p className="proj-tagline">{t(project.tagline, locale)}</p>
@@ -173,7 +181,7 @@ function ProjectCard({
         )}
 
         {href && (
-          <Link href={href} className="proj-more">
+          <Link href={href} className="proj-more" transitionTypes={NAV_FORWARD}>
             {locale === 'zh' ? '看完整项目' : 'Read the full project'}
             <span aria-hidden>→</span>
           </Link>
@@ -206,15 +214,17 @@ function CompactProject({
       {t(project.category, locale) && (
         <span className="proj-kicker">{t(project.category, locale)}</span>
       )}
-      <h3>
-        {href ? (
-          <Link href={href} className="proj-compact-stretch">
-            {projectTitle(project, locale)}
-          </Link>
-        ) : (
-          projectTitle(project, locale)
-        )}
-      </h3>
+      <Morph name={morphName('project', 'title', project.slug)}>
+        <h3>
+          {href ? (
+            <Link href={href} className="proj-compact-stretch" transitionTypes={NAV_FORWARD}>
+              {projectTitle(project, locale)}
+            </Link>
+          ) : (
+            projectTitle(project, locale)
+          )}
+        </h3>
+      </Morph>
       {body && <p>{body}</p>}
     </article>
   )

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { NAV_LATERAL } from '@/components/transitions'
 
 /**
  * A nav item that knows whether it is the page you are on.
@@ -34,7 +35,12 @@ export function NavLink({
   const active = pathname === href
 
   return (
-    <Link href={href} className={className} aria-current={active ? 'page' : undefined}>
+    <Link
+      href={href}
+      className={className}
+      aria-current={active ? 'page' : undefined}
+      transitionTypes={NAV_LATERAL}
+    >
       {children}
     </Link>
   )

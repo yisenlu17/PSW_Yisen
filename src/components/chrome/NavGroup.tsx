@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 import type { Locale } from '@/lib/locale'
+import { NAV_FORWARD, NAV_LATERAL } from '@/components/transitions'
 
 export type NavChild = { key: string; href: string; label: string; note?: string }
 
@@ -87,7 +88,12 @@ export function NavGroup({
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false)
       }}
     >
-      <Link href={href} className={className} aria-current={here ? 'page' : undefined}>
+      <Link
+        href={href}
+        className={className}
+        aria-current={here ? 'page' : undefined}
+        transitionTypes={NAV_LATERAL}
+      >
         {label}
       </Link>
 
@@ -113,6 +119,7 @@ export function NavGroup({
                 className="nav-option"
                 href={item.href}
                 aria-current={pathname === item.href ? 'page' : undefined}
+                transitionTypes={NAV_FORWARD}
                 onClick={() => setOpen(false)}
               >
                 <span className="nav-option-label">{item.label}</span>

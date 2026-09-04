@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { NAV_FORWARD, NAV_LATERAL } from '@/components/transitions'
 
 export type MenuLink = {
   key: string
@@ -76,13 +77,22 @@ export function MobileMenu({ links, name }: { links: MenuLink[]; name: string })
                 // The drawer has room the masthead does not, so the subpages are
                 // simply listed rather than hidden behind a second tap.
                 <div key={l.key} className="mobile-menu-item">
-                  <Link href={l.href} onClick={() => setOpen(false)}>
+                  <Link
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    transitionTypes={NAV_LATERAL}
+                  >
                     {l.label}
                   </Link>
                   {(l.children?.length ?? 0) > 0 && (
                     <div className="mobile-menu-sub">
                       {l.children!.map((c) => (
-                        <Link key={c.key} href={c.href} onClick={() => setOpen(false)}>
+                        <Link
+                          key={c.key}
+                          href={c.href}
+                          onClick={() => setOpen(false)}
+                          transitionTypes={NAV_FORWARD}
+                        >
                           {c.label}
                         </Link>
                       ))}

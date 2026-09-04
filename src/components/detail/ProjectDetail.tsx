@@ -19,6 +19,8 @@ import {
 } from '@/lib/project'
 import { roleCompany } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
+import { morphName } from '@/lib/view-transition'
+import { Morph, NAV_LATERAL } from '@/components/transitions'
 import { DetailHeader, DetailBlock, DetailList, MetricRow, copy } from './DetailChrome'
 
 export type ProjectDetailData = ProjectCardData & {
@@ -94,6 +96,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
         lede={t(project.summary, locale)}
         backHref={`/${locale}/projects`}
         backLabel={c.backToProjects}
+        titleName={morphName('project', 'title', project.slug)}
         chips={
           <>
             {status && (
@@ -142,13 +145,15 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
           <div className="wrap">
             {/* Asked for by width alone, and given the screenshot's own height: the
                 cover is the whole capture rather than a 16:9 slice of it. */}
-            <Image
-              src={urlFor(project.cover).width(1800).url()}
-              alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
-              {...imageSize(project.cover)}
-              sizes="(max-width: 1220px) 100vw, 1160px"
-              priority
-            />
+            <Morph name={morphName('project', 'cover', project.slug)}>
+              <Image
+                src={urlFor(project.cover).width(1800).url()}
+                alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
+                {...imageSize(project.cover)}
+                sizes="(max-width: 1220px) 100vw, 1160px"
+                priority
+              />
+            </Morph>
           </div>
         </div>
       )}
@@ -204,10 +209,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
         {roleHref && project.relatedExperience && (
           <div className="detail-block">
             <h2>{c.fromThisRole}</h2>
-            <Link
-              href={roleHref}
-              className="detail-cross"
-            >
+            <Link href={roleHref} className="detail-cross" transitionTypes={NAV_LATERAL}>
               <span className="detail-cross-name">{roleCompany(project.relatedExperience, locale)}</span>
               {t(project.relatedExperience.role, locale) && (
                 <span className="detail-cross-meta">
@@ -259,7 +261,7 @@ export function RelatedProject({
   )
 
   return href ? (
-    <Link href={href} className="detail-related-card">
+    <Link href={href} className="detail-related-card" transitionTypes={NAV_LATERAL}>
       {inner}
     </Link>
   ) : (

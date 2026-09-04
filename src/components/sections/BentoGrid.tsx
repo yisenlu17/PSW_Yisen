@@ -6,6 +6,7 @@ import { Section, type SectionSettings } from '@/components/Section'
 import { cropFor, urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import { localizeHref } from '@/lib/href'
+import { NAV_LATERAL } from '@/components/transitions'
 
 type Tile = {
   _key: string
@@ -115,7 +116,13 @@ export function BentoGrid({ data, locale }: { data: BentoGridSectionData; locale
               {inner}
             </a>
           ) : (
-            <Link key={tile._key} className={className} href={href} {...attrs}>
+            <Link
+              key={tile._key}
+              className={className}
+              href={href}
+              transitionTypes={NAV_LATERAL}
+              {...attrs}
+            >
               {inner}
             </Link>
           )

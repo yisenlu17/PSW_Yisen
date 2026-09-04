@@ -3,6 +3,7 @@ import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
 import { localizeHref } from '@/lib/href'
+import { NAV_LATERAL } from '@/components/transitions'
 import { resumeSet, type SiteSettings } from '@/lib/site'
 import type { NavigationData } from './Header'
 
@@ -94,7 +95,7 @@ export function Footer({
   }
 
   return (
-    <footer className="foot">
+    <footer className="foot" style={{ viewTransitionName: 'site-footer' }}>
       <div className="wrap">
         <div className="foot-grid">
           <div className="foot-about">
@@ -113,7 +114,7 @@ export function Footer({
                     {l.label}
                   </a>
                 ) : (
-                  <Link key={l.key} href={l.href}>
+                  <Link key={l.key} href={l.href} transitionTypes={NAV_LATERAL}>
                     {l.label}
                   </Link>
                 )

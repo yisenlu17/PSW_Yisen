@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
+import { Morph, NAV_BACK } from '@/components/transitions'
+
 import type { Locale } from '@/lib/locale'
 
 /**
@@ -21,6 +23,7 @@ export function DetailHeader({
   backHref,
   backLabel,
   children,
+  titleName,
 }: {
   eyebrow?: string
   title: string
@@ -30,16 +33,23 @@ export function DetailHeader({
   backHref: string
   backLabel: string
   children?: ReactNode
+  /** Ties this heading to the card it was opened from, so the two morph. */
+  titleName?: string
 }) {
   return (
     <header className="detail-head">
       <div className="wrap">
-        <Link href={backHref} className="detail-back">
+        <Link href={backHref} className="detail-back" transitionTypes={NAV_BACK}>
           <span aria-hidden>←</span> {backLabel}
         </Link>
 
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1>{title}</h1>
+        {/* The name goes on the heading rather than on any link inside it: an
+            inline box can be split across lines, and a snapshot of a fragmented box
+            is not something the browser can morph. */}
+        <Morph name={titleName}>
+          <h1>{title}</h1>
+        </Morph>
         {meta && <p className="detail-meta">{meta}</p>}
         {lede && <p className="detail-lede">{lede}</p>}
         {chips && <div className="detail-chips">{chips}</div>}
