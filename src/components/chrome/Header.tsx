@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString } from '@/lib/locale'
+import { detailHref, homeHref, localizeHref } from '@/lib/href'
 import { urlFor } from '@/sanity/image'
 import { projectTitle } from '@/lib/project'
 import { roleCompany } from '@/lib/experience'
@@ -70,14 +71,21 @@ export function Header({
   // somewhere else drops it, which is the right answer both times.
   const byHref = new Map<string, NavChild[]>()
 
-  const roles = (subpages?.experience ?? [])
-    .filter((role) => role.slug && role.company)
-    .map((role) => ({
-      key: role._id,
-      href: `/experience/${stegaClean(role.slug!)}`,
-      label: roleCompany(role, locale),
-      note: t(role.role, locale) || undefined,
-    }))
+  // `flatMap` rather than map-then-filter: `detailHref` returns null for a slug that
+  // cannot be one, and dropping the entry in the same step is what makes `href` a
+  // string here without asserting it.
+  const roles: NavChild[] = (subpages?.experience ?? []).flatMap((role) => {
+    const href = detailHref('experience', role.slug, locale)
+    if (!href || !role.company) return []
+    return [
+      {
+        key: role._id,
+        href,
+        label: roleCompany(role, locale),
+        note: t(role.role, locale) || undefined,
+      },
+    ]
+  })
   if (roles.length > 0) byHref.set('/experience', roles)
 
   // Only the projects that have a page. The accounts in "Also running" are set as
@@ -88,27 +96,37 @@ export function Header({
   const projects = (subpages?.projects ?? []).filter((project) => project.slug && project.title)
   const hasPage = projects.some((project) => project.featured)
 
-  const work = (hasPage ? projects.filter((project) => project.featured) : projects)
-    .map((project) => ({
-      key: project._id,
-      href: `/projects/${stegaClean(project.slug!)}`,
-      label: projectTitle(project, locale),
-      note: t(project.tagline, locale) || t(project.category, locale) || undefined,
-    }))
+  const work: NavChild[] = (hasPage ? projects.filter((project) => project.featured) : projects)
+    .flatMap((project) => {
+      const href = detailHref('projects', project.slug, locale)
+      if (!href) return []
+      return [
+        {
+          key: project._id,
+          href,
+          label: projectTitle(project, locale),
+          note: t(project.tagline, locale) || t(project.category, locale) || undefined,
+        },
+      ]
+    })
   if (work.length > 0) byHref.set('/projects', work)
 
   const items = (nav?.items ?? [])
     .map((i) => {
-      const href = i.href ? stegaClean(i.href) : ''
+      // Two forms of the same link. An editor types `/experience`, and that is what
+      // the subpage map is keyed by — so matching uses what was typed, while the
+      // rendered link is the one carrying the language. Localising before the lookup
+      // would silently empty every drop-down.
+      const authored = i.href ? stegaClean(i.href) : ''
       const external = Boolean(i.external)
       return {
         key: i._key,
         label: t(i.label, locale),
-        href,
+        href: localizeHref(authored, locale) ?? '',
         external,
         emphasis: stegaClean(i.emphasis ?? 'plain'),
         // An external link is somebody else's site, and has no subpages here.
-        children: external ? [] : (byHref.get(normalise(href)) ?? []),
+        children: external ? [] : (byHref.get(normalise(authored)) ?? []),
       }
     })
     .filter((i) => i.label && i.href)
@@ -147,7 +165,7 @@ export function Header({
   return (
     <header className="masthead">
       <div className="wrap">
-        <Link href="/" className="brand">
+        <Link href={homeHref(locale)} className="brand">
           <span className="brand-mark">
             {photo ? (
               <Image

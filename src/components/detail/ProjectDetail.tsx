@@ -83,7 +83,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
   const noDoorYet = links.length === 0 && handles.length === 0 && isInProgress(project.status)
   const gallery = (project.gallery ?? []).filter((g) => g?.asset)
   const related = project.relatedProjects ?? []
-  const roleHref = detailHref('experience', project.relatedExperience?.slug)
+  const roleHref = detailHref('experience', project.relatedExperience?.slug, locale)
 
   return (
     <main className="detail">
@@ -92,7 +92,7 @@ export function ProjectDetail({ project, locale }: { project: ProjectDetailData;
         title={projectTitle(project, locale)}
         meta={t(project.tagline, locale)}
         lede={t(project.summary, locale)}
-        backHref="/projects"
+        backHref={`/${locale}/projects`}
         backLabel={c.backToProjects}
         chips={
           <>
@@ -242,7 +242,7 @@ export function RelatedProject({
   project: ProjectCardData
   locale: Locale
 }) {
-  const href = detailHref('projects', project.slug)
+  const href = detailHref('projects', project.slug, locale)
   const body = t(project.summary, locale) || t(project.tagline, locale)
   const status = statusLabel(project.status, locale)
 

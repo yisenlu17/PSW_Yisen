@@ -115,7 +115,7 @@ function ProjectCard({
   linked: boolean
   flipped: boolean
 }) {
-  const href = linked ? detailHref('projects', project.slug) : null
+  const href = linked ? detailHref('projects', project.slug, locale) : null
   const status = statusLabel(project.status, locale)
   const tags = (project.tags ?? []).map((tag) => t(tag, locale)).filter(Boolean)
 
@@ -198,7 +198,7 @@ function CompactProject({
   locale: Locale
   linked: boolean
 }) {
-  const href = linked ? detailHref('projects', project.slug) : null
+  const href = linked ? detailHref('projects', project.slug, locale) : null
   const body = t(project.tagline, locale) || t(project.summary, locale)
 
   return (

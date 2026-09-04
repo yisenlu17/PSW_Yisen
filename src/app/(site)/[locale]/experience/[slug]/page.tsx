@@ -5,16 +5,17 @@ import { client } from '@/sanity/client'
 import { sanityFetch } from '@/sanity/fetch'
 import { EXPERIENCE_QUERY, EXPERIENCE_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ExperienceDetail, type ExperienceDetailData } from '@/components/detail/ExperienceDetail'
-import { getLocale } from '@/lib/locale-server'
-import { t } from '@/lib/locale'
+import { LOCALES, localeParam, t } from '@/lib/locale'
 
 /**
- * `/experience/<slug>`. The studio's Presentation config has pointed at this URL
- * since the Experience document type was written; this is the page it was pointing at.
+ * `/<locale>/experience/<slug>`. The studio's Presentation config has pointed at this
+ * URL since the Experience document type was written; this is the page it was
+ * pointing at.
  */
 export async function generateStaticParams() {
   const slugs = await client.fetch(EXPERIENCE_SLUGS_QUERY)
-  return (slugs ?? []).filter((s): s is string => Boolean(s)).map((slug) => ({ slug }))
+  const roles = (slugs ?? []).filter((s): s is string => Boolean(s))
+  return LOCALES.flatMap((locale) => roles.map((slug) => ({ locale, slug })))
 }
 
 export const dynamicParams = true
@@ -22,11 +23,13 @@ export const dynamicParams = true
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params
-  const [locale, { data: role }, { data: settings }] = await Promise.all([
-    getLocale(),
+  const { locale: param, slug } = await params
+  const locale = localeParam(param)
+  if (!locale) return {}
+
+  const [{ data: role }, { data: settings }] = await Promise.all([
     sanityFetch({ query: EXPERIENCE_QUERY, params: { slug }, stega: false }),
     sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false }),
   ])
@@ -44,13 +47,16 @@ export async function generateMetadata({
   }
 }
 
-export default async function ExperiencePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const [locale, { data: role }] = await Promise.all([
-    getLocale(),
-    sanityFetch({ query: EXPERIENCE_QUERY, params: { slug } }),
-  ])
+export default async function ExperiencePage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}) {
+  const { locale: param, slug } = await params
+  const locale = localeParam(param)
+  if (!locale) notFound()
 
+  const { data: role } = await sanityFetch({ query: EXPERIENCE_QUERY, params: { slug } })
   if (!role) notFound()
 
   return <ExperienceDetail experience={role as unknown as ExperienceDetailData} locale={locale} />

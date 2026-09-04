@@ -44,3 +44,41 @@ export function formatDateRange(
   const current = locale === 'zh' ? '至今' : 'Present'
   return `${fmt(start)} — ${end ? fmt(end) : current}`
 }
+
+/**
+ * Where the language preference is remembered.
+ *
+ * The language itself lives in the URL — this cookie only decides which language a
+ * visit to the bare domain lands in, so a returning reader is not sent back to
+ * English every time. Declared here rather than in a server module because three
+ * very different callers need it: `proxy.ts` reads it off the request, the language
+ * menu writes it from the browser, and the route handler sets it as a response
+ * cookie.
+ */
+export const LOCALE_COOKIE = 'lang'
+
+/**
+ * Turns the `[locale]` route param into a `Locale`, or nothing.
+ *
+ * Returning undefined rather than falling back to English is deliberate: `/fr/about`
+ * is a URL this site does not have, and answering it with the English page would
+ * have Google index the same content under an unbounded number of addresses. The
+ * caller sends it to `notFound()` instead.
+ */
+export function localeParam(value: string | undefined): Locale | undefined {
+  return isLocale(value) ? value : undefined
+}
+
+/**
+ * What goes in `<html lang>`.
+ *
+ * `zh` alone leaves the script open, and the site is written in simplified
+ * characters — a screen reader picking a traditional voice for it is the kind of
+ * thing only a reader relying on one would notice.
+ */
+export function htmlLang(locale: Locale): string {
+  return locale === 'zh' ? 'zh-Hans' : 'en'
+}
+
+/** The BCP 47 tags used for `hreflang`, keyed by locale. */
+export const HREFLANG: Record<Locale, string> = { en: 'en', zh: 'zh-Hans' }

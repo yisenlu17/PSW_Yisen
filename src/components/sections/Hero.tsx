@@ -3,6 +3,7 @@ import { stegaClean } from 'next-sanity'
 
 import { urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
+import { localizeHref } from '@/lib/href'
 import type { SectionSettings } from '@/components/Section'
 import type { SiteSettings } from '@/lib/site'
 import { RotatingWord } from './RotatingWord'
@@ -75,7 +76,7 @@ export function Hero({
               <div className="cta-row">
                 {data.ctas!.map((cta) => {
                   const label = t(cta.label, locale)
-                  const href = cta.href ? stegaClean(cta.href) : '#'
+                  const href = localizeHref(cta.href, locale) ?? '#'
                   if (!label) return null
                   return (
                     <a

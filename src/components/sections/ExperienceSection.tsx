@@ -82,7 +82,7 @@ export function ExperienceSection({
  * without one still renders — as plain text rather than a link to nowhere.
  */
 function RoleName({ role, locale }: { role: ExperienceRole; locale: Locale }) {
-  const href = detailHref('experience', role.slug)
+  const href = detailHref('experience', role.slug, locale)
   const company = roleCompany(role, locale)
   return href ? <Link href={href}>{company}</Link> : <>{company}</>
 }

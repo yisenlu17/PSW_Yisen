@@ -5,6 +5,7 @@ import { stegaClean } from 'next-sanity'
 import { Section, type SectionSettings } from '@/components/Section'
 import { cropFor, urlFor } from '@/sanity/image'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
+import { localizeHref } from '@/lib/href'
 
 type Tile = {
   _key: string
@@ -65,7 +66,7 @@ export function BentoGrid({ data, locale }: { data: BentoGridSectionData; locale
         {tiles.map((tile) => {
           const size = one(tile.size, SIZES, 'sm')
           const tone = one(tile.tone, TONES, 'paper')
-          const href = tile.href ? stegaClean(tile.href) : null
+          const href = localizeHref(tile.href, locale)
 
           const [shotWidth, shotHeight] = TILE_SHAPE[size]
 

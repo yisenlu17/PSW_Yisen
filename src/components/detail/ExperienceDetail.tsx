@@ -87,7 +87,7 @@ export function ExperienceDetail({
           .filter(Boolean)
           .join(' · ')}
         lede={t(experience.summary, locale)}
-        backHref="/experience"
+        backHref={`/${locale}/experience`}
         backLabel={c.backToExperience}
         chips={
           t(experience.highlight, locale) ? (

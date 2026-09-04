@@ -12,19 +12,14 @@ import type { NextConfig } from 'next'
  */
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
 
+/**
+ * There was an `experimental.staleTimes` override here, raising the client router
+ * cache off zero because every route was dynamic — the language came from a cookie,
+ * and a cookie cannot be prerendered. The language is a path segment now, the routes
+ * prerender, and static segments already get five minutes by default. The override
+ * was answering a question that is no longer asked.
+ */
 const nextConfig: NextConfig = {
-  /**
-   * Every route here is dynamic, because the language is read from a cookie and a
-   * cookie cannot be prerendered. Next gives dynamic routes a client cache TTL of
-   * zero, which means going back to a page you read a moment ago fetches it again
-   * from the server — the browser's own Back button included. Half a minute is long
-   * enough to make moving around the site feel like moving around one document, and
-   * short enough that a publish landing mid-visit is not held back by it.
-   */
-  experimental: {
-    staleTimes: { dynamic: 30, static: 300 },
-  },
-
   images: {
     remotePatterns: [
       {

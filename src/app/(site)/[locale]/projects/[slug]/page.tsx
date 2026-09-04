@@ -5,17 +5,17 @@ import { client } from '@/sanity/client'
 import { sanityFetch } from '@/sanity/fetch'
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ProjectDetail, type ProjectDetailData } from '@/components/detail/ProjectDetail'
-import { getLocale } from '@/lib/locale-server'
-import { t } from '@/lib/locale'
+import { LOCALES, localeParam, t } from '@/lib/locale'
 
 /**
- * `/projects/<slug>` exists for every Project document — creating one in the studio
- * publishes a page, with no route to write. `dynamicParams` keeps a project added
- * after the last build reachable straight away.
+ * `/<locale>/projects/<slug>` exists for every Project document — creating one in the
+ * studio publishes a page, with no route to write. `dynamicParams` keeps a project
+ * added after the last build reachable straight away.
  */
 export async function generateStaticParams() {
   const slugs = await client.fetch(PROJECT_SLUGS_QUERY)
-  return (slugs ?? []).filter((s): s is string => Boolean(s)).map((slug) => ({ slug }))
+  const projects = (slugs ?? []).filter((s): s is string => Boolean(s))
+  return LOCALES.flatMap((locale) => projects.map((slug) => ({ locale, slug })))
 }
 
 export const dynamicParams = true
@@ -23,11 +23,13 @@ export const dynamicParams = true
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params
-  const [locale, { data: project }, { data: settings }] = await Promise.all([
-    getLocale(),
+  const { locale: param, slug } = await params
+  const locale = localeParam(param)
+  if (!locale) return {}
+
+  const [{ data: project }, { data: settings }] = await Promise.all([
     sanityFetch({ query: PROJECT_QUERY, params: { slug }, stega: false }),
     sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false }),
   ])
@@ -46,13 +48,16 @@ export async function generateMetadata({
   }
 }
 
-export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const [locale, { data: project }] = await Promise.all([
-    getLocale(),
-    sanityFetch({ query: PROJECT_QUERY, params: { slug } }),
-  ])
+export default async function ProjectPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}) {
+  const { locale: param, slug } = await params
+  const locale = localeParam(param)
+  if (!locale) notFound()
 
+  const { data: project } = await sanityFetch({ query: PROJECT_QUERY, params: { slug } })
   if (!project) notFound()
 
   return <ProjectDetail project={project as unknown as ProjectDetailData} locale={locale} />

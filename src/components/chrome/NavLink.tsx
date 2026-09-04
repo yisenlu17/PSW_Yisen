@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation'
 /**
  * A nav item that knows whether it is the page you are on.
  *
- * Matching is exact rather than prefix-based, except for "/" which would otherwise
- * mark Home active on every page.
+ * Matching is exact rather than prefix-based, so a role's page does not also light up
+ * Experience — `NavGroup` is the one that marks a whole section, and it says so with
+ * `data-section` rather than with `aria-current`.
  */
 export function NavLink({
   href,
@@ -30,7 +31,7 @@ export function NavLink({
     )
   }
 
-  const active = href === '/' ? pathname === '/' : pathname === href
+  const active = pathname === href
 
   return (
     <Link href={href} className={className} aria-current={active ? 'page' : undefined}>

@@ -32,7 +32,7 @@ export function ExperienceCard({
 }) {
   const c = copy(locale)
 
-  const href = detailHref('experience', role.slug)
+  const href = detailHref('experience', role.slug, locale)
   const dates = formatDateRange(role.startDate, role.endDate, locale)
   const meta = [t(role.role, locale), dates].filter(Boolean).join(' · ')
   const summary = t(role.summary, locale)

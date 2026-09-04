@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
+import { localizeHref } from '@/lib/href'
 import { resumeSet, type SiteSettings } from '@/lib/site'
 import type { NavigationData } from './Header'
 
@@ -44,7 +45,7 @@ export function Footer({
     .map((i) => ({
       key: i._key,
       label: t(i.label, locale),
-      href: i.href ? stegaClean(i.href) : '',
+      href: localizeHref(i.href, locale) ?? '',
       external: Boolean(i.external),
     }))
     .filter((i) => i.label && i.href)

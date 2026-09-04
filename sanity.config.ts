@@ -28,26 +28,36 @@ export default defineConfig({
         // produced it. Without it the editing pane keeps whatever document it was
         // opened with, so navigating the preview to another page leaves the editor
         // still pointed at the homepage — every page renders, but only one is
-        // editable. Routes are matched top to bottom; `/:slug` is last because it
-        // would otherwise swallow the detail routes' first segment.
+        // editable. Routes are matched top to bottom; `/:locale/:slug` is last
+        // because it would otherwise swallow the detail routes' first segment.
+        //
+        // Every route opens with `:locale` because the language is the first segment
+        // of every address on the site. It is captured and thrown away: the same
+        // document is behind `/en/projects/vora` and `/zh/projects/vora`, and which
+        // language the preview happens to be showing does not change which document
+        // the editor should be editing.
         mainDocuments: defineDocuments([
           {
-            route: '/',
+            route: '/:locale',
             filter: '_type == "page" && slug.current == "/"',
           },
           {
-            route: '/experience/:slug',
+            route: '/:locale/experience/:slug',
             filter: '_type == "experience" && slug.current == $slug',
           },
           {
-            route: '/projects/:slug',
+            route: '/:locale/projects/:slug',
             filter: '_type == "project" && slug.current == $slug',
           },
           {
-            route: '/:slug',
+            route: '/:locale/:slug',
             filter: '_type == "page" && slug.current == $slug',
           },
         ]),
+        // Every location is given in English. A document appears at two addresses
+        // now, one per language, and listing both would double a list whose job is
+        // to be glanced at — the preview carries the site's own language menu, so
+        // the other one is a click away rather than a second entry.
         locations: {
           // Editing a role tells the editor which pages that role turns up on.
           experience: defineLocations({
@@ -56,10 +66,10 @@ export default defineConfig({
               locations: [
                 {
                   title: doc?.company || 'Experience',
-                  href: `/experience/${doc?.slug}`,
+                  href: `/en/experience/${doc?.slug}`,
                 },
-                { title: 'Experience', href: '/experience' },
-                { title: 'Homepage', href: '/' },
+                { title: 'Experience', href: '/en/experience' },
+                { title: 'Homepage', href: '/en' },
               ],
             }),
           }),
@@ -69,16 +79,16 @@ export default defineConfig({
             select: { title: 'title', slug: 'slug.current' },
             resolve: (doc) => ({
               locations: [
-                { title: doc?.title || 'Project', href: `/projects/${doc?.slug}` },
-                { title: 'Projects', href: '/projects' },
-                { title: 'Homepage', href: '/' },
+                { title: doc?.title || 'Project', href: `/en/projects/${doc?.slug}` },
+                { title: 'Projects', href: '/en/projects' },
+                { title: 'Homepage', href: '/en' },
               ],
             }),
           }),
           playgroundItem: defineLocations({
             select: { name: 'name' },
             resolve: () => ({
-              locations: [{ title: 'Playground', href: '/playground' }],
+              locations: [{ title: 'Playground', href: '/en/playground' }],
             }),
           }),
           page: defineLocations({
@@ -87,7 +97,7 @@ export default defineConfig({
               locations: [
                 {
                   title: doc?.title || 'Page',
-                  href: doc?.slug === '/' ? '/' : `/${doc?.slug}`,
+                  href: doc?.slug === '/' ? '/en' : `/en/${doc?.slug}`,
                 },
               ],
             }),
@@ -95,10 +105,10 @@ export default defineConfig({
           // Header, footer and site-wide text sit on every page, so the homepage
           // stands in for "everywhere" rather than listing all six.
           navigation: defineLocations({
-            locations: [{ title: 'Homepage', href: '/' }],
+            locations: [{ title: 'Homepage', href: '/en' }],
           }),
           globalSettings: defineLocations({
-            locations: [{ title: 'Homepage', href: '/' }],
+            locations: [{ title: 'Homepage', href: '/en' }],
           }),
         },
       },

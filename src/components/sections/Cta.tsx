@@ -3,6 +3,7 @@ import { stegaClean } from 'next-sanity'
 import { ResumeDownload } from '@/components/ResumeDownload'
 import { Section, type SectionSettings } from '@/components/Section'
 import { t, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
+import { localizeHref } from '@/lib/href'
 import { resumeFor, resumeSet, type ResumeChoice, type SiteSettings } from '@/lib/site'
 
 export type CtaSectionData = {
@@ -52,7 +53,7 @@ function resolveHref(
       return match?.url ? stegaClean(match.url) : null
     }
     case 'custom':
-      return action.href ? stegaClean(action.href) : null
+      return localizeHref(action.href, locale)
     default:
       return null
   }

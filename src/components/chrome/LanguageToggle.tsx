@@ -1,8 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { LOCALES, type Locale } from '@/lib/locale'
+import { LOCALES, LOCALE_COOKIE, type Locale } from '@/lib/locale'
+import { swapLocale } from '@/lib/href'
 
 /** What each language calls itself — never "Chinese", never "英语". */
 const LABEL: Record<Locale, string> = { en: 'English', zh: '中文' }
@@ -11,11 +13,23 @@ const LABEL: Record<Locale, string> = { en: 'English', zh: '中文' }
 const TRIGGER: Record<Locale, string> = { en: 'Language', zh: '语言' }
 
 /**
+ * Remembers the choice for next time.
+ *
+ * Only the bare domain reads this — every other address says its own language — so
+ * the cookie decides one thing: whether someone who typed the domain from memory
+ * lands where they left off.
+ */
+function remember(locale: Locale) {
+  document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=31536000; samesite=lax`
+}
+
+/**
  * Picks a language from a menu of both, rather than flipping to the other one.
  *
- * Each option is a plain link to a route handler rather than a fetch: the handler
- * sets the cookie and redirects, so the whole response — chrome included — comes back
- * in the chosen language, and it works before hydration. Only opening the menu needs
+ * Each option links to this same page in the other language, which is a real address
+ * now that the language is the first path segment — so it is a client navigation that
+ * keeps you on the project you were reading, rather than the round trip through
+ * `/api/lang` that used to reload the document. Only opening the menu needs
  * JavaScript; with none, the button is inert but the page is still readable.
  */
 export function LanguageToggle({ current }: { current: Locale }) {
@@ -61,12 +75,15 @@ export function LanguageToggle({ current }: { current: Locale }) {
         <ul className="lang-menu" role="menu">
           {LOCALES.map((locale) => (
             <li key={locale} role="none">
-              <a
+              <Link
                 role="menuitem"
                 className="lang-option"
-                href={`/api/lang?to=${locale}&next=${encodeURIComponent(pathname)}`}
+                href={swapLocale(pathname, locale)}
                 aria-current={locale === current}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  remember(locale)
+                  setOpen(false)
+                }}
               >
                 {LABEL[locale]}
                 {locale === current && (
@@ -80,7 +97,7 @@ export function LanguageToggle({ current }: { current: Locale }) {
                     />
                   </svg>
                 )}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
