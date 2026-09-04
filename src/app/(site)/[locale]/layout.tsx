@@ -7,10 +7,12 @@ import { DisableDraftMode } from '@/components/DisableDraftMode'
 import { Header } from '@/components/chrome/Header'
 import { Footer } from '@/components/chrome/Footer'
 import { ScrollReveal } from '@/components/ScrollReveal'
+import { PersonSchema } from '@/components/PersonSchema'
 import { SanityLive } from '@/sanity/live'
 import { sanityFetch } from '@/sanity/fetch'
 import { GLOBAL_SETTINGS_QUERY, NAV_CHILDREN_QUERY, NAVIGATION_QUERY } from '@/sanity/queries'
 import { DEFAULT_LOCALE, htmlLang, localeParam } from '@/lib/locale'
+import { metadataBase } from '@/lib/site-url'
 import type { SiteSettings } from '@/lib/site'
 
 import '@/styles/fonts.css'
@@ -27,9 +29,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const { data } = await sanityFetch({ query: GLOBAL_SETTINGS_QUERY, stega: false })
   const favicon = (data as SiteSettings | null)?.favicon
 
-  if (!favicon) return {}
+  // Without a base, every relative URL in a page's metadata — the share card above
+  // all — is emitted as a path, and a crawler reading it from somewhere else on the
+  // internet has nothing to resolve it against.
+  const base = { metadataBase: metadataBase() }
+
+  if (!favicon) return base
 
   return {
+    ...base,
     icons: {
       icon: [
         { url: urlFor(favicon).width(32).height(32).format('png').url(), sizes: '32x32' },
@@ -81,6 +89,7 @@ export default async function SiteLayout({
         {children}
         <Footer nav={nav} site={site} locale={locale} />
         <ScrollReveal />
+        <PersonSchema site={site} locale={locale} />
 
         {/* Only for the editor. `<SanityLive />` holds an EventSource open to Sanity
             for the lifetime of the tab and posts a server action every time content

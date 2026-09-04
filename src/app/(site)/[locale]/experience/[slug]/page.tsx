@@ -6,6 +6,7 @@ import { sanityFetch } from '@/sanity/fetch'
 import { EXPERIENCE_QUERY, EXPERIENCE_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ExperienceDetail, type ExperienceDetailData } from '@/components/detail/ExperienceDetail'
 import { LOCALES, localeParam, t } from '@/lib/locale'
+import { localeAlternates } from '@/lib/site-url'
 import { PageTransition } from '@/components/transitions'
 
 /**
@@ -44,6 +45,7 @@ export async function generateMetadata({
   return {
     title: `${title} — ${name}`,
     description: description || undefined,
+    alternates: localeAlternates(locale, `/experience/${slug}`),
     openGraph: { title, description: description || undefined, type: 'article' },
   }
 }

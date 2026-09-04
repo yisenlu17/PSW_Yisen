@@ -6,6 +6,7 @@ import { sanityFetch } from '@/sanity/fetch'
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { ProjectDetail, type ProjectDetailData } from '@/components/detail/ProjectDetail'
 import { LOCALES, localeParam, t } from '@/lib/locale'
+import { localeAlternates } from '@/lib/site-url'
 import { PageTransition } from '@/components/transitions'
 
 /**
@@ -45,6 +46,7 @@ export async function generateMetadata({
   return {
     title,
     description: description || undefined,
+    alternates: localeAlternates(locale, `/projects/${slug}`),
     openGraph: { title, description: description || undefined, type: 'article' },
   }
 }

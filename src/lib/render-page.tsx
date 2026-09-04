@@ -6,6 +6,7 @@ import { sanityFetch } from '@/sanity/fetch'
 import { PAGE_QUERY, GLOBAL_SETTINGS_QUERY } from '@/sanity/queries'
 import { SectionRenderer, type SectionData } from '@/components/sections'
 import { t, type Locale } from '@/lib/locale'
+import { localeAlternates } from '@/lib/site-url'
 import type { SiteSettings } from '@/lib/site'
 
 /**
@@ -48,6 +49,7 @@ export async function pageMetadata(slug: string, locale: Locale): Promise<Metada
   return {
     title,
     description: description || undefined,
+    alternates: localeAlternates(locale, slug === '/' ? '' : `/${slug}`),
     openGraph: { title, description: description || undefined },
   }
 }
