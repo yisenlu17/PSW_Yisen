@@ -6,6 +6,7 @@ import { urlFor } from '@/sanity/image'
 import { DisableDraftMode } from '@/components/DisableDraftMode'
 import { Header } from '@/components/chrome/Header'
 import { Footer } from '@/components/chrome/Footer'
+import { ScrollReveal } from '@/components/ScrollReveal'
 import { SanityLive } from '@/sanity/live'
 import { sanityFetch } from '@/sanity/fetch'
 import { GLOBAL_SETTINGS_QUERY, NAV_CHILDREN_QUERY, NAVIGATION_QUERY } from '@/sanity/queries'
@@ -79,6 +80,7 @@ export default async function SiteLayout({
         <Header nav={nav} subpages={subpages} site={site} locale={locale} />
         {children}
         <Footer nav={nav} site={site} locale={locale} />
+        <ScrollReveal />
 
         {/* Only for the editor. `<SanityLive />` holds an EventSource open to Sanity
             for the lifetime of the tab and posts a server action every time content
