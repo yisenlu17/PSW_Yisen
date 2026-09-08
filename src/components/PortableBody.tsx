@@ -1,4 +1,5 @@
 import NextImage from 'next/image'
+import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 import { PortableText, type PortableTextBlock, type PortableTextComponents } from '@portabletext/react'
 
@@ -63,12 +64,17 @@ function components(locale: Locale): PortableTextComponents {
       link: ({ children, value }) => {
         const href = typeof value?.href === 'string' ? stegaClean(value.href) : ''
         if (!href) return <>{children}</>
-        const external = href.startsWith('http')
-        return (
-          <a href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-            {children}
-          </a>
-        )
+        if (href.startsWith('http')) {
+          return (
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          )
+        }
+        // Same reason as the hero's buttons: a hand-written `href` never passes
+        // through the router, so on the copy served from `/PSW_Yisen` it points at a
+        // path that is not there. `<Link>` is what knows about the prefix.
+        return <Link href={href}>{children}</Link>
       },
       code: ({ children }) => <code>{children}</code>,
     },

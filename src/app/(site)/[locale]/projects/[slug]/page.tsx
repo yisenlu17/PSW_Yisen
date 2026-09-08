@@ -12,8 +12,8 @@ import { PageTransition } from '@/components/transitions'
 
 /**
  * `/<locale>/projects/<slug>` exists for every Project document — creating one in the
- * studio publishes a page, with no route to write. `dynamicParams` keeps a project
- * added after the last build reachable straight away.
+ * studio publishes a page, with no route to write. Publishing one and building are
+ * two steps now rather than one; see `dynamicParams` below.
  */
 export async function generateStaticParams() {
   const slugs = await client.fetch(PROJECT_SLUGS_QUERY)
@@ -21,7 +21,19 @@ export async function generateStaticParams() {
   return LOCALES.flatMap((locale) => projects.map((slug) => ({ locale, slug })))
 }
 
-export const dynamicParams = true
+/**
+ * The set generated above is the whole set.
+ *
+ * This was `true` — a server's promise to render a document it had not seen at build
+ * time, so a project added in the studio was reachable before the next deploy. The
+ * GitHub Pages copy has no server to keep that promise, and Next rejects the
+ * combination rather than degrading it; it also has to be a literal, so it cannot be
+ * one value per target. `false` is the value both deployments can honour, which
+ * leaves them answering the same addresses instead of two sites disagreeing about
+ * what exists. A publish now needs a build — which is what the `repository_dispatch`
+ * hook in `.github/workflows/deploy.yml` is for.
+ */
+export const dynamicParams = false
 
 export async function generateMetadata({
   params,

@@ -1,19 +1,18 @@
 import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
-import { VisualEditing } from 'next-sanity/visual-editing'
 import { urlFor } from '@/sanity/image'
 
-import { DisableDraftMode } from '@/components/DisableDraftMode'
+import { DraftTools } from '@/sanity/draft-tools'
 import { Header } from '@/components/chrome/Header'
 import { Footer } from '@/components/chrome/Footer'
 import { ScrollReveal } from '@/components/ScrollReveal'
 import { PersonSchema } from '@/components/PersonSchema'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { SanityLive } from '@/sanity/live'
 import { sanityFetch } from '@/sanity/fetch'
 import { GLOBAL_SETTINGS_QUERY, NAV_CHILDREN_QUERY, NAVIGATION_QUERY } from '@/sanity/queries'
 import { DEFAULT_LOCALE, htmlLang, localeParam } from '@/lib/locale'
+import { IS_STATIC_EXPORT } from '@/lib/static-export'
 import { metadataBase } from '@/lib/site-url'
 import type { SiteSettings } from '@/lib/site'
 
@@ -74,13 +73,15 @@ export default async function SiteLayout({
   const { locale: param } = await params
   const locale = localeParam(param) ?? DEFAULT_LOCALE
 
-  const [{ isEnabled: isDraft }, { data: settings }, { data: nav }, { data: subpages }] =
-    await Promise.all([
-      draftMode(),
-      sanityFetch({ query: GLOBAL_SETTINGS_QUERY }),
-      sanityFetch({ query: NAVIGATION_QUERY }),
-      sanityFetch({ query: NAV_CHILDREN_QUERY }),
-    ])
+  const [isDraft, { data: settings }, { data: nav }, { data: subpages }] = await Promise.all([
+    // See `sanity/fetch.ts`: in the static build there is no request to read the
+    // cookie off, and Next treats the call itself as the error rather than returning
+    // a false. Nothing downstream of it can be true there anyway.
+    IS_STATIC_EXPORT ? false : draftMode().then(({ isEnabled }) => isEnabled),
+    sanityFetch({ query: GLOBAL_SETTINGS_QUERY }),
+    sanityFetch({ query: NAVIGATION_QUERY }),
+    sanityFetch({ query: NAV_CHILDREN_QUERY }),
+  ])
 
   const site = (settings ?? null) as SiteSettings | null
 
@@ -94,9 +95,19 @@ export default async function SiteLayout({
         <PersonSchema site={site} locale={locale} />
 
         {/* Which project a recruiter opened, and how the page performed while they
-            were on it. Both are cookieless and neither reads anything identifying. */}
-        <Analytics />
-        <SpeedInsights />
+            were on it. Both are cookieless and neither reads anything identifying.
+
+            Left out of the static build, and not only because it reports to a project
+            it is no longer part of: both scripts load from Vercel's own domains, which
+            are the thing that copy of the site exists to route around. On the reader
+            it was built for they are two requests per page that hang until they give
+            up. */}
+        {!IS_STATIC_EXPORT && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
 
         {/* Only for the editor. `<SanityLive />` holds an EventSource open to Sanity
             for the lifetime of the tab and posts a server action every time content
@@ -104,13 +115,7 @@ export default async function SiteLayout({
             edit land. A visitor reading published content gets nothing from it — the
             reads behind this page are cached and expired by `/api/revalidate` — beyond
             a connection to keep alive and a reason for the page to re-render. */}
-        {isDraft && (
-          <>
-            <SanityLive />
-            <VisualEditing />
-            <DisableDraftMode />
-          </>
-        )}
+        {isDraft && <DraftTools />}
       </body>
     </html>
   )

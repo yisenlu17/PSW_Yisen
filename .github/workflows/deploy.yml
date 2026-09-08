@@ -1,0 +1,83 @@
+# Publishes the site to GitHub Pages.
+#
+# Vercel is unreachable from mainland China, so the same site is built a second way —
+# `npm run build:static`, which produces `out/` as plain files — and served from Pages
+# instead. See `scripts/build-static.mjs` for what that build has to do differently.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # The content lives in Sanity, and a static site only knows what it knew at build
+  # time. This is the button for "I published something, go and fetch it".
+  workflow_dispatch:
+  # The same thing without the button: point a Sanity webhook at
+  # POST /repos/yisenlu17/PSW_Yisen/dispatches with {"event_type":"content-published"}
+  # and publishing rebuilds the site by itself.
+  repository_dispatch:
+    types: [content-published]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A queued deploy is only ever interested in the newest commit, but cancelling one
+# mid-upload leaves Pages holding half a site — so newer runs wait rather than replace.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Hands back the address Pages will actually serve from — including the
+      # `/PSW_Yisen` prefix a project site sits under, or nothing at all once a custom
+      # domain is configured. Reading it from here rather than writing it down means
+      # moving the site to a domain does not need an edit to this file.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build
+        env:
+          # Public by nature: all three are compiled into the browser bundle, and the
+          # dataset is world-readable by project id. Only the token is a secret.
+          NEXT_PUBLIC_SANITY_PROJECT_ID: eekyq9um
+          NEXT_PUBLIC_SANITY_DATASET: production
+          NEXT_PUBLIC_SANITY_API_VERSION: 2026-08-07
+          # Not public: this dataset has no anonymous read grant, so the build cannot
+          # read a word of the site's content without it.
+          SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
+          # What the pages call themselves from the outside — canonical links,
+          # hreflang, share cards, the sitemap.
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          # What every asset URL is prefixed with, which is a different question: the
+          # first is an origin plus a path, this is the path alone.
+          STATIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run build:static
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

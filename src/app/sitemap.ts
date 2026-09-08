@@ -8,6 +8,15 @@ import {
 } from '@/sanity/queries'
 import { HREFLANG, LOCALES } from '@/lib/locale'
 import { siteOrigin } from '@/lib/site-url'
+import { IS_STATIC_EXPORT } from '@/lib/static-export'
+
+/**
+ * Same as `robots.ts`: emitted as a file at build time rather than answered per
+ * request. The queries below still run — at build, alongside the ones that decide
+ * which pages to prerender — so the sitemap lists exactly what was built, which is
+ * the only claim it can honestly make on a static host.
+ */
+export const dynamic = 'force-static'
 
 /**
  * Every address on the site, in every language, each declaring the others.
@@ -42,13 +51,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const origin = siteOrigin()
   const lastModified = new Date()
 
+  /**
+   * The static build serves every route as a directory, so its pages declare
+   * themselves canonical *with* a trailing slash. Next normalises the metadata but
+   * not the sitemap, which left the two disagreeing about the same page — the one
+   * mismatch a sitemap exists to not have.
+   */
+  const address = (locale: string, path: string) => {
+    const url = `${origin}/${locale}${path}`
+    return IS_STATIC_EXPORT && !url.endsWith('/') ? `${url}/` : url
+  }
+
   return LOCALES.flatMap((locale) =>
     paths.map((path) => ({
-      url: `${origin}/${locale}${path}`,
+      url: address(locale, path),
       lastModified,
       alternates: {
         languages: Object.fromEntries(
-          LOCALES.map((each) => [HREFLANG[each], `${origin}/${each}${path}`])
+          LOCALES.map((each) => [HREFLANG[each], address(each, path)])
         ),
       },
     }))

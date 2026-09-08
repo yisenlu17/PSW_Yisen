@@ -5,6 +5,7 @@ import 'server-only'
 import { cache } from 'react'
 import { draftMode } from 'next/headers'
 
+import { IS_STATIC_EXPORT } from '@/lib/static-export'
 import { client } from './client'
 import { sanityFetch as liveFetch } from './live'
 
@@ -89,7 +90,12 @@ type SanityFetch = typeof liveFetch
  * stega-encoded strings that `defineLive` resolves from the cookies for itself.
  */
 export const sanityFetch = (async (options: Parameters<SanityFetch>[0]) => {
-  const { isEnabled: isDraft } = await draftMode()
+  // `draftMode()` reads a cookie off the request, and a build producing files rather
+  // than answering requests has none — Next treats the call itself as the error, so it
+  // has to be skipped rather than have its answer ignored. Nothing is lost: preview
+  // needs a server to swap the perspective, and the static site has no studio in front
+  // of it to preview from.
+  const isDraft = IS_STATIC_EXPORT ? false : (await draftMode()).isEnabled
 
   if (isDraft) return liveFetch(options)
 

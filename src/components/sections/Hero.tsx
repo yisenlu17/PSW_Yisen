@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { urlFor } from '@/sanity/image'
@@ -78,14 +79,37 @@ export function Hero({
                   const label = t(cta.label, locale)
                   const href = localizeHref(cta.href, locale) ?? '#'
                   if (!label) return null
+
+                  const className = `btn ${stegaClean(cta.style ?? 'gold') === 'ghost' ? 'btn-ghost' : 'btn-gold'}`
+
+                  /**
+                   * `<Link>` for our own pages, a plain anchor for anything else.
+                   *
+                   * These were all plain anchors, which cost a full reload on the two
+                   * most-clicked links on the site — and, once the site was also
+                   * served from `/PSW_Yisen`, sent people to the wrong place entirely:
+                   * `basePath` is applied by the router, and an `href` written by hand
+                   * never passes through it. `localizeHref` leaves a scheme alone, so
+                   * that is the test for which of the two this is.
+                   */
+                  if (/^([a-z][a-z0-9+.-]*:|\/\/)/i.test(href)) {
+                    return (
+                      <a
+                        key={cta._key}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={className}
+                      >
+                        {label}
+                      </a>
+                    )
+                  }
+
                   return (
-                    <a
-                      key={cta._key}
-                      href={href}
-                      className={`btn ${stegaClean(cta.style ?? 'gold') === 'ghost' ? 'btn-ghost' : 'btn-gold'}`}
-                    >
+                    <Link key={cta._key} href={href} className={className}>
                       {label}
-                    </a>
+                    </Link>
                   )
                 })}
               </div>

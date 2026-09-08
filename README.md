@@ -2,7 +2,12 @@
 
 Three things, not one site:
 
-1. **The website** — Next.js 16, deployed on Vercel.
+1. **The website** — Next.js 16, deployed twice: on Vercel, and as plain files on
+   GitHub Pages, because Vercel does not resolve from mainland China. `npm run
+   build:static` produces the second one; `scripts/build-static.mjs` explains what it
+   has to do differently, and `.github/workflows/deploy.yml` publishes it. Content
+   comes from the CMS at build time, so publishing something needs a build to follow
+   it — the Actions tab has a **Run workflow** button for that.
 2. **The CMS** — Sanity Studio at `/studio`, where content, media and page order are managed.
 3. **The component system** — premium sections written in code, registered to the CMS.
 
