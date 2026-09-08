@@ -39,8 +39,13 @@ jobs:
           node-version: 22
           cache: npm
 
+      # `npm ci` refuses this lockfile on Linux, and is right to: it is written on
+      # Windows, where sharp's wasm32 build is never installed and its `@emnapi/*`
+      # dependencies are therefore never recorded — so the file that has to describe
+      # the whole tree does not. `npm install` fills those two in and leaves every
+      # version the lockfile does pin exactly where it is.
       - name: Install
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       # Hands back the address Pages will actually serve from — including the
       # `/PSW_Yisen` prefix a project site sits under, or nothing at all once a custom
