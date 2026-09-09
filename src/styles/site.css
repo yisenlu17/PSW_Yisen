@@ -5,6 +5,60 @@
    ============================================================ */
 
 /* ---------- section settings → the only design knobs the CMS drives ---------- */
+.section { position: relative; }
+
+/* ---------- the chapter mark ---------- */
+/* One gesture repeated on every section of every page: a two-digit number and a
+   gold rule down the left margin.
+ *
+ * It is the cheapest thing on this site and does the most work. Six unrelated
+ * blocks — a hero, some numbers, a run of cards, a photo wall — read as chapters
+ * of one document rather than as a stack of sections, and a reader always knows
+ * how far in they are. The number is counted in `SectionRenderer`, not authored,
+ * so reordering the page in the studio renumbers it.
+ *
+ * Below 1000px there is no margin to put it in: the rule stays, pinned to the
+ * page edge as a hairline, and the number goes. */
+.section-index {
+  position: absolute;
+  top: calc(clamp(56px, 8vw, 110px) - 6px);
+  bottom: clamp(56px, 8vw, 110px);
+  left: 10px;
+  width: 1px;
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none;
+}
+.section-index-num { display: none; }
+.section-index-rule {
+  flex: 1; width: 1px;
+  background: var(--rule-gold-v);
+  transform-origin: 50% 0;
+}
+
+.section[data-spacing='compact'] .section-index { top: calc(clamp(36px, 5vw, 64px) - 6px); bottom: clamp(36px, 5vw, 64px); }
+.section[data-spacing='large']   .section-index { top: calc(clamp(80px, 11vw, 150px) - 6px); bottom: clamp(80px, 11vw, 150px); }
+
+/* Dark and gold-wash sections need the rule lifted off their own ground. */
+.section[data-theme='dark'] .section-index-rule { background: linear-gradient(180deg, var(--gold), rgba(200,162,75,0)); opacity: .9; }
+.section[data-theme='accent'] .section-index-rule { background: linear-gradient(180deg, var(--navy), rgba(10,45,94,0)); }
+.section[data-theme='accent'] .section-index-num { color: var(--navy); }
+
+@media (min-width: 1000px) {
+  /* Out in the margin beside the text, lined up with the content column rather
+     than with the viewport — so it holds its place as the page gets wider. */
+  .section-index {
+    left: calc(max(0px, (100% - var(--maxw)) / 2) + var(--gut) - 46px);
+    align-items: flex-start;
+  }
+  .section-index-num {
+    display: block;
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    letter-spacing: .12em; color: var(--gold);
+    margin-bottom: 14px; margin-left: -4px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 .section[data-theme='light']  { background: var(--paper); color: var(--body); }
 .section[data-theme='cream']  { background: var(--cream); color: var(--body); }
 .section[data-theme='dark']   { background: var(--navy-deep); color: rgba(255,255,255,.86); }
@@ -65,48 +119,142 @@
 .proj-summary, .proj-tagline, .cta p, .bento-tile p { text-wrap: pretty; }
 
 /* ---------- hero ---------- */
+/* The opening screen, and the only one that gets the whole of it.
+ *
+ * The negative top margin is what makes that true. The masthead is `sticky`, so it
+ * takes its 84px out of the flow above the hero, and the hero used to start under
+ * it — a white bar across the top of the navy, and the first screen 84px short of
+ * a screen. Pulled up by exactly the header's height and padded back down by the
+ * same amount, the navy starts at y=0 with the bar floating over it, and the copy
+ * still clears the nav. `100svh` rather than `100vh` so a phone's address bar
+ * appearing does not make the hero taller than the screen it is on. */
 .hero {
   position: relative;
   background: var(--navy-deep);
   color: #fff;
   overflow: clip;
-  padding-block: clamp(56px, 7vw, 96px) clamp(48px, 6vw, 84px);
+  margin-top: calc(var(--head-h) * -1);
+  min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-block: calc(var(--head-h) + clamp(28px, 3.4vh, 52px)) clamp(74px, 9vh, 104px);
 }
+/* Two glows rather than one, and neither centred: a single radial gradient in the
+   middle of a panel is the default every dark hero on the internet has, and it
+   reads as a background rather than as light. Offset and unequal, they read as a
+   room with a window in it. */
 .hero-glow {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 78% 10%, rgba(20,86,160,.42), transparent 58%);
+  background:
+    radial-gradient(ellipse 70% 55% at 82% 6%, rgba(20,86,160,.46), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 8% 96%, rgba(200,162,75,.13), transparent 66%);
 }
-.hero-wrap { position: relative; z-index: 2; }
+.hero-wrap { position: relative; z-index: 2; width: 100%; }
 .hero-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: clamp(32px, 5vw, 72px);
+  gap: clamp(32px, 4vw, 64px);
   align-items: center;
 }
 .hero-grid[data-has-portrait='false'] { grid-template-columns: 1fr; }
+/* Two equal columns put the headline in a 660px box, where it broke to four lines
+   and pushed the meta strip off the bottom of the screen. The words get the larger
+   share and the picture the smaller one — which is also the right order of
+   importance for the first thing anybody reads. */
+@media (min-width: 900px) {
+  .hero-grid[data-has-portrait='true'] {
+    grid-template-columns: minmax(0, 1.18fr) minmax(260px, 0.82fr);
+  }
+}
+/* A step down from the full-width setting, for the same reason. */
+.hero-grid[data-has-portrait='true'] h1 { font-size: clamp(38px, 5vw, 72px); }
+:lang(zh) .hero-grid[data-has-portrait='true'] h1 { font-size: clamp(28px, 3.6vw, 52px); }
+.hero-grid[data-has-portrait='true'] .hero-lede { max-width: 48ch; font-size: clamp(15.5px, 1.15vw, 17px); }
+:lang(zh) .hero-grid[data-has-portrait='true'] .hero-lede { max-width: 34ch; }
 .hero-copy { max-width: 660px; }
+/* Without a portrait beside it the copy has the whole page, and 660px of it would
+   leave two thirds of a very large screen empty. The heading takes its own measure
+   in `ch`, so it holds two or three lines at any size rather than stretching to one
+   very long one. */
+.hero-grid[data-has-portrait='false'] .hero-copy { max-width: min(100%, 1040px); }
+.hero-grid[data-has-portrait='false'] h1 { max-width: 15ch; }
+:lang(zh) .hero-grid[data-has-portrait='false'] h1 { max-width: 13ch; }
 .hero h1 {
   color: #fff;
-  font-size: clamp(40px, 6.4vw, 80px);
-  letter-spacing: -.038em;
-  line-height: 1.02;
+  font-size: var(--h1-size);
+  letter-spacing: var(--h1-tracking);
+  line-height: var(--h1-leading);
+  font-weight: var(--h1-weight);
 }
 .hero .eyebrow { color: #fff; }
 .hero .eyebrow::before { background: var(--gold); }
+/* Wider than a body measure on purpose. This paragraph is under a headline that
+   runs most of the page's width, and set to 52ch it made six short lines under
+   three long ones — a column of text with a hole beside it. At 66ch it is four
+   lines the width of the thing above it, and the hero fits one screen. */
 .hero-lede {
   color: rgba(255,255,255,.86);
-  margin: 26px 0 0;
-  font-size: clamp(16px, 1.5vw, 19px);
-  max-width: 52ch;
+  margin: 22px 0 0;
+  font-size: clamp(16px, 1.3vw, 18px);
+  line-height: 1.6;
+  max-width: 66ch;
 }
-.hero .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+:lang(zh) .hero-lede { max-width: 42ch; line-height: 1.75; }
+.hero .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: clamp(24px, 3vh, 34px); }
+/* The index line at the foot of the hero: coordinates, languages, degree. A row of
+   facts rather than a sentence, so it is set like one — mono, wide-tracked, and
+   with a gold point between the entries. The rule above it fades out rather than
+   running the full width, so it reads as the start of a line rather than as the
+   bottom border of a box. */
 .hero-meta {
-  display: flex; flex-wrap: wrap; gap: 0 28px;
-  margin-top: 40px; padding-top: 22px;
-  border-top: 1px solid rgba(255,255,255,.16);
+  display: flex; flex-wrap: wrap; gap: 8px 26px;
+  margin-top: clamp(26px, 3.4vh, 44px); padding-top: 20px;
+  position: relative;
   font-family: var(--mono); font-size: 11.5px;
-  letter-spacing: .14em; color: rgba(255,255,255,.55);
+  letter-spacing: .14em; color: rgba(255,255,255,.58);
+  font-variant-numeric: tabular-nums;
 }
+.hero-meta::before {
+  content: ""; position: absolute; top: 0; left: 0;
+  width: min(100%, 560px); height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,.34), rgba(255,255,255,0));
+}
+.hero-meta > * { display: inline-flex; align-items: center; }
+/* The point trails the item before it rather than leading the item after it. On a
+   narrow column the row wraps, and a separator that leads its item ends up as a
+   gold dot alone at the start of the second line. */
+.hero-meta > *:not(:last-child)::after {
+  content: ""; width: 3px; height: 3px; border-radius: 50%;
+  background: var(--gold); margin-left: 26px;
+}
+
+/* ---------- hero: the headline arriving ---------- */
+/* One span per word — per character in Chinese — each carrying its position as
+   `--i`. The movement itself is in motion.css; all this does is make the spans
+   movable and give them a floor, so a headline whose animation never runs (no
+   support, reduced motion, `animation: none` in the studio) is a plain headline
+   rather than an invisible one. */
+.hword { display: inline-block; }
+
+/* ---------- hero: the scroll cue ---------- */
+.hero-cue {
+  position: absolute; z-index: 2;
+  left: max(var(--gut), 50% - var(--maxw) / 2 + var(--gut));
+  bottom: clamp(26px, 4vh, 46px);
+  display: flex; align-items: center; gap: 14px;
+  color: rgba(255,255,255,.5);
+  font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .22em; text-transform: uppercase;
+}
+.hero-cue-rail {
+  position: relative; display: block;
+  width: 1px; height: 44px;
+  background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,0));
+}
+.hero-cue-dot {
+  position: absolute; left: -1px; top: 0;
+  width: 3px; height: 3px; border-radius: 50%; background: var(--gold);
+}
+@media (max-width: 720px) { .hero-cue { display: none; } }
 
 .rotor { display: inline-block; color: var(--gold); font-weight: 800; }
 .rotor .rword {
@@ -114,7 +262,7 @@
   transition: transform .35s ease, opacity .35s ease;
 }
 
-.hero-portrait { position: relative; justify-self: end; width: min(100%, 420px); }
+.hero-portrait { position: relative; justify-self: end; width: min(100%, 400px); }
 .hero-portrait-frame {
   position: absolute; inset: -14px -14px 22px 22px;
   border: 1px solid rgba(200,162,75,.5); border-radius: var(--r-lg);
@@ -187,6 +335,139 @@
   content: ""; position: absolute; left: -7px; top: 6px;
   width: 12px; height: 12px; border-radius: 50%;
   background: var(--gold); box-shadow: 0 0 0 4px var(--paper);
+}
+
+/* ---------- experience: the stack ---------- */
+/* Five roles read in order rather than compared at once.
+ *
+ * Each slot is `sticky` at its own offset — `--head-h` clears the masthead and
+ * `--peek * --i` steps each card down by the height of one collapsed strip. So a
+ * card rides up, pins, and the next one comes over it leaving exactly its top edge
+ * showing. Four edges and one open card is a contents page for the section, built
+ * out of the cards themselves.
+ *
+ * `--peek` is load-bearing twice: it is the step between the pinned cards and it is
+ * the height of the strip that survives being covered. The two have to be the same
+ * number or the strips overlap their own contents, which is why the edge is sized
+ * from it rather than from its own padding. */
+.exp-stack {
+  --peek: clamp(46px, 6.2vh, 62px);
+  list-style: none; margin: 0; padding: 0;
+}
+/* Room after the last card, so it gets a screen to itself with the four strips
+   above it still pinned — which is the moment the stack becomes a contents page.
+ *
+ * It has to be CONTENT, not padding. A sticky box is held inside its containing
+ * block's *content* box reduced by its own margins, so `padding-bottom` on the list
+ * buys no extra sticky range at all: measured, every card broke its pin about 350px
+ * early and the five of them slid away together. An empty block at the end of the
+ * list moves the content edge, and they hold. */
+.exp-stack::after {
+  content: ""; display: block; height: clamp(120px, 38vh, 400px);
+}
+.exp-stack-slot {
+  position: sticky;
+  top: calc(var(--head-h) + var(--peek) * var(--i));
+  /* The gap is the scroll distance a card gets to itself before the next one starts
+     covering it. Too small and the stack riffles past; this is about half a screen. */
+  margin-bottom: clamp(72px, 13vh, 150px);
+}
+.exp-stack-slot:last-child { margin-bottom: 0; }
+.exp-stack-link { display: block; color: inherit; }
+
+.exp-stack-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  /* The card recedes from its own top edge, so the strip that stays visible stays
+     exactly where it was while the body behind it shrinks away. */
+  transform-origin: 50% 0;
+  transition: border-color .25s, box-shadow .25s;
+}
+.exp-stack-link:hover .exp-stack-card {
+  border-color: rgba(200,162,75,.65);
+  box-shadow: var(--shadow-lg);
+}
+
+/* The spine. Four facts, one line, and it must not wrap: it is sized to `--peek`
+   and anything that wraps out of it is showing under the card above. */
+.exp-stack-edge {
+  display: grid;
+  grid-template-columns: auto minmax(0, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 clamp(14px, 1.8vw, 26px);
+  height: calc(var(--peek) - 3px);
+  padding-inline: clamp(20px, 2.4vw, 34px);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  white-space: nowrap;
+}
+.exp-stack-num {
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; color: var(--gold); font-variant-numeric: tabular-nums;
+}
+.exp-stack-co { font-size: 18px; font-weight: 800; letter-spacing: -.015em; color: var(--ink); }
+.exp-stack-role {
+  font-size: 14px; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis;
+}
+.exp-stack-years {
+  font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+  letter-spacing: .06em; font-variant-numeric: tabular-nums;
+}
+
+.exp-stack-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(20px, 3vw, 52px);
+  align-items: end;
+  padding: clamp(24px, 2.8vw, 34px) clamp(20px, 2.4vw, 34px) clamp(26px, 3vw, 36px);
+}
+.exp-stack-lines { min-width: 0; }
+.exp-stack-summary {
+  margin: 12px 0 0; font-size: 16.5px; line-height: 1.65; color: var(--body);
+  max-width: 68ch;
+}
+.exp-stack-meta {
+  margin: 16px 0 0; font-family: var(--mono);
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.exp-stack-side {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 14px; text-align: right;
+}
+.exp-stack-metric {
+  font-family: var(--mono); font-size: 12.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--gold);
+  max-width: 22ch;
+}
+.exp-stack-side .exp-more { margin-top: 0; padding-top: 0; }
+.exp-stack-link:hover .exp-more { gap: 13px; color: var(--navy); }
+.exp-stack-link:hover .exp-more-mark { background: var(--gold); transform: translateX(2px); }
+
+.section[data-theme='dark'] .exp-stack-card,
+.section[data-theme='dark'] .exp-stack-edge { background: #0b2547; border-color: var(--line-navy); }
+.section[data-theme='dark'] .exp-stack-co { color: #fff; }
+.section[data-theme='dark'] .exp-stack-summary { color: rgba(255,255,255,.82); }
+.section[data-theme='dark'] .exp-stack-role,
+.section[data-theme='dark'] .exp-stack-years,
+.section[data-theme='dark'] .exp-stack-meta { color: rgba(255,255,255,.55); }
+
+/* A pinned card on a phone covers the thing you scrolled down to read, and five of
+   them leave nothing on screen at all. Below this width the stack is a stack of
+   cards in the ordinary sense. */
+@media (max-width: 900px) {
+  .exp-stack-slot { position: static; margin-bottom: 18px; }
+  .exp-stack-body { grid-template-columns: 1fr; align-items: start; }
+  .exp-stack-side { align-items: flex-start; text-align: left; }
+  .exp-stack-edge {
+    height: auto; white-space: normal;
+    grid-template-columns: auto 1fr; gap: 4px 14px;
+    padding-block: 16px;
+  }
+  .exp-stack-role, .exp-stack-years { grid-column: 2; }
 }
 
 /* ---------- experience: the card that leads somewhere ---------- */
@@ -360,6 +641,88 @@
 .section[data-theme='dark'] .proj-also-item p { color: rgba(255,255,255,.7); }
 .section[data-theme='dark'] .proj-also-item .proj-also-handles { color: rgba(255,255,255,.55); }
 
+/* ---------- projects: the showcase ---------- */
+/* The card frame comes off and the cover becomes the object on the page.
+ *
+ * A bordered box around a screenshot reads as a card in a list of cards. The same
+ * screenshot at size, with a two-digit number set against it and the writing held to
+ * a reading measure beside it, reads as a piece of work — which is what these are.
+ * The alternating sides stay: they are what make three of them a sequence.
+ *
+ * The cover is still never cropped, for the reason given above `.proj-media`. The
+ * frame takes the picture's shape; only the hover push exceeds it, and `clip` on the
+ * frame is what keeps that from bleeding over the words. */
+.proj-list[data-variant='showcase'] { gap: clamp(56px, 9vh, 120px); }
+
+.proj-card[data-showcase] {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  gap: clamp(26px, 4vw, 68px);
+}
+.proj-card[data-showcase]:hover { border-color: transparent; }
+
+@media (min-width: 900px) {
+  .proj-card[data-showcase] { grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); }
+}
+
+.proj-card[data-showcase] .proj-media {
+  position: relative;
+  overflow: clip;
+  border-radius: var(--r);
+  box-shadow: var(--shadow-lg);
+  background: var(--cream);
+}
+.proj-card[data-showcase] .proj-media img {
+  transition: transform .55s var(--ease-out);
+}
+.proj-card[data-showcase]:hover .proj-media img { transform: scale(1.035); }
+
+/* The door, where the pointer already is. */
+.proj-open {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px clamp(16px, 2vw, 26px);
+  background: var(--gold); color: var(--navy-deep);
+  font-size: 12.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
+  transform: translateY(101%);
+  transition: transform .38s var(--ease-out);
+}
+.proj-card[data-showcase]:hover .proj-open { transform: none; }
+.proj-open-mark { transition: transform .28s var(--ease-out); }
+.proj-card[data-showcase]:hover .proj-open-mark { transform: translateX(4px); }
+
+/* Big, quiet, and behind everything else in the column — a page number rather than
+   a label. It is the same two-digit mark the section rail uses, at the scale the
+   work deserves. */
+.proj-index {
+  display: block;
+  font-family: var(--mono); font-weight: 700;
+  font-size: clamp(34px, 4.4vw, 62px);
+  line-height: 1; letter-spacing: -.04em;
+  color: rgba(200,162,75,.32);
+  margin-bottom: clamp(14px, 1.6vw, 22px);
+  font-variant-numeric: tabular-nums;
+}
+.section[data-theme='dark'] .proj-index { color: rgba(200,162,75,.4); }
+
+.proj-card[data-showcase] h3 { font-size: clamp(28px, 3.2vw, 44px); margin: 14px 0 8px; }
+.proj-card[data-showcase] .proj-summary { max-width: 46ch; }
+
+/* A project that is being worked on right now should look like it. Only `building`
+   gets the pulse — "validating" and "coming soon" are states, not activity. */
+.proj-status[data-live='true'] { display: inline-flex; align-items: center; gap: 8px; }
+.proj-status[data-live='true']::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); flex: none;
+}
+
+@media (max-width: 899px) {
+  .proj-open { position: static; transform: none; border-radius: 0 0 var(--r) var(--r); }
+}
+
 /* ---------- projects: the homepage row of one-liners ---------- */
 .proj-compact-grid {
   display: grid;
@@ -413,7 +776,15 @@
   background: var(--paper); padding: 24px 22px; min-height: 132px;
   display: flex; flex-direction: column; transition: background .25s;
 }
+.play-tile { position: relative; }
+.play-tile::after {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 2px;
+  background: var(--gold); transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .35s var(--ease-out);
+}
 .play-tile:hover { background: var(--cream); }
+.play-tile:hover::after { transform: scaleX(1); }
+.play-tile-stack:hover::after { transform: scaleX(0); }
 .play-tile-name {
   font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: var(--ink);
 }
@@ -533,14 +904,47 @@
 }
 .stats-note { margin: 0; max-width: 34ch; color: var(--muted); font-size: 15px; }
 
+/* Two columns, and the left one stays.
+ *
+ * The head used to sit above the numbers, which meant that by the time you were
+ * reading the fourth figure the question it answers had scrolled off. Held in place
+ * beside them, the claim and the numbers are on screen together — and the section
+ * gets a rhythm of its own instead of the head-then-grid shape every other one has.
+ *
+ * Done with `:has()` rather than a wrapper, because a wrapper would put the cards a
+ * level deeper than the scroll-reveal selector reaches and they would stop arriving
+ * one after another. */
+@media (min-width: 1000px) {
+  .section:has(> .wrap > .stats-grid) > .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: clamp(30px, 4.5vw, 76px);
+    align-items: start;
+  }
+  .section:has(> .wrap > .stats-grid) .stats-head {
+    position: sticky; top: calc(var(--head-h) + clamp(28px, 5vh, 56px));
+    flex-direction: column; align-items: flex-start;
+    margin-bottom: 0;
+  }
+  .section:has(> .wrap > .stats-grid) .stats-note { margin-top: 22px; max-width: none; }
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
   gap: 20px;
 }
+/* A flat navy panel this size reads as a hole in the page. The two gradients are
+   almost invisible on their own and are what stop it reading as one dead colour —
+   the same trick as the hero's offset glows, at panel scale and no image request. */
 .stat-feature {
+  position: relative; overflow: hidden;
   grid-column: span 2; min-width: 0;
-  background: var(--navy-deep); color: #fff;
+  background:
+    radial-gradient(ellipse 90% 70% at 88% 0%, rgba(20,86,160,.5), transparent 62%),
+    radial-gradient(ellipse 70% 60% at 0% 100%, rgba(200,162,75,.1), transparent 68%),
+    var(--navy-deep);
+  color: #fff;
   border-radius: var(--r-lg); padding: clamp(28px, 3.2vw, 40px);
   display: flex; flex-direction: column; justify-content: space-between;
   box-shadow: var(--shadow); min-height: 210px;
@@ -557,16 +961,27 @@
 .stat-accent { color: var(--gold); }
 
 .stat-card {
+  position: relative; overflow: hidden;
   background: var(--paper); border-radius: var(--r-lg); padding: 28px 26px;
-  border-top: 3px solid transparent; box-shadow: var(--shadow-sm);
-  transition: transform .26s, box-shadow .26s, border-color .26s;
+  box-shadow: var(--shadow-sm);
+  transition: transform .26s, box-shadow .26s;
 }
-.stat-card:hover {
-  transform: translateY(-6px); box-shadow: var(--shadow); border-top-color: var(--gold);
+/* The gold cap used to appear only on hover, which on a touch screen meant never.
+   Now it draws itself across the top as the card comes up the page — the same
+   gesture as the section rail down the left margin, at card scale. */
+.stat-card::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: var(--gold);
+  transform: scaleX(0); transform-origin: 0 50%;
 }
+.stat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+
+/* The figure is pushed up from behind the line above it rather than fading in.
+   `overflow: hidden` on the card is what gives it something to come out from. */
 .stat-value {
+  display: block;
   font-weight: 800; font-size: clamp(32px, 3.6vw, 46px);
-  line-height: 1; letter-spacing: -.03em; color: var(--ink);
+  line-height: 1.05; letter-spacing: -.03em; color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 .stat-label { margin: 12px 0 0; font-size: 14px; font-weight: 700; color: var(--ink); }
@@ -645,12 +1060,15 @@
 
 /* ---------- detail pages (/projects/… and /experience/…) ---------- */
 .detail-head {
+  position: relative;
   background: var(--navy-deep); color: rgba(255,255,255,.86);
   padding-block: clamp(40px, 6vw, 76px) clamp(44px, 6vw, 80px);
 }
+/* One step below the hero, and on the same scale — so it moves with the
+   language the way everything else does. */
 .detail-head h1 {
-  color: #fff; font-size: clamp(34px, 5.4vw, 62px);
-  letter-spacing: -.035em; line-height: 1.04; margin: 0;
+  color: #fff; font-size: var(--h2-size);
+  letter-spacing: var(--h2-tracking); line-height: var(--h2-leading); margin: 0;
 }
 .detail-head .eyebrow { color: var(--gold); }
 
@@ -709,6 +1127,75 @@
   max-width: 820px;
 }
 
+/* ---------- detail: the facts that stay beside you ---------- */
+/* Who, when, where and the headline number, held in place while the writing goes
+   past. A role's page is long enough that by the third contribution the dates are
+   two screens above; here they never leave. */
+.detail-aside { margin-bottom: clamp(32px, 4vw, 44px); }
+.detail-facts { margin: 0; display: grid; gap: 18px; }
+.detail-fact { display: grid; gap: 3px; }
+.detail-fact dt {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+}
+.detail-fact dd { margin: 0; font-size: 15.5px; line-height: 1.45; color: var(--ink); font-weight: 600; }
+.detail-fact dd[data-accent] {
+  font-family: var(--mono); font-size: 13px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--gold);
+}
+
+@media (min-width: 1120px) {
+  /* Two columns, made where the aside is rather than everywhere: a project page with
+     no aside keeps the single reading column it already had. */
+  .detail-body:has(> .detail-aside) {
+    display: grid;
+    grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
+    column-gap: clamp(36px, 5vw, 76px);
+    max-width: 1120px;
+    align-items: start;
+  }
+  .detail-body:has(> .detail-aside) > .detail-aside {
+    grid-column: 1; grid-row: 1 / 200;
+    position: sticky; top: calc(var(--head-h) + clamp(28px, 5vh, 56px));
+    margin-bottom: 0;
+    padding-right: 26px; border-right: 1px solid var(--line);
+  }
+  .detail-body:has(> .detail-aside) > *:not(.detail-aside) { grid-column: 2; }
+}
+
+/* ---------- detail: what to read next ---------- */
+/* The rules are drawn on the cells, not as a coloured gap behind them: this element
+   is a `.wrap`, so a background on it also paints the container's own side padding
+   and the divider turns into two grey bands down the edges of the page. */
+.detail-seq {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  border-block: 1px solid var(--line);
+}
+.detail-seq-item + .detail-seq-item { border-left: 1px solid var(--line); }
+.detail-seq-item {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--paper); padding: clamp(24px, 3vw, 36px) clamp(20px, 2.4vw, 32px);
+  transition: background .25s;
+}
+.detail-seq-item:hover { background: var(--cream); }
+/* The one going forward is right-aligned, so the pair reads as two directions rather
+   than as two cards. */
+.detail-seq-item[data-dir='next'] { text-align: right; align-items: flex-end; }
+.detail-seq-label {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--gold);
+}
+.detail-seq-item[data-dir='prev'] .detail-seq-label::before { content: "←"; transition: transform .2s; }
+.detail-seq-item[data-dir='next'] .detail-seq-label::after { content: "→"; transition: transform .2s; }
+.detail-seq-item[data-dir='prev']:hover .detail-seq-label::before { transform: translateX(-4px); }
+.detail-seq-item[data-dir='next']:hover .detail-seq-label::after { transform: translateX(4px); }
+.detail-seq-name {
+  font-family: var(--display); font-size: clamp(20px, 2.2vw, 27px);
+  font-weight: 800; letter-spacing: -.02em; color: var(--ink);
+}
+.detail-seq-meta { font-size: 14px; color: var(--muted); }
+
 .detail-metrics {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 24px; padding-bottom: clamp(36px, 4vw, 50px);
@@ -762,7 +1249,12 @@
 .contrib::after {
   content: ""; position: absolute; left: 7px; top: 24px; bottom: 4px;
   width: 1px; background: var(--line);
+  transform-origin: 50% 0;
 }
+/* The line down the left of a contribution draws itself as you read past it — the
+   same gesture as the section rail in the margin, at paragraph scale. Gold rather
+   than grey, so the finished part is visibly the part you have read. */
+.contrib-list .contrib::before { z-index: 1; }
 .contrib:last-child::after { display: none; }
 .contrib-title {
   margin: 0 0 8px; font-size: clamp(18px, 1.8vw, 21px);
@@ -961,6 +1453,55 @@ a.detail-related-card:hover {
   break-inside: avoid; margin-bottom: 20px;
 }
 
+/* ---------- the strip that travels sideways ---------- */
+/* The one horizontal movement on the site, and it is on the page where it belongs:
+   the page about weekends, not the one about work. You scroll down, the photographs
+   go across. It breaks the vertical rhythm exactly once, which is what makes it
+   register.
+ *
+ * The rail is edge to edge — the standard escape from a centred container — because
+ * a strip that runs off the screen has to actually run off the screen. `clip` rather
+ * than `hidden`: `hidden` on an ancestor turns it into a scroll container, which
+ * would let a stray gesture scroll the track out of step with its own animation. */
+.gallery-rail {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  overflow: clip;
+}
+.gallery[data-variant='scroller'] {
+  display: flex;
+  gap: clamp(14px, 1.6vw, 24px);
+  width: max-content;
+  padding-inline: var(--gut);
+  will-change: transform;
+}
+.gallery[data-variant='scroller'] .gallery-item {
+  flex: none;
+  width: clamp(240px, 26vw, 380px);
+}
+/* 4:3, which is the shape the image service was asked to crop to — see the comment
+   in PhotoGallery.tsx. Giving a frame a different ratio here would crop the picture a
+   second time, in CSS, around the middle rather than around the hotspot, and it is
+   faces that end up outside the second crop. */
+.gallery[data-variant='scroller'] img {
+  aspect-ratio: 4/3; object-fit: cover; width: 100%;
+}
+/* The variety comes from width instead, so the strip has a rhythm without a single
+   picture being recropped. */
+.gallery[data-variant='scroller'] .gallery-item:nth-child(3n) { width: clamp(200px, 21vw, 300px); }
+.gallery[data-variant='scroller'] .gallery-item:nth-child(5n) { width: clamp(280px, 31vw, 440px); }
+
+/* No scroll-driven animation, no sideways travel — so it becomes what it already is
+   underneath: a strip you can push with a finger. */
+@supports not (animation-timeline: view()) {
+  .gallery-rail { overflow-x: auto; scrollbar-width: thin; }
+  .gallery[data-variant='scroller'] { scroll-snap-type: x mandatory; }
+  .gallery[data-variant='scroller'] .gallery-item { scroll-snap-align: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gallery-rail { overflow-x: auto; }
+}
+
 .gallery[data-variant='filmstrip'] {
   display: grid; grid-auto-flow: column; grid-auto-columns: minmax(280px, 34%);
   gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory;
@@ -1000,7 +1541,13 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 .bento-tile[data-tone='gold']  { background: var(--gold); color: var(--navy-deep); border-color: transparent; }
 .bento-tile[data-tone='navy'] h3 { color: #fff; }
 
-.bento-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bento-image {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s var(--ease-out);
+}
+a.bento-tile:hover .bento-image { transform: scale(1.06); }
+.bento-content { transition: transform .35s var(--ease-out); }
+a.bento-tile:hover .bento-content { transform: translateY(-4px); }
 /* Text over a photograph needs its own scrim, or a light sky eats the headline. It
    is weighted to the bottom third rather than spread evenly: that is where the type
    sits, and the picture above it stays a picture. Strong enough to carry white text
@@ -1141,6 +1688,53 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 .nav-group[data-section='true'] > a::after { transform: scaleX(1); }
 .nav-group[data-section='true'] > a.nav-cta::after { display: none; }
 
+/* ---------- masthead over a hero ---------- */
+/* A white bar laid across a full-screen navy hero was the most template-looking
+   thing on this site: it cut the opening image in half before anyone had read a
+   word of it. Over a hero the masthead has no ground of its own — it is white
+   type on the hero — and it only becomes a bar once the hero has gone.
+ *
+ * Which pages get that is decided in CSS rather than in script: `:has(~ main .hero)`
+ * is true on the server, so the header renders in the right state on the first
+ * frame and never flashes the other one. `MastheadState.tsx` adds `data-scrolled`
+ * and nothing else — the one fact CSS cannot work out for itself. */
+.masthead:has(~ main .hero):not([data-scrolled]) {
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+.masthead { transition: background .4s var(--ease-out), border-color .4s var(--ease-out), box-shadow .3s; }
+
+.masthead:has(~ main .hero):not([data-scrolled]) :is(.brand-name, .brand-local) { color: #fff; }
+.masthead:has(~ main .hero):not([data-scrolled]) .brand-local { color: rgba(255,255,255,.55); }
+.masthead:has(~ main .hero):not([data-scrolled]) :is(.nav, .nav-group) > a:not(.nav-cta) { color: rgba(255,255,255,.82); }
+.masthead:has(~ main .hero):not([data-scrolled]) :is(.nav, .nav-group) > a:not(.nav-cta):hover,
+.masthead:has(~ main .hero):not([data-scrolled]) :is(.nav, .nav-group) > a[aria-current='page'],
+.masthead:has(~ main .hero):not([data-scrolled]) .nav-group[data-section='true'] > a { color: #fff; }
+.masthead:has(~ main .hero):not([data-scrolled]) .nav-caret { color: rgba(255,255,255,.55); }
+.masthead:has(~ main .hero):not([data-scrolled]) .nav-group:hover .nav-caret { color: #fff; }
+.masthead:has(~ main .hero):not([data-scrolled]) .masthead-clock { color: rgba(255,255,255,.6); }
+.masthead:has(~ main .hero):not([data-scrolled]) .masthead-meta::before { background: rgba(255,255,255,.22); }
+.masthead:has(~ main .hero):not([data-scrolled]) .lang-toggle {
+  border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.85);
+}
+.masthead:has(~ main .hero):not([data-scrolled]) .lang-toggle:hover,
+.masthead:has(~ main .hero):not([data-scrolled]) .lang-toggle[aria-expanded='true'] {
+  background: #fff; color: var(--navy); border-color: #fff;
+}
+.masthead:has(~ main .hero):not([data-scrolled]) .burger {
+  border-color: rgba(255,255,255,.3); color: #fff;
+}
+/* The navy CTA has no contrast left on a navy hero, so over one it borrows the
+   ghost button's outline. The gold one is already the brightest thing in the bar
+   and is left exactly as it is. */
+.masthead:has(~ main .hero):not([data-scrolled]) .btn-navy.nav-cta {
+  background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.5);
+}
+.masthead:has(~ main .hero):not([data-scrolled]) .btn-navy.nav-cta:hover {
+  background: #fff; color: var(--navy); box-shadow: none;
+}
+
 /* ---------- nav drop-downs (Experience, Projects) ---------- */
 /* Both are stretched to the full height of the bar so the panel hangs off the
    masthead's own bottom edge. There is then no gap between the item and the menu for
@@ -1244,6 +1838,52 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 
 /* ---------- footer ---------- */
 .foot { background: var(--foot-bg); color: rgba(255,255,255,.72); padding-block: clamp(48px, 6vw, 78px) 30px; }
+
+/* The address, at heading size, above a gold rule that runs the width of the page.
+   Everything below it is reference; this is the part that asks for a reply. */
+.foot-open {
+  padding-bottom: clamp(36px, 5vw, 56px);
+  margin-bottom: clamp(36px, 5vw, 56px);
+  border-bottom: 1px solid var(--line-navy);
+  position: relative;
+}
+.foot-open::after {
+  content: ""; position: absolute; left: 0; bottom: -1px;
+  width: min(46%, 420px); height: 1px; background: var(--rule-gold);
+}
+.foot-open .eyebrow { color: var(--gold); }
+.foot-address {
+  display: inline-block; position: relative;
+  font-family: var(--display); color: #fff;
+  font-size: var(--h2-size); font-weight: var(--h2-weight);
+  line-height: var(--h2-leading); letter-spacing: var(--h2-tracking);
+  word-break: break-word;
+}
+/* Wipes in from the left rather than appearing all at once, so the underline
+   reads as being drawn under the address. */
+.foot-address::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -.08em; height: 2px;
+  background: var(--gold);
+  transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform var(--t-base) var(--ease-out);
+}
+a.foot-address:hover { color: var(--gold); }
+a.foot-address:hover::after { transform: scaleX(1); }
+
+.foot-open-meta {
+  margin: 22px 0 0; display: flex; flex-wrap: wrap; gap: 0 20px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.45);
+  font-variant-numeric: tabular-nums;
+}
+/* A gold point between the place and the time, drawn rather than typed so it
+   disappears cleanly when the two wrap onto separate lines. */
+.foot-open-meta > * + *::before {
+  content: ""; display: inline-block; vertical-align: middle;
+  width: 3px; height: 3px; border-radius: 50%; background: var(--gold);
+  margin-right: 20px;
+}
+
 .foot-grid {
   display: grid; grid-template-columns: minmax(260px, 2fr) 1fr 1fr;
   gap: clamp(28px, 4vw, 56px);
@@ -1281,26 +1921,6 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
   .hero-portrait-badge { left: 0; }
 }
 
-/* One switch for everything that moves.
-   The old version set the two durations and nothing else, which left
-   `animation-delay` and `animation-iteration-count` alone: an infinite animation
-   became a fast flicker instead of stopping — the reason `.skeleton-bar` needs its
-   own override further down — and a delayed one still waited before appearing all
-   at once. It reaches no JavaScript either, which is why CountUp, RotatingWord and
-   ScrollReveal each ask `matchMedia` themselves rather than trusting this. */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    animation-delay: 0ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
-    transition-delay: 0ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
 /* ---------------------------------------------------------------- skeleton */
 /* The shape of a page before it lands. Deliberately the same navy band and the
    same rhythm as a real hero, so the swap is a change of content rather than a
@@ -1335,243 +1955,4 @@ a.bento-tile:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 @keyframes skeleton-sheen {
   from { background-position: 150% 0; }
   to { background-position: -150% 0; }
-}
-
-/* The blanket rule above only shortens durations, which on an infinite animation
-   trades a slow sweep for a fast flicker. Stop it outright instead. */
-@media (prefers-reduced-motion: reduce) {
-  .skeleton-bar { animation: none; background: var(--tone); }
-}
-
-/* ------------------------------------------------------- page transitions */
-/* Navigating used to be a hard cut: the old page vanished, the new one appeared,
-   and nothing on screen said the two were related. These rules are the browser's
-   own View Transitions, driven by React's <ViewTransition> — no library, and no
-   animation running on the main thread.
-
-   Three vocabularies, because three different things happen. A card opening into
-   its own page moves forward; the back link moves back; everything else — nav,
-   footer, language — is the same depth and only fades. Anything arriving without
-   a type animates not at all, which covers the browser's back button, where the
-   browser is already doing its own thing and a second animation on top reads as a
-   glitch. */
-
-/* The overlay sits above the live page for the length of the transition and would
-   otherwise swallow any click that lands during it. */
-::view-transition {
-  pointer-events: none;
-}
-
-/* The two fixed points. Without this the masthead is treated as content that left
-   and content that arrived, so it slides with everything else and the whole
-   viewport appears to move. `display: none` on the outgoing snapshot stops the
-   moment where both are painted at once. */
-::view-transition-group(site-header),
-::view-transition-group(site-footer) {
-  animation: none;
-  z-index: 100;
-}
-::view-transition-old(site-header),
-::view-transition-old(site-footer) {
-  display: none;
-}
-::view-transition-new(site-header),
-::view-transition-new(site-footer) {
-  animation: none;
-}
-
-/* Going deeper: the page you leave slides out to the left, the one you open
-   arrives from the right. */
-::view-transition-old(.nav-forward) {
-  --vt-offset: calc(var(--vt-travel) * -1);
-  animation:
-    var(--vt-exit) ease-in both vt-fade reverse,
-    var(--vt-move) ease-in-out both vt-slide reverse;
-}
-::view-transition-new(.nav-forward) {
-  --vt-offset: var(--vt-travel);
-  animation:
-    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-    var(--vt-move) ease-in-out both vt-slide;
-}
-
-/* Coming back out: the same movement, mirrored. */
-::view-transition-old(.nav-back) {
-  --vt-offset: var(--vt-travel);
-  animation:
-    var(--vt-exit) ease-in both vt-fade reverse,
-    var(--vt-move) ease-in-out both vt-slide reverse;
-}
-::view-transition-new(.nav-back) {
-  --vt-offset: calc(var(--vt-travel) * -1);
-  animation:
-    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-    var(--vt-move) ease-in-out both vt-slide;
-}
-
-/* Sideways: no travel at all. Projects and About are not in front of or behind
-   each other, and moving between them should not claim they are. */
-::view-transition-old(.nav-lateral) {
-  animation: var(--vt-exit) ease-in both vt-fade reverse;
-}
-::view-transition-new(.nav-lateral) {
-  animation: var(--vt-enter) ease-out var(--vt-exit) both vt-fade;
-}
-
-/* The shared elements: a card's cover and its heading, growing into the ones on
-   the page they open. The browser interpolates between two bitmaps, which on a
-   photograph changing size is visible as a shimmer — the blur at the midpoint is
-   there to cover it, not for its own sake. */
-::view-transition-group(.morph) {
-  animation-duration: var(--vt-morph);
-}
-::view-transition-image-pair(.morph) {
-  animation-name: vt-via-blur;
-}
-
-@keyframes vt-fade {
-  from { opacity: 0; filter: blur(3px); }
-  to   { opacity: 1; filter: blur(0); }
-}
-@keyframes vt-slide {
-  from { translate: var(--vt-offset); }
-  to   { translate: 0; }
-}
-@keyframes vt-via-blur {
-  30% { filter: blur(3px); }
-}
-
-/* Sliding a whole page across the viewport is the single most common trigger for
-   motion sensitivity, and the blanket rule earlier in this file does not reach
-   these pseudo-elements — `*` does not match them. Stated explicitly, so the
-   pages simply swap, which is what the browser does with no transition at all. */
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(*),
-  ::view-transition-new(*),
-  ::view-transition-group(*) {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
-  }
-}
-
-/* ---------------------------------------------------------- scroll reveal */
-/* Sections used to arrive already finished — the only thing marking one off from
-   the next was a change of background colour. Now the head lines and then the
-   cards lift into place as they come up the screen.
-
-   Driven by the scroll position rather than fired once on arrival: scroll back up
-   and it plays backwards, which is what makes it feel attached to the page rather
-   than triggered at it. That is `animation-timeline: view()`, which runs on the
-   compositor and costs the main thread nothing — no scroll listener, no library.
-
-   Firefox has not shipped it outside Nightly, so everything here sits inside
-   `@supports`. The hidden state has to be in there too: written outside it, every
-   Firefox visitor would get a page of permanently invisible content. What they get
-   instead is the page, plainly — and `ScrollReveal` puts the same movement back
-   with an IntersectionObserver, which is what the `.reveal` rules in ui-kit.css
-   were written for and never wired up to.
-
-   Body copy is deliberately not in the list. A case study's prose is a single tall
-   block, and tying its opacity to the scroll position means text that is still
-   arriving while you are trying to read it. What reveals on a detail page is the
-   metric row and the related cards — things you look at, rather than read.
-
-   The group selector is repeated below rather than factored out, and is kept in
-   step with TARGETS in src/components/ScrollReveal.tsx. */
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    :is(
-      .section:not([data-animation='none']) .wrap > *,
-      .detail-metrics,
-      .detail-related-grid
-    ) > * {
-      animation: reveal-rise linear both;
-      animation-timeline: view();
-      animation-range: entry 4% cover 30%;
-    }
-
-    /* Each child runs on its own timeline and a row of cards shares a top edge, so
-       without this they would all arrive on the same frame. Offsetting the range by
-       position is what turns an appearance into a sequence. */
-    :is(
-      .section:not([data-animation='none']) .wrap > *,
-      .detail-metrics,
-      .detail-related-grid
-    ) > *:nth-child(2) {
-      animation-range: entry 8% cover 34%;
-    }
-    :is(
-      .section:not([data-animation='none']) .wrap > *,
-      .detail-metrics,
-      .detail-related-grid
-    ) > *:nth-child(3) {
-      animation-range: entry 12% cover 38%;
-    }
-    :is(
-      .section:not([data-animation='none']) .wrap > *,
-      .detail-metrics,
-      .detail-related-grid
-    ) > *:nth-child(n + 4) {
-      animation-range: entry 16% cover 42%;
-    }
-
-    /* The editor's middle setting, honoured as the comment at the top of this file
-       has always claimed it was: reduced arrives, it just does not travel. */
-    .section[data-animation='reduced'] .wrap > * > * {
-      animation-name: reveal-fade;
-    }
-
-    /* Photographs open rather than fade. Only in galleries: the covers on cards and
-       on a detail header are shared elements that morph between pages, and giving
-       one of those a second animation of its own is asking the two to disagree. */
-    .gallery img,
-    .detail-gallery img {
-      animation: reveal-wipe linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 45%;
-    }
-  }
-}
-
-/* The fallback path answers to the same three settings. `none` is already covered
-   by the blanket at the top of this file; this is `reduced`. */
-.section[data-animation='reduced'] .reveal { transform: none; }
-
-@keyframes reveal-rise {
-  from { opacity: 0; transform: translateY(26px); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes reveal-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes reveal-wipe {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0 0 0); }
-}
-
-/* How far down the page you are, in one gold line under the masthead. Four lines
-   of CSS and no JavaScript, because the scroll position is the timeline. */
-@supports (animation-timeline: scroll(root)) {
-  @media (prefers-reduced-motion: no-preference) {
-    .masthead::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -1px;
-      height: 2px;
-      background: var(--gold);
-      transform: scaleX(0);
-      transform-origin: 0 50%;
-      animation: scroll-progress linear both;
-      animation-timeline: scroll(root);
-    }
-  }
-}
-
-@keyframes scroll-progress {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
 }

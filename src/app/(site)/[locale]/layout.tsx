@@ -6,7 +6,9 @@ import { urlFor } from '@/sanity/image'
 import { DisableDraftMode } from '@/components/DisableDraftMode'
 import { Header } from '@/components/chrome/Header'
 import { Footer } from '@/components/chrome/Footer'
+import { MastheadState } from '@/components/chrome/MastheadState'
 import { ScrollReveal } from '@/components/ScrollReveal'
+import { Magnetic } from '@/components/Magnetic'
 import { PersonSchema } from '@/components/PersonSchema'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -21,6 +23,7 @@ import '@/styles/fonts.css'
 import '@/styles/tokens.css'
 import '@/styles/ui-kit.css'
 import '@/styles/site.css'
+import '@/styles/motion.css'
 
 /**
  * The favicon is authored in the CMS, so it is resolved here rather than shipped as
@@ -90,7 +93,9 @@ export default async function SiteLayout({
         <Header nav={nav} subpages={subpages} site={site} locale={locale} />
         {children}
         <Footer nav={nav} site={site} locale={locale} />
+        <MastheadState />
         <ScrollReveal />
+        <Magnetic />
         <PersonSchema site={site} locale={locale} />
 
         {/* Which project a recruiter opened, and how the page performed while they

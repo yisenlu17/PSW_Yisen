@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation'
  * decision, and only one of them ever runs.
  */
 const TARGETS = [
-  ".section:not([data-animation='none']) .wrap > * > *",
+  ".section:not([data-animation='none']) .wrap > *:not(.exp-stack, .gallery-rail) > *",
   '.detail-metrics > *',
   '.detail-related-grid > *',
 ].join(', ')

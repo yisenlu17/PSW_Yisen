@@ -17,6 +17,7 @@ export type ProjectsSectionData = {
   title?: LocaleString
   lede?: LocaleText
   limit?: number | null
+  variant?: 'cards' | 'showcase' | null
   compact?: boolean | null
   alsoLabel?: LocaleString
   linkToDetail?: boolean | null
@@ -36,9 +37,11 @@ export type ProjectsSectionData = {
 export function ProjectsSection({
   data,
   locale,
+  index,
 }: {
   data: ProjectsSectionData
   locale: Locale
+  index?: number
 }) {
   const all = data.projects ?? []
   const linked = data.linkToDetail !== false
@@ -58,8 +61,13 @@ export function ProjectsSection({
   // work exists, and a link to the page that actually shows it.
   const compact = data.compact === true
 
+  // Showcase drops the card frame entirely: the cover becomes the object on the page
+  // and the writing sits beside it, numbered. A bordered box around a screenshot is a
+  // card; a screenshot at size with a number against it is a piece of work.
+  const showcase = stegaClean(data.variant ?? 'cards') === 'showcase' && !compact
+
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="section-head">
         {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}
         {t(data.title, locale) && <h2 className="title">{t(data.title, locale)}</h2>}
@@ -79,7 +87,7 @@ export function ProjectsSection({
             ))}
           </div>
         ) : (
-          <div className="proj-list">
+          <div className="proj-list" data-variant={showcase ? 'showcase' : undefined}>
             {featured.map((project, i) => (
               <ProjectCard
                 key={project._id}
@@ -87,6 +95,8 @@ export function ProjectsSection({
                 locale={locale}
                 linked={linked}
                 flipped={i % 2 === 1}
+                showcase={showcase}
+                index={i + 1}
               />
             ))}
           </div>
@@ -111,18 +121,22 @@ function ProjectCard({
   locale,
   linked,
   flipped,
+  showcase = false,
+  index,
 }: {
   project: ProjectCardData
   locale: Locale
   linked: boolean
   flipped: boolean
+  showcase?: boolean
+  index?: number
 }) {
   const href = linked ? detailHref('projects', project.slug, locale) : null
   const status = statusLabel(project.status, locale)
   const tags = (project.tags ?? []).map((tag) => t(tag, locale)).filter(Boolean)
 
   return (
-    <article className="proj-card" data-flipped={flipped}>
+    <article className="proj-card" data-flipped={flipped} data-showcase={showcase || undefined}>
       {/* No picture, no column: the card goes full width rather than holding a grey
           rectangle open for one that was never given. */}
       {project.cover && (
@@ -132,19 +146,43 @@ function ProjectCard({
               src={urlFor(project.cover).width(1120).url()}
               alt={project.cover.alt ? stegaClean(project.cover.alt) : ''}
               {...imageSize(project.cover)}
-              sizes="(max-width: 900px) 100vw, 46vw"
+              // Showcase gives the cover the wider of the two columns, so the hint
+              // has to move with it or the browser fetches a file it then has to
+              // scale up. Same reasoning as the "Also running" covers below.
+              sizes={showcase ? '(max-width: 900px) 100vw, 52vw' : '(max-width: 900px) 100vw, 46vw'}
             />
           </Morph>
+          {/* Slides up over the bottom of the cover on hover. The card already has a
+              "Read the full project" link under the words; this is the same door in
+              the place the pointer actually is. */}
+          {showcase && href && (
+            <span className="proj-open" aria-hidden>
+              {locale === 'zh' ? '打开项目' : 'Open the case study'}
+              <span className="proj-open-mark">→</span>
+            </span>
+          )}
         </div>
       )}
 
       <div className="proj-body">
+        {showcase && index !== undefined && (
+          <span className="proj-index" aria-hidden>
+            {String(index).padStart(2, '0')}
+          </span>
+        )}
         <div className="proj-kickers">
           {t(project.category, locale) && (
             <span className="proj-kicker">{t(project.category, locale)}</span>
           )}
           {status && (
-            <span className="proj-status" data-shipped={isShipped(project.status)}>
+            <span
+              className="proj-status"
+              data-shipped={isShipped(project.status)}
+              // A dot, only on the one that is actually being worked on. "Validating"
+              // and "coming soon" are states; "building" is activity, and it is the
+              // only one a pulse would be telling the truth about.
+              data-live={stegaClean(project.status ?? '') === 'building' || undefined}
+            >
               {status}
             </span>
           )}

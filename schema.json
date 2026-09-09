@@ -4269,6 +4269,10 @@
               {
                 "type": "string",
                 "value": "filmstrip"
+              },
+              {
+                "type": "string",
+                "value": "scroller"
               }
             ]
           },
@@ -4834,6 +4838,23 @@
           },
           "optional": true
         },
+        "variant": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "cards"
+              },
+              {
+                "type": "string",
+                "value": "showcase"
+              }
+            ]
+          },
+          "optional": true
+        },
         "compact": {
           "type": "objectAttribute",
           "value": {
@@ -4966,6 +4987,10 @@
               {
                 "type": "string",
                 "value": "timeline"
+              },
+              {
+                "type": "string",
+                "value": "stack"
               }
             ]
           },

@@ -84,6 +84,10 @@ export const experienceSection = defineType({
           { title: 'Cards + compact list', value: 'cardsAndList' },
           { title: 'Cards only', value: 'cards' },
           { title: 'Timeline', value: 'timeline' },
+          {
+            title: 'Stack — each role pins, the one before it collapses',
+            value: 'stack',
+          },
         ],
         layout: 'dropdown',
       },

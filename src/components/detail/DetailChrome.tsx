@@ -24,6 +24,7 @@ export function DetailHeader({
   backLabel,
   children,
   titleName,
+  headName,
 }: {
   eyebrow?: string
   title: string
@@ -35,8 +36,17 @@ export function DetailHeader({
   children?: ReactNode
   /** Ties this heading to the card it was opened from, so the two morph. */
   titleName?: string
+  /**
+   * Ties the whole dark band to the card it was opened from — so the card grows into
+   * the page rather than its heading flying out of it.
+   *
+   * Never pass both. An element carrying a view-transition name is lifted out of its
+   * ancestor's snapshot, so a named heading inside a named header would leave a hole
+   * in the header's picture for the length of the transition.
+   */
+  headName?: string
 }) {
-  return (
+  const head = (
     <header className="detail-head">
       <div className="wrap">
         <Link href={backHref} className="detail-back" transitionTypes={NAV_BACK}>
@@ -57,6 +67,8 @@ export function DetailHeader({
       </div>
     </header>
   )
+
+  return headName ? <Morph name={headName}>{head}</Morph> : head
 }
 
 /** A labelled prose block — "The problem", "What I did", "What happened". */

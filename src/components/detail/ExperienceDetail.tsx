@@ -1,10 +1,20 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 import type { PortableTextBlock } from '@portabletext/react'
 
 import { urlFor, imageSize } from '@/sanity/image'
 import { PortableBody } from '@/components/PortableBody'
-import { t, formatDateRange, type Locale, type LocaleString, type LocaleText } from '@/lib/locale'
+import {
+  t,
+  formatDateRange,
+  formatYearRange,
+  type Locale,
+  type LocaleString,
+  type LocaleText,
+} from '@/lib/locale'
+import { detailHref } from '@/lib/href'
+import { NAV_FORWARD } from '@/components/transitions'
 import type { ProjectCardData, SanityImage } from '@/lib/project'
 import { morphName } from '@/lib/view-transition'
 import { roleCompany, roleLocation } from '@/lib/experience'
@@ -46,6 +56,18 @@ export type ExperienceDetailData = {
   images?: SanityImage[] | null
   documents?: Array<{ _key: string; url?: string | null; filename?: string | null }> | null
   projects?: ProjectCardData[] | null
+  /** The roles either side of this one in the order /experience lists them. */
+  older?: SequenceLink | null
+  newer?: SequenceLink | null
+}
+
+type SequenceLink = {
+  company?: string | null
+  companyLocal?: string | null
+  slug?: string | null
+  role?: LocaleString
+  startDate?: string | null
+  endDate?: string | null
 }
 
 /**
@@ -90,7 +112,9 @@ export function ExperienceDetail({
         lede={t(experience.summary, locale)}
         backHref={`/${locale}/experience`}
         backLabel={c.backToExperience}
-        titleName={morphName('experience', 'title', experience.slug)}
+        // Every Experience card on the site — compact, full or stacked — morphs as
+        // a whole card into this band. One vocabulary rather than two.
+        headName={morphName('experience', 'card', experience.slug)}
         chips={
           t(experience.highlight, locale) ? (
             <span className="detail-chip" data-shipped>
@@ -101,6 +125,28 @@ export function ExperienceDetail({
       />
 
       <div className="wrap detail-body">
+        {/* The facts you keep glancing back at while reading — who, when, where, and
+            the one number the role is remembered for. On a wide screen it holds its
+            place beside the writing instead of scrolling off the top of it. */}
+        <aside className="detail-aside">
+          <dl className="detail-facts">
+            <Fact label={locale === 'zh' ? '职位' : 'Role'} value={t(experience.role, locale)} />
+            <Fact
+              label={locale === 'zh' ? '时间' : 'Dates'}
+              value={formatDateRange(experience.startDate, experience.endDate, locale)}
+            />
+            <Fact
+              label={locale === 'zh' ? '地点' : 'Location'}
+              value={roleLocation(experience, locale)}
+            />
+            <Fact
+              label={locale === 'zh' ? '重点' : 'Headline'}
+              value={t(experience.highlight, locale)}
+              accent
+            />
+          </dl>
+        </aside>
+
         <MetricRow metrics={metrics} />
 
         {t(experience.secondary, locale) && (
@@ -186,6 +232,8 @@ export function ExperienceDetail({
         )}
       </div>
 
+      <SequenceNav older={experience.older} newer={experience.newer} locale={locale} />
+
       {projects.length > 0 && (
         <section className="detail-related">
           <div className="wrap">
@@ -199,5 +247,69 @@ export function ExperienceDetail({
         </section>
       )}
     </main>
+  )
+}
+
+/** One line of the fact list. Renders nothing rather than an empty row. */
+function Fact({ label, value, accent }: { label: string; value?: string; accent?: boolean }) {
+  if (!value) return null
+  return (
+    <div className="detail-fact">
+      <dt>{label}</dt>
+      <dd data-accent={accent || undefined}>{value}</dd>
+    </div>
+  )
+}
+
+/**
+ * Where to go next, at the end of a role.
+ *
+ * "Next" follows the order /experience is in — newest first — so it is the role that
+ * came before this one in time. A page that only offers the way back out is a page
+ * people leave; this one offers the rest of the sequence, which is what the stack on
+ * the index page already told them exists.
+ */
+function SequenceNav({
+  older,
+  newer,
+  locale,
+}: {
+  older?: SequenceLink | null
+  newer?: SequenceLink | null
+  locale: Locale
+}) {
+  const link = (role: SequenceLink | null | undefined, dir: 'prev' | 'next') => {
+    const href = detailHref('experience', role?.slug, locale)
+    if (!role || !href) return null
+    return (
+      <Link className="detail-seq-item" data-dir={dir} href={href} transitionTypes={NAV_FORWARD}>
+        <span className="detail-seq-label">
+          {dir === 'prev'
+            ? locale === 'zh'
+              ? '上一段'
+              : 'Previous role'
+            : locale === 'zh'
+              ? '下一段'
+              : 'Next role'}
+        </span>
+        <span className="detail-seq-name">{roleCompany(role, locale)}</span>
+        <span className="detail-seq-meta">
+          {[t(role.role, locale), formatYearRange(role.startDate, role.endDate, locale)]
+            .filter(Boolean)
+            .join(' · ')}
+        </span>
+      </Link>
+    )
+  }
+
+  const prev = link(newer, 'prev')
+  const next = link(older, 'next')
+  if (!prev && !next) return null
+
+  return (
+    <nav className="wrap detail-seq">
+      {prev}
+      {next}
+    </nav>
   )
 }

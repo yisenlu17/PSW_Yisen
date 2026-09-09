@@ -164,6 +164,7 @@ const SECTIONS = /* groq */ `
       lede,
       source,
       limit,
+      variant,
       compact,
       alsoLabel,
       linkToDetail,
@@ -267,7 +268,20 @@ export const EXPERIENCE_QUERY = defineQuery(`
     images[]{ _key, alt, asset },
     documents[]{ _key, "url": asset->url, "filename": asset->originalFilename },
     "projects": *[_type == "project" && !(_id in path("drafts.**")) && relatedExperience._ref == ^._id]
-      | order(coalesce(order, 9999) asc)[0...6]{ ${PROJECT_CARD_FIELDS} }
+      | order(coalesce(order, 9999) asc)[0...6]{ ${PROJECT_CARD_FIELDS} },
+
+    // The five roles are one sequence — that is what the stack on /experience says —
+    // so a role's page ends by offering the next one rather than the way out. "Next"
+    // is the next one down that page: the same order, which is newest first, so it is
+    // the role that started before this one.
+    "older": *[_type == "experience" && !(_id in path("drafts.**")) && defined(slug.current)
+      && startDate < ^.startDate] | order(startDate desc)[0]{
+        company, companyLocal, "slug": slug.current, role, startDate, endDate
+      },
+    "newer": *[_type == "experience" && !(_id in path("drafts.**")) && defined(slug.current)
+      && startDate > ^.startDate] | order(startDate asc)[0]{
+        company, companyLocal, "slug": slug.current, role, startDate, endDate
+      }
   }
 `)
 

@@ -20,9 +20,11 @@ export type VideoFeatureSectionData = {
 export function VideoFeature({
   data,
   locale,
+  index,
 }: {
   data: VideoFeatureSectionData
   locale: Locale
+  index?: number
 }) {
   const resolved = resolveVideo(data.video)
   // An unresolvable link — a playlist URL, a typo — renders nothing rather than an
@@ -35,7 +37,7 @@ export function VideoFeature({
   const caption = t(data.video?.caption as LocaleString, locale)
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="video-feature" data-variant={variant}>
         <div className="video-copy">
           {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}

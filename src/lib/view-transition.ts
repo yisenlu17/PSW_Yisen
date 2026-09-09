@@ -21,7 +21,7 @@ const SAFE = /^[a-zA-Z0-9_-]+$/
  */
 export function morphName(
   kind: 'project' | 'experience',
-  part: 'cover' | 'title',
+  part: 'cover' | 'title' | 'card',
   slug: string | null | undefined
 ): string | undefined {
   if (!slug) return undefined

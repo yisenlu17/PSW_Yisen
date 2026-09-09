@@ -7,6 +7,7 @@ import { roleCompany, type ExperienceRole } from '@/lib/experience'
 import { detailHref } from '@/lib/href'
 import { NAV_FORWARD } from '@/components/transitions'
 import { ExperienceCard } from './ExperienceCard'
+import { ExperienceStack } from './ExperienceStack'
 
 export type { ExperienceRole }
 
@@ -16,7 +17,7 @@ export type ExperienceSectionData = {
   eyebrow?: LocaleString
   title?: LocaleString
   lede?: LocaleText
-  variant?: 'cardsAndList' | 'cards' | 'timeline' | null
+  variant?: 'cardsAndList' | 'cards' | 'timeline' | 'stack' | null
   compact?: boolean | null
   limit?: number | null
   roles?: ExperienceRole[] | null
@@ -26,9 +27,11 @@ export type ExperienceSectionData = {
 export function ExperienceSection({
   data,
   locale,
+  index,
 }: {
   data: ExperienceSectionData
   locale: Locale
+  index?: number
 }) {
   const variant = stegaClean(data.variant ?? 'cardsAndList')
   // The query slices to a fixed ceiling because GROQ needs literal bounds; the
@@ -41,31 +44,40 @@ export function ExperienceSection({
   // pointing somewhere else should not also carry the long tail.
   const compact = data.compact === true
 
+  // The stack is the whole set, in order, or it is not a stack: half a career with
+  // the other half in a list underneath would be two ideas about the same five roles.
+  const stacked = variant === 'stack' && !compact
+
   // `cards` promotes everything; `cardsAndList` honours the per-role Featured flag.
   // Falling back to "all cards" when nothing is featured avoids an empty-looking
   // section the first time someone adds roles and forgets the tickbox.
   const featured =
-    variant === 'cards' || !roles.some((r) => r.featured) ? roles : roles.filter((r) => r.featured)
+    variant === 'cards' || stacked || !roles.some((r) => r.featured)
+      ? roles
+      : roles.filter((r) => r.featured)
   const rest = variant === 'cardsAndList' && !compact ? roles.filter((r) => !featured.includes(r)) : []
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="section-head">
         {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}
         {t(data.title, locale) && <h2 className="title">{t(data.title, locale)}</h2>}
         {t(data.lede, locale) && <p className="lede">{t(data.lede, locale)}</p>}
       </div>
 
-      {featured.length > 0 && (
-        <div
-          className={variant === 'timeline' && !compact ? 'exp-timeline' : 'exp-cards'}
-          data-compact={compact || undefined}
-        >
-          {featured.map((role) => (
-            <ExperienceCard key={role._id} role={role} locale={locale} compact={compact} />
-          ))}
-        </div>
-      )}
+      {featured.length > 0 &&
+        (stacked ? (
+          <ExperienceStack roles={featured} locale={locale} />
+        ) : (
+          <div
+            className={variant === 'timeline' && !compact ? 'exp-timeline' : 'exp-cards'}
+            data-compact={compact || undefined}
+          >
+            {featured.map((role) => (
+              <ExperienceCard key={role._id} role={role} locale={locale} compact={compact} />
+            ))}
+          </div>
+        ))}
 
       {rest.length > 0 && (
         <div className="exp-list">
