@@ -49,12 +49,12 @@ const TILE_SHAPE: Record<(typeof SIZES)[number], [number, number]> = {
   lg: [1200, 840],
 }
 
-export function BentoGrid({ data, locale }: { data: BentoGridSectionData; locale: Locale }) {
+export function BentoGrid({ data, locale, index }: { data: BentoGridSectionData; locale: Locale; index?: number }) {
   const tiles = data.tiles ?? []
   if (tiles.length === 0) return null
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       {(t(data.eyebrow, locale) || t(data.title, locale)) && (
         <div className="section-head">
           {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}

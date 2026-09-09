@@ -16,7 +16,7 @@ export type QuoteSectionData = {
   settings?: SectionSettings | null
 }
 
-export function Quote({ data, locale }: { data: QuoteSectionData; locale: Locale }) {
+export function Quote({ data, locale, index }: { data: QuoteSectionData; locale: Locale; index?: number }) {
   const quote = t(data.quote, locale)
   if (!quote) return null
 
@@ -29,7 +29,7 @@ export function Quote({ data, locale }: { data: QuoteSectionData; locale: Locale
   const context = t(data.context, locale)
 
   return (
-    <Section settings={data.settings} className="quote-section">
+    <Section settings={data.settings} index={index} className="quote-section">
       <figure className="quote" data-variant={layout}>
         {layout === 'portrait' && data.portrait && (
           <div className="quote-portrait">

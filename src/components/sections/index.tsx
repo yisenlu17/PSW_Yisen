@@ -29,12 +29,19 @@ export type SectionData =
   | VideoFeatureSectionData
   | CtaSectionData
 
-/** Every section receives the same props; most ignore `site`. */
+/** Every section receives the same props; most ignore `site` and `index`. */
 type SectionProps = {
   data: never
   locale: Locale
   site: SiteSettings | null
+  index?: number
 }
+
+/**
+ * The hero is the cover, not a chapter, so the numbering starts after it. Any
+ * section type added here is one that opts out of the running order.
+ */
+const UNNUMBERED = new Set<string>(['heroSection'])
 
 /**
  * The registry. Adding a premium component means writing it, describing it as a
@@ -76,6 +83,10 @@ export function SectionRenderer({
   // reordering, which looks like a bug rather than a missing attribute.
   const attr = createDataAttribute({ id: documentId, type: documentType })
 
+  // Counted over what actually renders, so hiding a section in the studio closes
+  // the gap rather than leaving 01, 03, 04 down the page.
+  let counter = 0
+
   return (
     <main data-sanity={attr.scope(['sections']).toString()}>
       {visible.map((section) => {
@@ -92,12 +103,14 @@ export function SectionRenderer({
           return null
         }
 
+        const index = UNNUMBERED.has(section._type) ? undefined : ++counter
+
         return (
           <div
             key={section._key}
             data-sanity={attr.scope(['sections', { _key: section._key }]).toString()}
           >
-            <Component data={section as never} locale={locale} site={site} />
+            <Component data={section as never} locale={locale} site={site} index={index} />
           </div>
         )
       })}

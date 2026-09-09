@@ -6,6 +6,7 @@ import { localizeHref } from '@/lib/href'
 import { NAV_LATERAL } from '@/components/transitions'
 import { resumeSet, type SiteSettings } from '@/lib/site'
 import type { NavigationData } from './Header'
+import { Clock } from './Clock'
 
 /**
  * Spelled out rather than intersected with `NavigationData`: that type is nullable,
@@ -94,9 +95,31 @@ export function Footer({
     })
   }
 
+  const email = site?.email ? stegaClean(site.email) : ''
+  const where = t(site?.currentLocation, locale)
+
   return (
     <footer className="foot" style={{ viewTransitionName: 'site-footer' }}>
       <div className="wrap">
+        {/* The footer used to begin with three columns of links, which is where a
+            reader who got all the way down here stops looking. The one thing worth
+            putting at the end of the page is the address, at the size of a heading:
+            it is the only element on the site that asks for something back. */}
+        <div className="foot-open">
+          <p className="eyebrow">{locale === 'zh' ? '聊聊' : "Let's talk"}</p>
+          {email ? (
+            <a className="foot-address" href={`mailto:${email}`}>
+              {email}
+            </a>
+          ) : (
+            <span className="foot-address">{stegaClean(site?.name ?? 'Yisen Lu')}</span>
+          )}
+          <p className="foot-open-meta">
+            {where && <span>{where}</span>}
+            <Clock />
+          </p>
+        </div>
+
         <div className="foot-grid">
           <div className="foot-about">
             {t(nav?.footerStatement, locale) && <p className="foot-statement">{t(nav?.footerStatement, locale)}</p>}

@@ -1,3 +1,4 @@
+import { Fragment, type CSSProperties } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
@@ -33,6 +34,23 @@ export type HeroSectionData = {
   settings?: SectionSettings | null
 }
 
+/**
+ * The headline, broken into the pieces that arrive one after another.
+ *
+ * English splits on spaces, because a word is the unit a reader takes in at once.
+ * Chinese has no spaces to split on and splits per character instead, which reads
+ * as the line being written rather than as words being dropped into place.
+ *
+ * Whitespace is emitted as its own text node between the spans rather than kept
+ * inside them: the spans are `inline-block` so they can be moved independently,
+ * and an `inline-block` swallows the trailing space that would have separated it
+ * from the next word.
+ */
+function splitDisplay(text: string, locale: Locale): string[] {
+  if (!text) return []
+  return locale === 'zh' ? Array.from(text) : text.split(/\s+/).filter(Boolean)
+}
+
 export function Hero({
   data,
   locale,
@@ -49,8 +67,31 @@ export function Hero({
   const showPortrait = data.showPortrait !== false && Boolean(portrait?.asset)
   const noMotion = stegaClean(data.settings?.animation ?? 'default') === 'none'
 
+  const line1 = t(data.headlineLine1, locale)
+  const line2 = t(data.headlineLine2, locale)
+
+  // One running count across both lines and the rotating word, so the headline
+  // arrives as a single sentence being spoken rather than as two lines racing each
+  // other. It is a plain `let` because it is consumed entirely within this render.
+  let step = 0
+  const gap = locale === 'zh' ? '' : ' '
+
+  const spans = (text: string) =>
+    splitDisplay(text, locale).map((part, i, all) => (
+      <Fragment key={`${part}-${i}`}>
+        <span className="hword" style={{ '--i': step++ } as CSSProperties}>
+          {part}
+        </span>
+        {i < all.length - 1 ? gap : null}
+      </Fragment>
+    ))
+
   return (
-    <section className="hero" id={data.settings?.anchorId ? stegaClean(data.settings.anchorId) : undefined}>
+    <section
+      className="hero"
+      id={data.settings?.anchorId ? stegaClean(data.settings.anchorId) : undefined}
+      data-still={noMotion || undefined}
+    >
       <div className="hero-glow" aria-hidden />
 
       <div className="wrap hero-wrap">
@@ -59,16 +100,22 @@ export function Hero({
             {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}
 
             <h1>
-              {t(data.headlineLine1, locale)}
-              {t(data.headlineLine2, locale) && (
+              {noMotion ? line1 : spans(line1)}
+              {line2 && (
                 <>
                   <br />
-                  {t(data.headlineLine2, locale)}{' '}
+                  {noMotion ? line2 : spans(line2)}
+                  {gap}
                 </>
               )}
-              {words.length > 0 && (
-                <RotatingWord words={words} enabled={data.rotateHeadlineWord !== false && !noMotion} />
-              )}
+              {words.length > 0 &&
+                (noMotion ? (
+                  <RotatingWord words={words} enabled={false} />
+                ) : (
+                  <span className="hword" style={{ '--i': step++ } as CSSProperties}>
+                    <RotatingWord words={words} enabled={data.rotateHeadlineWord !== false} />
+                  </span>
+                ))}
             </h1>
 
             {t(data.lede, locale) && <p className="lede hero-lede">{t(data.lede, locale)}</p>}
@@ -80,7 +127,7 @@ export function Hero({
                   const href = localizeHref(cta.href, locale) ?? '#'
                   if (!label) return null
 
-                  const className = `btn ${stegaClean(cta.style ?? 'gold') === 'ghost' ? 'btn-ghost' : 'btn-gold'}`
+                  const className = `btn magnetic ${stegaClean(cta.style ?? 'gold') === 'ghost' ? 'btn-ghost' : 'btn-gold'}`
 
                   /**
                    * `<Link>` for our own pages, a plain anchor for anything else.
@@ -143,6 +190,17 @@ export function Hero({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Not decoration: a hero that fills the screen has no visible edge, and
+          without something saying so a first-time visitor can take it for the whole
+          page. It fades out over the first fifth of a screen, so it is gone before
+          it has been looked at twice. */}
+      <div className="hero-cue" aria-hidden>
+        <span className="hero-cue-label">{locale === 'zh' ? '下滑' : 'Scroll'}</span>
+        <span className="hero-cue-rail">
+          <span className="hero-cue-dot" />
+        </span>
       </div>
     </section>
   )

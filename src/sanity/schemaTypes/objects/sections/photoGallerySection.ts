@@ -55,6 +55,7 @@ export const photoGallerySection = defineType({
           { title: 'Grid — equal tiles', value: 'grid' },
           { title: 'Masonry — natural heights', value: 'masonry' },
           { title: 'Filmstrip — horizontal scroll', value: 'filmstrip' },
+          { title: 'Scroller — the strip travels sideways as the page goes down', value: 'scroller' },
         ],
         layout: 'dropdown',
       },

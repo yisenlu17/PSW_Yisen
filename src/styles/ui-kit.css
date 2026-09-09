@@ -25,10 +25,16 @@ button{font-family:inherit;cursor:pointer}
 .eyebrow::before{content:"";width:30px;height:2px;background:var(--gold);display:inline-block}
 .eyebrow.center{justify-content:center}
 .eyebrow.center::after{content:"";width:30px;height:2px;background:var(--gold);display:inline-block}
-h1,h2,h3,h4{font-family:var(--display);color:var(--ink);font-weight:800;line-height:1.04;margin:0;letter-spacing:-.03em}
-h2.title{font-size:clamp(30px,4.2vw,50px)}
+/* The display faces read their size, weight, leading and tracking from the
+   tokens rather than restating a clamp each. That is what lets `:lang(zh)`
+   retune the whole scale in one block instead of thirty. */
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);margin:0}
+h1{font-size:var(--h1-size);font-weight:var(--h1-weight);line-height:var(--h1-leading);letter-spacing:var(--h1-tracking)}
+h2{font-size:var(--h2-size);font-weight:var(--h2-weight);line-height:var(--h2-leading);letter-spacing:var(--h2-tracking)}
+h3,h4{font-size:var(--h3-size);font-weight:var(--h3-weight);line-height:var(--h3-leading);letter-spacing:var(--h3-tracking)}
+h2.title{font-size:var(--h2-size)}
 h2.title em{font-style:normal;color:var(--blue)}
-.lede{font-size:clamp(17px,1.4vw,19px);color:var(--body);max-width:60ch}
+.lede{font-size:var(--lede-size);line-height:var(--lede-leading);color:var(--body);max-width:60ch}
 .center{text-align:center}
 .center .lede{margin-inline:auto}
 
@@ -49,7 +55,9 @@ h2.title em{font-style:normal;color:var(--blue)}
 
 /* HEADER */
 .masthead{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .25s,background .25s}
-.masthead.scrolled{box-shadow:0 8px 30px -16px rgba(10,45,94,.25)}
+/* Set by MastheadState once the hero is behind you; also the shadow the bar
+   carries on every page that never had one. */
+.masthead[data-scrolled]{box-shadow:0 8px 30px -16px rgba(10,45,94,.25)}
 .masthead .wrap{display:flex;align-items:center;gap:28px;height:84px}
 .masthead-meta{display:inline-flex;align-items:center;gap:14px;flex:none}
 .brand img{height:50px;width:auto}
@@ -65,23 +73,17 @@ h2.title em{font-style:normal;color:var(--blue)}
 :is(.nav,.nav-group)>a.nav-cta::after{display:none}
 .burger{display:none}
 
-/* HERO */
-.hero{position:relative;background:var(--navy-deep);color:#fff;overflow:clip;height:calc(100vh - 84px);min-height:580px;display:flex;flex-direction:column;justify-content:center}
-.hero h1{color:#fff;font-size:clamp(40px,6vw,76px);letter-spacing:-.035em;font-weight:800}
+/* HERO — everything else about it is in site.css, which is where the hero was
+   already fully described. What was here was a second, older copy of the same
+   rules, and the two disagreed about the hero's height. */
 .hero h1 em{font-style:normal;color:var(--gold)}
-.hero .lede{color:rgba(255,255,255,.9);margin:22px 0 34px;font-size:clamp(17px,1.6vw,21px);max-width:46ch}
-.hero .cta-row{display:flex;flex-wrap:wrap;gap:14px}
-.hero .eyebrow{color:#fff}
-.hero .eyebrow::before{background:var(--gold)}
-.rotor{display:inline-block;color:var(--gold);font-weight:800}
-.rotor .rword{display:inline-block;will-change:transform,opacity;transition:transform .35s ease,opacity .35s ease}
 
 /* CTA */
 .cta{position:relative;background:var(--navy-deep);color:#fff;overflow:clip;text-align:center}
 .cta::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(20,86,160,.5),transparent 60%)}
 .cta .wrap{position:relative;z-index:2;max-width:760px}
 .cta .eyebrow{color:var(--gold)}
-.cta h2{color:#fff;font-size:clamp(30px,4.4vw,52px)}
+.cta h2{color:#fff;font-size:var(--h2-size)}
 .cta h2 em{font-style:normal;color:var(--gold)}
 .cta p{color:rgba(255,255,255,.85);margin:20px auto 34px;font-size:18px;max-width:50ch}
 .cta .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}

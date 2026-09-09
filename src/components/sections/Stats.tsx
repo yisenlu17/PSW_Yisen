@@ -40,12 +40,12 @@ function highlight(text: string) {
   )
 }
 
-export function Stats({ data, locale }: { data: StatsSectionData; locale: Locale }) {
+export function Stats({ data, locale, index }: { data: StatsSectionData; locale: Locale; index?: number }) {
   const stats = data.stats ?? []
   const featureValue = t(data.feature?.value, locale)
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="stats-head">
         <div>
           {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}

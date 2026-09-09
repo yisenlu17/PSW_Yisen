@@ -42,10 +42,13 @@ export function ExperienceCard({
   const company = roleCompany(role, locale)
 
   return (
-    <article className={compact ? 'exp-card exp-card-compact' : 'exp-card'}>
-      {!compact && category && <span className="exp-kicker">{category}</span>}
+    // The whole card is the shared element, not the heading inside it: the card is
+    // what grows into the role's page. Naming both would take the heading out of the
+    // card's own snapshot and leave a hole in it mid-flight.
+    <Morph name={morphName('experience', 'card', role.slug)}>
+      <article className={compact ? 'exp-card exp-card-compact' : 'exp-card'}>
+        {!compact && category && <span className="exp-kicker">{category}</span>}
 
-      <Morph name={morphName('experience', 'title', role.slug)}>
         <h3>
           {href ? (
             <Link href={href} className="exp-card-stretch" transitionTypes={NAV_FORWARD}>
@@ -55,16 +58,16 @@ export function ExperienceCard({
             company
           )}
         </h3>
-      </Morph>
-      {meta && <p className="exp-meta">{meta}</p>}
-      {summary && <p className="exp-body">{summary}</p>}
+        {meta && <p className="exp-meta">{meta}</p>}
+        {summary && <p className="exp-body">{summary}</p>}
 
-      {href && (
-        <span className="exp-more" aria-hidden>
-          {c.learnMore}
-          <span className="exp-more-mark">→</span>
-        </span>
-      )}
-    </article>
+        {href && (
+          <span className="exp-more" aria-hidden>
+            {c.learnMore}
+            <span className="exp-more-mark">→</span>
+          </span>
+        )}
+      </article>
+    </Morph>
   )
 }

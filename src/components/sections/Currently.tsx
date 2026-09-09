@@ -11,11 +11,11 @@ export type CurrentlySectionData = {
   settings?: SectionSettings | null
 }
 
-export function Currently({ data, locale }: { data: CurrentlySectionData; locale: Locale }) {
+export function Currently({ data, locale, index }: { data: CurrentlySectionData; locale: Locale; index?: number }) {
   const items = data.items ?? []
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="now-grid">
         <div>
           {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}

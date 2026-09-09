@@ -46,6 +46,29 @@ export function formatDateRange(
 }
 
 /**
+ * The same span, as two years.
+ *
+ * `formatDateRange` writes "Jul 2026 — Present", which is what a card that has room
+ * for it should say. The stacked cards on /experience do not have room: once a card
+ * is collapsed, its whole line is a number, a company, a role and a date, and the
+ * date is the part that has to give. A year is enough to place a role in a career —
+ * the month is on the page the card opens.
+ */
+export function formatYearRange(
+  start: string | null | undefined,
+  end: string | null | undefined,
+  locale: Locale
+): string {
+  if (!start) return ''
+  const year = (iso: string) => stegaClean(iso).split('-')[0]
+  const from = year(start)
+  if (!end) return `${from} — ${locale === 'zh' ? '至今' : 'Now'}`
+  const to = year(end)
+  // A role that started and ended in the same year is one year, not a range.
+  return from === to ? from : `${from} — ${to}`
+}
+
+/**
  * Where the language preference is remembered.
  *
  * The language itself lives in the URL — this cookie only decides which language a

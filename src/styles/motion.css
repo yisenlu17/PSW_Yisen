@@ -1,0 +1,627 @@
+/* ============================================================
+   MOTION — everything on this site that moves.
+
+   Split out of site.css, which had grown to 1,577 lines and was carrying two
+   unrelated jobs: what a component looks like, and what it does when you
+   scroll past it. This file is the second job. site.css is the first.
+
+   Three systems live here and they never overlap:
+
+     SCROLL REVEAL   how a section arrives          animation-timeline: view()
+     EFFECTS         the per-section signatures     animation-timeline: view()
+     TRANSITIONS     how one page becomes another   ::view-transition-*
+
+   Almost none of it is JavaScript. `animation-timeline` runs on the
+   compositor, so a scroll-driven animation costs the main thread nothing and —
+   because it is driven by scroll POSITION rather than fired once on arrival —
+   scrolling back up plays it backwards. That is the difference between an
+   animation that feels attached to the page and one that feels triggered at it,
+   and it is why no animation library is installed and none should be.
+
+   Firefox has not shipped `animation-timeline` outside Nightly, so every
+   scroll-driven rule sits inside `@supports`. The hidden state has to be in
+   there too, or a Firefox visitor gets a page of permanently invisible content.
+   `src/components/ScrollReveal.tsx` puts the movement back there with an
+   IntersectionObserver, and deliberately no-ops wherever these rules work.
+
+   The reduced-motion section at the bottom is the opt-out for all three.
+   ============================================================ */
+
+/* ---------------------------------------------------------- scroll reveal */
+/* Sections used to arrive already finished — the only thing marking one off from
+   the next was a change of background colour. Now the head lines and then the
+   cards lift into place as they come up the screen.
+
+   Driven by the scroll position rather than fired once on arrival: scroll back up
+   and it plays backwards, which is what makes it feel attached to the page rather
+   than triggered at it. That is `animation-timeline: view()`, which runs on the
+   compositor and costs the main thread nothing — no scroll listener, no library.
+
+   Firefox has not shipped it outside Nightly, so everything here sits inside
+   `@supports`. The hidden state has to be in there too: written outside it, every
+   Firefox visitor would get a page of permanently invisible content. What they get
+   instead is the page, plainly — and `ScrollReveal` puts the same movement back
+   with an IntersectionObserver, which is what the `.reveal` rules in ui-kit.css
+   were written for and never wired up to.
+
+   Body copy is deliberately not in the list. A case study's prose is a single tall
+   block, and tying its opacity to the scroll position means text that is still
+   arriving while you are trying to read it. What reveals on a detail page is the
+   metric row and the related cards — things you look at, rather than read.
+
+   The group selector is repeated below rather than factored out, and is kept in
+   step with TARGETS in src/components/ScrollReveal.tsx. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :is(
+      .section:not([data-animation='none']) .wrap > *:not(.exp-stack, .gallery-rail),
+      .detail-metrics,
+      .detail-related-grid
+    ) > * {
+      animation: reveal-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 30%;
+    }
+
+    /* Each child runs on its own timeline and a row of cards shares a top edge, so
+       without this they would all arrive on the same frame. Offsetting the range by
+       position is what turns an appearance into a sequence. */
+    :is(
+      .section:not([data-animation='none']) .wrap > *:not(.exp-stack, .gallery-rail),
+      .detail-metrics,
+      .detail-related-grid
+    ) > *:nth-child(2) {
+      animation-range: entry 8% cover 34%;
+    }
+    :is(
+      .section:not([data-animation='none']) .wrap > *:not(.exp-stack, .gallery-rail),
+      .detail-metrics,
+      .detail-related-grid
+    ) > *:nth-child(3) {
+      animation-range: entry 12% cover 38%;
+    }
+    :is(
+      .section:not([data-animation='none']) .wrap > *:not(.exp-stack, .gallery-rail),
+      .detail-metrics,
+      .detail-related-grid
+    ) > *:nth-child(n + 4) {
+      animation-range: entry 16% cover 42%;
+    }
+
+    /* The editor's middle setting, honoured as the comment at the top of this file
+       has always claimed it was: reduced arrives, it just does not travel. */
+    .section[data-animation='reduced'] .wrap > * > * {
+      animation-name: reveal-fade;
+    }
+
+    /* Photographs open rather than fade. Only in galleries: the covers on cards and
+       on a detail header are shared elements that morph between pages, and giving
+       one of those a second animation of its own is asking the two to disagree. */
+    .gallery img,
+    .detail-gallery img {
+      animation: reveal-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 45%;
+    }
+  }
+}
+
+/* The fallback path answers to the same three settings. `none` is already covered
+   by the blanket at the top of this file; this is `reduced`. */
+.section[data-animation='reduced'] .reveal { transform: none; }
+
+@keyframes reveal-rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes reveal-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* How far down the page you are, in one gold line under the masthead. Four lines
+   of CSS and no JavaScript, because the scroll position is the timeline. */
+@supports (animation-timeline: scroll(root)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .masthead::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      animation: scroll-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+@keyframes scroll-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ============================================================
+   EFFECTS — the per-section signatures.
+
+   Everything below is one section's own gesture. They are deliberately not
+   uniform: a page where every block arrives the same way reads as a template
+   however good the individual block is, and the thing an interviewer remembers
+   is a specific moment, not a consistent easing curve.
+   ============================================================ */
+
+/* ---------- the chapter rule fills as you read past it ---------- */
+/* The static rail is in site.css. This is the only part that moves: the gold
+   hairline draws itself downward at the rate you scroll, and undraws if you
+   scroll back. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section-index-rule {
+      animation: rule-draw linear both;
+      animation-timeline: view();
+      animation-range: cover 8% cover 92%;
+    }
+  }
+}
+
+@keyframes rule-draw {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* ---------- hero: the opening ---------- */
+/* Three things happen here and they are deliberately different in kind.
+ *
+ * The headline ARRIVES — a one-off, on load, timed. The rest of the hero LEAVES —
+ * tied to scroll position, so it recedes exactly as far as you have scrolled and
+ * comes back if you scroll up. Mixing the two would be wrong both ways round: a
+ * headline that waits for you to scroll before it appears is a headline you read
+ * before it animated, and a hero that fades out on a timer fades out while you are
+ * still looking at it. */
+
+/* The headline, word by word. `both` so the first frame is the start state and the
+   last one is kept — without it a slow font load can paint the finished headline,
+   then move it. The `--i` cap is what stops a long Chinese line, which splits per
+   character, from still arriving two seconds in. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero:not([data-still]) .hword {
+    animation: word-rise .8s var(--ease-out) both;
+    animation-delay: calc(min(var(--i), 16) * 55ms);
+  }
+}
+
+@keyframes word-rise {
+  from { opacity: 0; transform: translateY(.42em); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@supports (animation-timeline: scroll(root)) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The hero recedes rather than scrolling away — it settles back a plane as the
+       page comes over it. Driven from the root scroller rather than from `view()`
+       because the hero is the top of the document: there is no ambiguity about
+       where it starts, and the range can be stated in screens. */
+    .hero:not([data-still]) .hero-wrap {
+      animation: hero-recede linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 72svh;
+    }
+    /* The light moves slower than the copy, which is what reads as depth. */
+    .hero:not([data-still]) .hero-glow {
+      animation: hero-glow-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+    /* Gone before it has been looked at twice. */
+    .hero:not([data-still]) .hero-cue {
+      animation: reveal-fade linear reverse both;
+      animation-timeline: scroll(root);
+      animation-range: 0 18svh;
+    }
+    /* The portrait holds its place a moment longer than the frame around it. */
+    .hero:not([data-still]) .hero-portrait-media img {
+      animation: portrait-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+  }
+}
+
+@keyframes hero-recede {
+  from { opacity: 1; transform: none; filter: blur(0); }
+  to   { opacity: .12; transform: translateY(-38px) scale(.955); filter: blur(5px); }
+}
+@keyframes hero-glow-drift {
+  from { transform: none; opacity: 1; }
+  to   { transform: translateY(9%) scale(1.08); opacity: .5; }
+}
+@keyframes portrait-drift {
+  from { transform: scale(1.08) translateY(-3%); }
+  to   { transform: scale(1.08) translateY(4%); }
+}
+
+/* The cue's dot runs the rail on a loop. Infinite, and therefore stopped rather
+   than shortened under reduced motion — see the override at the foot of this file,
+   which is the same fix `.skeleton-bar` needs and for the same reason. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero:not([data-still]) .hero-cue-dot { animation: cue-run 2.1s var(--ease-out) infinite; }
+  /* The portrait uncovers itself once, on load. A photograph sliding in reads as a
+     card; a photograph being revealed reads as a photograph. */
+  .hero:not([data-still]) .hero-portrait-media {
+    animation: portrait-uncover 1.1s var(--ease-out) .25s both;
+  }
+}
+
+@keyframes cue-run {
+  0%   { transform: translateY(0); opacity: 0; }
+  22%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { transform: translateY(41px); opacity: 0; }
+}
+@keyframes portrait-uncover {
+  from { clip-path: inset(100% 0 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- numbers: the figure and its rule ---------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The gold cap draws across the top of each card as it comes up the page. */
+    .section:not([data-animation='none']) .stat-card::before {
+      animation: rule-draw-x linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 32%;
+    }
+    /* And the figure is pushed up out of the card's own edge. Deliberately not a
+       fade: a number that fades in is a number you read before it arrived. */
+    .section:not([data-animation='none']) .stat-value,
+    .section:not([data-animation='none']) .stat-feature-value {
+      animation: figure-push linear both;
+      animation-timeline: view();
+      animation-range: entry 18% cover 34%;
+    }
+  }
+}
+
+@keyframes rule-draw-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes figure-push {
+  from { clip-path: inset(0 0 100% 0); transform: translateY(.24em); }
+  to   { clip-path: inset(0 0 -10% 0); transform: none; }
+}
+
+/* ---------- experience: the card that gets covered ---------- */
+/* The card does not just get hidden behind the next one — it settles back, dims,
+   and loses its shadow, so a stack of four reads as depth rather than as four cards
+   that happen to overlap. `exit` is the right range because a pinned card is, as far
+   as the page is concerned, on its way out from the moment the next one starts
+   moving over it.
+ *
+ * The animation is on the card rather than on the sticky slot: the slot's position
+ * is what `position: sticky` is deciding, and an animation on it would be a second
+ * opinion about where the card is. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+    /* The timeline is the SECTION's, not the card's.
+     *
+     * A card's own `view()` timeline is useless here: the card is inside a `sticky`
+     * box, and a view timeline reads the box's used position — which, once pinned,
+     * stops moving. Every card's timeline freezes at the moment it pins and then all
+     * five resolve together when the stack finally leaves, so all five recede on the
+     * same frame. Measured, not assumed: five cards at scale(0.93) at once.
+     *
+     * The list itself is not sticky, so its pass IS honest, and the cards arrive at
+     * evenly spaced points along it — same gap between every pair. So card i takes
+     * the i-th slice of that pass.
+     *
+     * `contain`, not `exit`. For a subject taller than the viewport — which a stack
+     * of five always is — `exit` is only the last screenful, so all five recedes got
+     * crammed into the moment the section was already leaving. `contain` is exactly
+     * the stretch where the list fills the viewport, which is exactly the stretch
+     * where the cards are handing over to each other. Measured: card 0 now starts
+     * settling within a pixel of card 1 first touching it. */
+    .exp-stack { view-timeline-name: --stack; }
+
+    /* The last card is never covered by anything, so it never settles back — it
+       just scrolls away like any other block. Its slice would start past the end of
+       the timeline and extrapolate into the section's exit, which reads as the card
+       you are still reading dimming under you. */
+    .section:not([data-animation='none']) .exp-stack-slot:not(:last-child) .exp-stack-card {
+      animation: stack-recede linear both;
+      animation-timeline: --stack;
+      animation-range:
+        contain calc(var(--i) * 100% / var(--handovers))
+        contain calc((var(--i) + 1) * 100% / var(--handovers));
+    }
+  }
+}
+
+/* Scale and shadow, and deliberately NOT opacity.
+ *
+ * Fading the card was the obvious way to say "behind" and it was wrong: a card at
+ * 72% opacity is a translucent card, so the open card underneath showed straight
+ * through the two strips above it and the index turned into a smear. The strip is
+ * the one part of a covered card that stays on screen and it has to stay crisp.
+ *
+ * What is left is what actually reads as depth anyway — the card gets a little
+ * smaller and the one in front of it casts further. */
+@keyframes stack-recede {
+  /* A short hold, so a card does not start settling back before the next one has
+     begun to cover it. */
+  0%, 10% {
+    transform: none;
+    box-shadow: var(--shadow);
+  }
+  100% {
+    transform: scale(var(--stack-scale));
+    box-shadow: 0 6px 18px -12px rgba(10,45,94,.4);
+  }
+}
+
+/* ---------- projects: the one that is being built right now ---------- */
+/* Slow enough to be a heartbeat rather than a notification badge. Infinite, so it is
+   stopped outright under reduced motion at the foot of this file. */
+@media (prefers-reduced-motion: no-preference) {
+  .proj-status[data-live='true']::before { animation: live-pulse 2.4s ease-in-out infinite; }
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: .35; transform: scale(.82); }
+  50%      { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- playground: the interests, one after another ---------- */
+/* The pills sit two levels below the section's reveal, so they arrive as one block
+   with the panel around them. Given their own short stagger they arrive as a list of
+   separate things, which is what they are. Written as nth-child rather than as an
+   index the component computes: there is no ceiling on how many interests get added
+   in the studio, and a twentieth pill waiting a full second to appear would be worse
+   than one arriving with the nineteenth. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section:not([data-animation='none']) .play-pill {
+      animation: pill-pop linear both;
+      animation-timeline: view();
+      animation-range: cover 2% cover 22%;
+    }
+    /* Two things about these numbers.
+     *
+     * The stagger is in the RANGE, not in `animation-delay`. A scroll-driven
+     * animation has no wall-clock timeline to be delayed against, so the delay is
+     * simply ignored and every pill arrives on the same frame.
+     *
+     * And the range is `cover`, not `entry`. A pill is about 34px tall, and its
+     * `entry` range is its own height — the entire animation would play out over
+     * 34px of scrolling, which is indistinguishable from not animating. `cover` is
+     * the pill's height plus a screen, which is a window you can actually see. */
+    .play-pill:nth-child(n + 2) { animation-range: cover 5% cover 25%; }
+    .play-pill:nth-child(n + 4) { animation-range: cover 8% cover 28%; }
+    .play-pill:nth-child(n + 6) { animation-range: cover 11% cover 31%; }
+    .play-pill:nth-child(n + 8) { animation-range: cover 14% cover 34%; }
+  }
+}
+
+@keyframes pill-pop {
+  from { opacity: 0; transform: translateY(10px) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- playground: the strip that goes sideways ---------- */
+/* `min()` guards the short case: with only a few photographs the track is narrower
+   than the screen, the offset comes out positive, and without the clamp the strip
+   would slide to the RIGHT — off the edge it came from. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section:not([data-animation='none']) .gallery[data-variant='scroller'] {
+      animation: strip-travel linear both;
+      animation-timeline: view();
+      animation-range: entry 60% exit 40%;
+    }
+  }
+}
+
+@keyframes strip-travel {
+  from { transform: translateX(0); }
+  to   { transform: translateX(min(0px, calc(94vw - 100%))); }
+}
+
+/* ---------- the primary buttons lean toward you ---------- */
+/* The offset comes from `Magnetic.tsx` as two custom properties; the spring back is
+   this transition, so releasing the pointer runs no script at all. */
+.magnetic {
+  transform: translate(var(--mx, 0px), var(--my, 0px));
+  transition: transform var(--t-base) var(--ease-out), box-shadow .2s, background .2s, color .2s;
+}
+/* `.btn:hover` lifts by 2px, which would be a second opinion about this element's
+   transform and would win. The lean IS the hover state here. */
+.btn.magnetic:hover { transform: translate(var(--mx, 0px), var(--my, 0px)); }
+.magnetic:active { transition-duration: var(--t-fast); }
+
+/* ---------- a detail page: how far through the writing you are ---------- */
+/* Scoped to the article, not to the document. A page-length progress bar on a page
+   whose last third is "what to read next" and a footer is telling you about the
+   footer. This one is full when the writing is finished.
+ *
+ * `scroll(root)` with the range measured against the article's own box: the article
+ * is the subject of a view timeline, and the bar reads that timeline instead. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .detail-body { view-timeline-name: --article; }
+    /* The bar lives on the masthead, which is not inside the article — so the name
+       has to be published beyond the subtree that declares it. Without this the
+       lookup walks up from the masthead, finds nothing, and the bar silently falls
+       back to the whole-document timeline. */
+    body { timeline-scope: --article; }
+
+    /* On a page that is a piece of writing, the bar in the masthead measures the
+       WRITING, not the document. A page-length bar on a page whose last third is
+       "what to read next" plus a footer is a bar that tells you about the footer.
+       Everywhere else it keeps measuring the page, which is the right answer there. */
+    .masthead:has(~ main .detail-body)::after {
+      animation-timeline: --article;
+      animation-range: contain 0% contain 100%;
+    }
+
+    /* The spine beside a contribution fills as you read past it. */
+    .contrib::after {
+      animation: rule-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 70% exit 30%;
+    }
+  }
+}
+
+/* ------------------------------------------------------- page transitions */
+/* Navigating used to be a hard cut: the old page vanished, the new one appeared,
+   and nothing on screen said the two were related. These rules are the browser's
+   own View Transitions, driven by React's <ViewTransition> — no library, and no
+   animation running on the main thread.
+
+   Three vocabularies, because three different things happen. A card opening into
+   its own page moves forward; the back link moves back; everything else — nav,
+   footer, language — is the same depth and only fades. Anything arriving without
+   a type animates not at all, which covers the browser's back button, where the
+   browser is already doing its own thing and a second animation on top reads as a
+   glitch. */
+
+/* The overlay sits above the live page for the length of the transition and would
+   otherwise swallow any click that lands during it. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* The two fixed points. Without this the masthead is treated as content that left
+   and content that arrived, so it slides with everything else and the whole
+   viewport appears to move. `display: none` on the outgoing snapshot stops the
+   moment where both are painted at once. */
+::view-transition-group(site-header),
+::view-transition-group(site-footer) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header),
+::view-transition-old(site-footer) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(site-footer) {
+  animation: none;
+}
+
+/* Going deeper: the page you leave slides out to the left, the one you open
+   arrives from the right. */
+::view-transition-old(.nav-forward) {
+  --vt-offset: calc(var(--vt-travel) * -1);
+  animation:
+    var(--vt-exit) ease-in both vt-fade reverse,
+    var(--vt-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --vt-offset: var(--vt-travel);
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    var(--vt-move) ease-in-out both vt-slide;
+}
+
+/* Coming back out: the same movement, mirrored. */
+::view-transition-old(.nav-back) {
+  --vt-offset: var(--vt-travel);
+  animation:
+    var(--vt-exit) ease-in both vt-fade reverse,
+    var(--vt-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --vt-offset: calc(var(--vt-travel) * -1);
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    var(--vt-move) ease-in-out both vt-slide;
+}
+
+/* Sideways: no travel at all. Projects and About are not in front of or behind
+   each other, and moving between them should not claim they are. */
+::view-transition-old(.nav-lateral) {
+  animation: var(--vt-exit) ease-in both vt-fade reverse;
+}
+::view-transition-new(.nav-lateral) {
+  animation: var(--vt-enter) ease-out var(--vt-exit) both vt-fade;
+}
+
+/* The shared elements: a card's cover and its heading, growing into the ones on
+   the page they open. The browser interpolates between two bitmaps, which on a
+   photograph changing size is visible as a shimmer — the blur at the midpoint is
+   there to cover it, not for its own sake. */
+::view-transition-group(.morph) {
+  animation-duration: var(--vt-morph);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: vt-via-blur;
+}
+
+@keyframes vt-fade {
+  from { opacity: 0; filter: blur(3px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+@keyframes vt-slide {
+  from { translate: var(--vt-offset); }
+  to   { translate: 0; }
+}
+@keyframes vt-via-blur {
+  30% { filter: blur(3px); }
+}
+
+/* ============================================================
+   REDUCED MOTION — the opt-out for everything above.
+   ============================================================ */
+
+/* One switch for everything that moves.
+   The old version set the two durations and nothing else, which left
+   `animation-delay` and `animation-iteration-count` alone: an infinite animation
+   became a fast flicker instead of stopping — the reason `.skeleton-bar` needs its
+   own override further down — and a delayed one still waited before appearing all
+   at once. It reaches no JavaScript either, which is why CountUp, RotatingWord and
+   ScrollReveal each ask `matchMedia` themselves rather than trusting this. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The blanket rule above only shortens durations, which on an infinite animation
+   trades a slow sweep for a fast flicker. Stop it outright instead. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar { animation: none; background: var(--tone); }
+  /* Same reason: an infinite loop with a 1ms duration is a flicker, not a stop. */
+  .hero-cue-dot,
+  .proj-status[data-live='true']::before,
+  .marquee-track { animation: none; }
+}
+
+/* Sliding a whole page across the viewport is the single most common trigger for
+   motion sensitivity, and the blanket rule earlier in this file does not reach
+   these pseudo-elements — `*` does not match them. Stated explicitly, so the
+   pages simply swap, which is what the browser does with no transition at all. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

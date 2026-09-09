@@ -57,7 +57,7 @@ function itemLabel(item: PlaygroundItem, locale: Locale): string {
  * fourteen — the prototype's version broke the moment a seventh was added, because
  * the six tiles were written out by hand.
  */
-export function Playground({ data, locale }: { data: PlaygroundSectionData; locale: Locale }) {
+export function Playground({ data, locale, index }: { data: PlaygroundSectionData; locale: Locale; index?: number }) {
   const items = data.items ?? []
   const sports = items.filter((i) => stegaClean(i.kind ?? 'sport') === 'sport')
   const interests = items.filter((i) => stegaClean(i.kind ?? '') === 'interest')
@@ -80,7 +80,7 @@ export function Playground({ data, locale }: { data: PlaygroundSectionData; loca
   const hasLastColumn = hasInterests || Boolean(data.secondaryImage)
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="section-head">
         {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}
         {t(data.title, locale) && <h2 className="title">{t(data.title, locale)}</h2>}

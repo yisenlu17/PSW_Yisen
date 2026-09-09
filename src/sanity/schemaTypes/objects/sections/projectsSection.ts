@@ -55,6 +55,21 @@ export const projectsSection = defineType({
       validation: (rule) => rule.min(1).integer(),
     }),
     defineField({
+      name: 'variant',
+      title: 'Layout',
+      type: 'string',
+      group: 'content',
+      options: {
+        list: [
+          { title: 'Cards — image and words in a bordered card', value: 'cards' },
+          { title: 'Showcase — the cover at size, numbered, no card frame', value: 'showcase' },
+        ],
+        layout: 'dropdown',
+      },
+      initialValue: 'cards',
+      hidden: ({ parent }) => parent?.compact === true,
+    }),
+    defineField({
       name: 'compact',
       title: 'Compact cards',
       description:

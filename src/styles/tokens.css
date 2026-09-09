@@ -40,16 +40,16 @@
      Display headings are the serif at weight 500, tight leading, slight
      negative tracking. Italics in headings carry the gold/blue accent. */
   --h1-font: var(--display);
-  --h1-size: clamp(40px, 6vw, 76px);
-  --h1-weight: 800;
-  --h1-leading: 1.02;
-  --h1-tracking: -.035em;
+  --h1-size: clamp(40px, 6.6vw, 94px);
+  --h1-weight: 900;
+  --h1-leading: .98;
+  --h1-tracking: -.042em;
 
   --h2-font: var(--display);
-  --h2-size: clamp(30px, 4.2vw, 50px);
+  --h2-size: clamp(30px, 4.6vw, 60px);
   --h2-weight: 800;
-  --h2-leading: 1.05;
-  --h2-tracking: -.03em;
+  --h2-leading: 1.02;
+  --h2-tracking: -.035em;
 
   --h3-font: var(--display);
   --h3-size: clamp(20px, 2vw, 23px);
@@ -111,6 +111,54 @@
   /* Far enough to read as direction, near enough that the eye is not asked to
      track something across the screen. */
   --vt-travel: 60px;
+
+  /* ───────────────────────── STRUCTURE ─────────────────────────
+     The masthead's own height, named once so anything that has to sit clear of
+     it — a sticky card, an anchor's scroll offset — stops guessing. */
+  --head-h: 84px;
+
+  /* The gold rule, as a material rather than a colour. A hairline that fades
+     out reads as a rule someone drew; a solid 2px block reads as a div. */
+  --rule-gold: linear-gradient(90deg, var(--gold), rgba(200,162,75,0));
+  --rule-gold-v: linear-gradient(180deg, var(--gold), rgba(200,162,75,0));
+
+  /* ───────────────────────── STACKING ─────────────────────────
+     How a card behaves once the next one is coming over it. `--peek` is the
+     sliver left visible at the top, and it is what turns a pile into an index:
+     four slivers and one open card is a readable table of contents. */
+  --peek: 18px;
+  /* Deliberately slight. The part of a covered card that stays on screen is its
+     index strip, and the strip has to stay readable — four of them are the contents
+     page for the section. Enough to say "behind", not enough to say "gone". */
+  --stack-scale: .955;
+}
+
+/* ───────────────────────── CHINESE ─────────────────────────
+   The same scale, one size down.
+
+   A `clamp` tuned on English is wrong for Chinese twice over: a Chinese
+   character is full-width, so a headline that fits in nine Latin words runs off
+   the line at nine characters — and Inter has no CJK faces, so the text is being
+   set in PingFang, whose heaviest weights smear at display sizes where Inter's
+   stay crisp. Both are handled here rather than in every component. */
+:lang(zh) {
+  --h1-size: clamp(30px, 4.8vw, 68px);
+  --h1-weight: 700;
+  --h1-tracking: -.02em;
+  --h1-leading: 1.14;
+
+  --h2-size: clamp(25px, 3.4vw, 44px);
+  --h2-weight: 700;
+  --h2-tracking: -.015em;
+  --h2-leading: 1.2;
+
+  --h3-weight: 700;
+  --h3-tracking: 0;
+
+  /* Chinese has no spaces to break on, so a long line needs more room between
+     lines to stay scannable. */
+  --body-leading: 1.75;
+  --lede-leading: 1.8;
 }
 
 /* ───────────────────────── SEMANTIC ELEMENT DEFAULTS ─────────────────────────

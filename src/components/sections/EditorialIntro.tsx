@@ -25,10 +25,12 @@ export function EditorialIntro({
   data,
   locale,
   site,
+  index,
 }: {
   data: EditorialIntroSectionData
   locale: Locale
   site: SiteSettings | null
+  index?: number
 }) {
   const steps = data.steps ?? []
 
@@ -49,7 +51,7 @@ export function EditorialIntro({
       : stegaClean(site?.name ?? '')
 
   return (
-    <Section settings={data.settings}>
+    <Section settings={data.settings} index={index}>
       <div className="intro-top" data-has-portrait={showPortrait}>
         <div className="section-head intro-head">
           {t(data.eyebrow, locale) && <p className="eyebrow">{t(data.eyebrow, locale)}</p>}

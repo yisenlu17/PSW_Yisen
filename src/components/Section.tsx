@@ -28,10 +28,21 @@ export function Section({
   settings,
   children,
   className,
+  index,
 }: {
   settings?: SectionSettings | null
   children: ReactNode
   className?: string
+  /**
+   * Where this section falls in the page's running order, 1-based.
+   *
+   * Rendered as a two-digit number on a gold rule down the left margin — the
+   * one gesture that runs through every section on every page and makes six
+   * unrelated blocks read as chapters of one document. It is counted by
+   * `SectionRenderer` rather than authored, so reordering the page in the
+   * studio renumbers it and nobody has to remember.
+   */
+  index?: number
 }) {
   const theme = pick(settings?.theme, ['light', 'cream', 'dark', 'accent'], 'light')
   const spacing = pick(settings?.spacing, ['compact', 'normal', 'large'], 'normal')
@@ -66,6 +77,17 @@ export function Section({
           style={{ backgroundImage: `url(${background})` }}
         />
       )}
+
+      {/* The chapter mark. A sibling of `.wrap` rather than a child of it,
+          because the scroll-reveal rules animate `.wrap > * > *` and a rail with
+          its own scroll-driven fill must not also be picked up by those. */}
+      {index !== undefined && (
+        <div className="section-index" aria-hidden>
+          <span className="section-index-num">{String(index).padStart(2, '0')}</span>
+          <span className="section-index-rule" />
+        </div>
+      )}
+
       <div className="wrap">{children}</div>
     </section>
   )

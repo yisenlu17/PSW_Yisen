@@ -63,10 +63,12 @@ export function Cta({
   data,
   locale,
   site,
+  index,
 }: {
   data: CtaSectionData
   locale: Locale
   site: SiteSettings | null
+  index?: number
 }) {
   const resumes = resumeSet(site)
 
@@ -88,7 +90,7 @@ export function Cta({
   const missing = (data.actions ?? []).length - actions.length
 
   return (
-    <Section settings={data.settings} className="cta">
+    <Section settings={data.settings} index={index} className="cta">
       <div className="cta-inner">
         {t(data.eyebrow, locale) && <p className="eyebrow center">{t(data.eyebrow, locale)}</p>}
         {t(data.title, locale) && <h2 className="title">{t(data.title, locale)}</h2>}
@@ -97,7 +99,7 @@ export function Cta({
         {actions.length > 0 && (
           <div className="cta-row">
             {actions.map((a) => {
-              const className = `btn ${stegaClean(a.style ?? 'ghost') === 'gold' ? 'btn-gold' : 'btn-ghost'}`
+              const className = `btn magnetic ${stegaClean(a.style ?? 'ghost') === 'gold' ? 'btn-gold' : 'btn-ghost'}`
 
               return a.asks ? (
                 <ResumeDownload
