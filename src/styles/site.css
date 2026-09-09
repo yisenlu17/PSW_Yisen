@@ -620,15 +620,21 @@
 
 /* The prototype ran this section on deep navy with a corner glow, and the dark
    theme is where it is meant to live — everything below re-tints it. */
-.section[data-theme='dark'] .proj-card {
+/* `:not([data-showcase])` is load-bearing. These are more specific than the
+   showcase block below — `.section[data-theme='dark'] .proj-card` is 0,2,1 against
+   its 0,2,0 — so without it the dark theme painted the card frame back on to the one
+   layout whose whole point is not having one, and the covers sat on lifted panels. */
+.section[data-theme='dark'] .proj-card:not([data-showcase]) {
   background: rgba(255,255,255,.05);
   border-color: var(--line-navy);
 }
-.section[data-theme='dark'] .proj-card:hover {
+.section[data-theme='dark'] .proj-card:not([data-showcase]):hover {
   background: rgba(255,255,255,.08);
   border-color: rgba(200,162,75,.45);
 }
-.section[data-theme='dark'] .proj-media { background: rgba(255,255,255,.06); }
+.section[data-theme='dark'] .proj-card:not([data-showcase]) .proj-media {
+  background: rgba(255,255,255,.06);
+}
 .section[data-theme='dark'] .proj-tagline { color: rgba(255,255,255,.6); }
 .section[data-theme='dark'] .proj-summary { color: rgba(255,255,255,.86); }
 .section[data-theme='dark'] .proj-status { border-color: var(--line-navy); color: rgba(255,255,255,.65); }
@@ -664,7 +670,16 @@
 .proj-card[data-showcase]:hover { border-color: transparent; }
 
 @media (min-width: 900px) {
+  /* The cover takes the larger share, and keeps it when the card flips.
+   *
+   * Alternating sides is done with `order`, which moves the children between the
+   * columns but leaves the columns where they are — so the cover got 1.12fr on one
+   * card and 0.88fr on the next, and three covers came out at three different widths
+   * down the page. Swapping the track sizes with the order is what keeps them equal. */
   .proj-card[data-showcase] { grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); }
+  .proj-card[data-showcase][data-flipped='true'] {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  }
 }
 
 .proj-card[data-showcase] .proj-media {
@@ -672,7 +687,7 @@
   overflow: clip;
   border-radius: var(--r);
   box-shadow: var(--shadow-lg);
-  background: var(--cream);
+  background: transparent;
 }
 .proj-card[data-showcase] .proj-media img {
   transition: transform .55s var(--ease-out);
@@ -706,7 +721,7 @@
   margin-bottom: clamp(14px, 1.6vw, 22px);
   font-variant-numeric: tabular-nums;
 }
-.section[data-theme='dark'] .proj-index { color: rgba(200,162,75,.4); }
+.section[data-theme='dark'] .proj-index { color: rgba(200,162,75,.62); }
 
 .proj-card[data-showcase] h3 { font-size: clamp(28px, 3.2vw, 44px); margin: 14px 0 8px; }
 .proj-card[data-showcase] .proj-summary { max-width: 46ch; }
@@ -1851,12 +1866,27 @@ a.bento-tile:hover .bento-content { transform: translateY(-4px); }
   content: ""; position: absolute; left: 0; bottom: -1px;
   width: min(46%, 420px); height: 1px; background: var(--rule-gold);
 }
-.foot-open .eyebrow { color: var(--gold); }
+/* `.eyebrow` is `inline-flex`, and the address below it is `inline-block` — so the
+   two sat on one line with "LET'S TALK" wedged against the address. Block-level
+   here, and the label goes back above the thing it labels. */
+.foot-open .eyebrow { color: var(--gold); display: flex; }
+
+/* An address, not a headline.
+ *
+ * Set at the h2 weight and tracking, `18901701112@163.com` came out as a brick:
+ * eleven digits at 800 with -.035em close up into each other, and Inter's
+ * proportional figures make `1` and `0` different widths so the run has no rhythm
+ * either. Lighter, with the tracking let out to near-normal and the figures set
+ * tabular, it reads as something you could copy down. A step smaller too — this is
+ * the reply-to, not the closing line. */
 .foot-address {
   display: inline-block; position: relative;
   font-family: var(--display); color: #fff;
-  font-size: var(--h2-size); font-weight: var(--h2-weight);
-  line-height: var(--h2-leading); letter-spacing: var(--h2-tracking);
+  font-size: clamp(22px, 3.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -.005em;
+  font-variant-numeric: tabular-nums;
   word-break: break-word;
 }
 /* Wipes in from the left rather than appearing all at once, so the underline
