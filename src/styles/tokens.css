@@ -133,6 +133,14 @@
   --stack-scale: .955;
 }
 
+/* The masthead is shorter on a phone, and `--head-h` is not decoration: the hero
+   is pulled up by exactly this and padded back down by it, and every sticky offset
+   on the site is measured from it. Left at 84 while the bar rendered at 68, the hero
+   would sit 16px low and the first screen would be 16px short of one. */
+@media (max-width: 520px) {
+  :root { --head-h: 68px; }
+}
+
 /* ───────────────────────── CHINESE ─────────────────────────
    The same scale, one size down.
 

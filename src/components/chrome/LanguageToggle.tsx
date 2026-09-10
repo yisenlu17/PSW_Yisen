@@ -14,6 +14,17 @@ const LABEL: Record<Locale, string> = { en: 'English', zh: '中文' }
 const TRIGGER: Record<Locale, string> = { en: 'Language', zh: '语言' }
 
 /**
+ * The same button where there is no room for a word.
+ *
+ * A phone masthead has to hold a name, this, and the menu button inside about 280px,
+ * and "Language" is the piece that can give: the caret already says it opens
+ * something, and the code says which language you are in — which is the more useful
+ * of the two facts anyway. The accessible name is on `aria-label` either way, so
+ * nothing is lost to a screen reader by swapping the visible text.
+ */
+const TRIGGER_SHORT: Record<Locale, string> = { en: 'EN', zh: '中' }
+
+/**
  * Remembers the choice for next time.
  *
  * Only the bare domain reads this — every other address says its own language — so
@@ -66,7 +77,10 @@ export function LanguageToggle({ current }: { current: Locale }) {
         aria-label={current === 'zh' ? '选择语言' : 'Choose language'}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
       >
-        {TRIGGER[current]}
+        <span className="lang-toggle-long">{TRIGGER[current]}</span>
+        <span className="lang-toggle-short" aria-hidden>
+          {TRIGGER_SHORT[current]}
+        </span>
         <svg className="lang-caret" viewBox="0 0 12 8" fill="none" aria-hidden>
           <path d="M1 1.5 6 6.5l5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
