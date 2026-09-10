@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import Image from 'next/image'
 import { stegaClean } from 'next-sanity'
 
@@ -55,24 +55,44 @@ export function PhotoGallery({
         <div className="gallery" data-variant={variant}>
           {photos.map((photo, i) => {
             const caption = t(photo.caption, locale)
-            // Masonry keeps natural proportions, so the picture's own dimensions are
-            // what reserve its space — a column of photographs that all settle a
-            // different amount as they load is the thing masonry is worst at. The other
-            // two crop to a fixed shape so rows line up, done by the image service
-            // rather than by CSS: the hotspot is honoured, and the browser never
-            // downloads pixels it is about to hide.
-            const masonry = variant === 'masonry'
-            const size = masonry ? imageSize(photo, { width: 800, height: 600 }) : { width: 800, height: 600 }
-            const img = masonry ? urlFor(photo).width(800).url() : cropFor(photo, 800, 600).url()
+            // Masonry and the scroller keep the picture's own proportions; the grid
+            // and the filmstrip crop to a fixed shape so their rows line up. Where a
+            // crop does happen it is done by the image service rather than by
+            // `object-fit`: the hotspot set in the studio is honoured, and the browser
+            // never downloads the half of a photograph it is about to hide.
+            //
+            // The scroller belongs in the first group because it has no rows to line
+            // up — it is one band of photographs at a shared height. Cropping them all
+            // to 4:3 took a quarter of the width off every 16:9 frame and nearly half
+            // the height off the one portrait, which is most of a photograph removed
+            // to make it match photographs it was never going to match.
+            const natural = variant === 'masonry' || scroller
+            const size = natural
+              ? imageSize(photo, { width: 800, height: 600 })
+              : { width: 800, height: 600 }
+            const img = natural ? urlFor(photo).width(1000).url() : cropFor(photo, 800, 600).url()
 
             return (
-              <figure key={photo._key} className="gallery-item">
+              <figure
+                key={photo._key}
+                className="gallery-item"
+                // The strip is sized by height, so each frame's width is its own
+                // aspect ratio — which is what lets a landscape photograph be
+                // landscape, and the portrait one sit narrow beside it, both whole.
+                style={
+                  scroller
+                    ? ({ '--ar': (size.width / size.height).toFixed(4) } as CSSProperties)
+                    : undefined
+                }
+              >
                 <Image
                   src={img}
                   alt={photo.alt ? stegaClean(photo.alt) : ''}
                   {...size}
-                  sizes="(max-width: 700px) 100vw, 33vw"
-                  style={masonry ? { height: 'auto' } : undefined}
+                  sizes={
+                    scroller ? '(max-width: 700px) 70vw, 520px' : '(max-width: 700px) 100vw, 33vw'
+                  }
+                  style={variant === 'masonry' ? { height: 'auto' } : undefined}
                   // The first couple are likely above the fold on a gallery page.
                   loading={i < 2 ? 'eager' : 'lazy'}
                 />

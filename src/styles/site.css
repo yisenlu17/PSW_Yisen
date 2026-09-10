@@ -1484,27 +1484,37 @@ a.detail-related-card:hover {
   overflow: clip;
 }
 .gallery[data-variant='scroller'] {
+  /* One band, one height. Everything else about a frame follows from the photograph
+     in it. */
+  --strip-h: clamp(190px, 30vh, 330px);
   display: flex;
+  align-items: flex-start;
   gap: clamp(14px, 1.6vw, 24px);
   width: max-content;
   padding-inline: var(--gut);
   will-change: transform;
 }
+/* Held to a HEIGHT, never to a width — the same bargain as `.proj-also-covers`, and
+   for the same reason. These photographs are 16:9 and 3:4, and a strip that fixes the
+   width has to crop them to a shared shape to keep the band level: a quarter off the
+   sides of every landscape frame and nearly half the height off the portrait one.
+   Fixing the height instead lets each frame be as wide as its own picture, so the
+   band stays level and nothing is cut. `--ar` is the photograph's real ratio, set by
+   the component from the asset's own dimensions. */
 .gallery[data-variant='scroller'] .gallery-item {
   flex: none;
-  width: clamp(240px, 26vw, 380px);
+  width: calc(var(--strip-h) * var(--ar, 1.5));
+  max-width: 78vw;
 }
-/* 4:3, which is the shape the image service was asked to crop to — see the comment
-   in PhotoGallery.tsx. Giving a frame a different ratio here would crop the picture a
-   second time, in CSS, around the middle rather than around the hotspot, and it is
-   faces that end up outside the second crop. */
 .gallery[data-variant='scroller'] img {
-  aspect-ratio: 4/3; object-fit: cover; width: 100%;
+  height: var(--strip-h);
+  width: 100%;
+  max-width: none;
+  /* The box is built from the picture's own ratio, so this crops nothing — it is
+     here to absorb the sub-pixel rounding in that multiplication rather than let it
+     show as a hairline of background down one edge. */
+  object-fit: cover;
 }
-/* The variety comes from width instead, so the strip has a rhythm without a single
-   picture being recropped. */
-.gallery[data-variant='scroller'] .gallery-item:nth-child(3n) { width: clamp(200px, 21vw, 300px); }
-.gallery[data-variant='scroller'] .gallery-item:nth-child(5n) { width: clamp(280px, 31vw, 440px); }
 
 /* No scroll-driven animation, no sideways travel — so it becomes what it already is
    underneath: a strip you can push with a finger. */
