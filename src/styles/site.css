@@ -1873,18 +1873,22 @@ a.bento-tile:hover .bento-content { transform: translateY(-4px); }
 
 /* An address, not a headline.
  *
- * Set at the h2 weight and tracking, `18901701112@163.com` came out as a brick:
- * eleven digits at 800 with -.035em close up into each other, and Inter's
- * proportional figures make `1` and `0` different widths so the run has no rhythm
- * either. Lighter, with the tracking let out to near-normal and the figures set
- * tabular, it reads as something you could copy down. A step smaller too — this is
- * the reply-to, not the closing line. */
+ * It was set at the h2 size and weight, where `18901701112@163.com` came out as a
+ * brick: eleven digits at 800 with -.035em close up into each other, and Inter's
+ * proportional figures give a run of them no rhythm either. Tabular figures and the
+ * tracking let back out fix the brick; the size is the other half of it.
+ *
+ * This is a reply-to, not the closing line. The closing line is the CTA section
+ * above — "Let's build something interesting." — and an address set larger than a
+ * sentence is a page shouting its own phone number. At this size it is still the
+ * largest thing in the footer and unmistakably the thing to click, without
+ * competing with the heading two blocks up. */
 .foot-address {
   display: inline-block; position: relative;
   font-family: var(--display); color: #fff;
-  font-size: clamp(22px, 3.4vw, 44px);
+  font-size: clamp(17px, 2vw, 26px);
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.25;
   letter-spacing: -.005em;
   font-variant-numeric: tabular-nums;
   word-break: break-word;
