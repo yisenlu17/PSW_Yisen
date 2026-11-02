@@ -1,5 +1,5 @@
 /**
- * The case studies themselves — three projects, both languages, no transport.
+ * The case studies themselves — four projects, both languages, no transport.
  *
  * Kept apart from the script that writes them so the same words can be rendered
  * somewhere else without a Sanity token: `project-detail.mjs` patches them into the
@@ -128,6 +128,135 @@ function writeUp(nodes, lang, assets = {}) {
 const keyed = (prefix, items) => items.map((item, i) => ({ ...item, _key: `${prefix}${i}` }))
 const refs = (ids) => ids.map((id, i) => ({ _type: 'reference', _key: `rel${i}`, _ref: id }))
 
+/* ------------------------------------------------------------- Exploremehere */
+
+const EXPLOREMEHERE = [
+  H('Why I built it', '为什么做 Exploremehere'),
+  P(
+    'A résumé is one page, read in seconds. What it cannot hold is the part an interviewer or an admissions officer actually decides on: why this person, for this role.',
+    '简历只有一页，被看的时间以秒计。它装不下的，恰恰是面试官和招生官真正拿来做决定的那部分——为什么是这个人，为什么适合这个岗位。'
+  ),
+  P(
+    'Most people are not short of experience. They are short of words for it — months of work reduced to one line, and the same document sent to every job and every programme.',
+    '大多数人并不缺经历，缺的是把经历讲清楚的话——几个月的工作在简历上只剩一行，同一份简历被投给每一个岗位、每一个项目。'
+  ),
+  P(
+    'So I built Exploremehere. Upload a résumé in Chinese, English or both; the AI asks about what it only mentions in passing, then builds a bilingual personal website you can send — and a version of it tailored to each job or programme.',
+    '所以我做了 Exploremehere。上传中文或英文简历（或两份都传），AI 会追问简历上一笔带过的经历，生成一个可以直接发出去的中英双语个人网站，并为每个岗位、每个留学项目生成一份定制版本。'
+  ),
+  IMG(
+    'exploremehere-site.png',
+    'A finished Exploremehere site: a dark navy personal website with a name in the bar, a headline, two buttons and a city and languages line under them.',
+    'What a user ends up with: a personal website in either language, at an address of their own, in one of 23 templates. This is the sample site the product shows to new users.',
+    '用户最后拿到的东西：一个中英双语的个人网站，有自己的网址，23 套模板任选。这是产品给新用户看的示例网站。'
+  ),
+
+  H('The first rule: AI that does not make things up', '第一条规则：AI 不能编'),
+  P(
+    'An AI résumé tool can make anyone sound impressive, which is exactly why a reader stops believing it. So the first thing I designed was what the AI is not allowed to do.',
+    'AI 简历工具可以让任何人听起来都很厉害——这也正是读的人不再相信它的原因。所以我最先设计的，是 AI 不允许做什么。'
+  ),
+  UL(
+    [
+      '**Facts are locked.** Companies, titles, dates, schools and degrees are never changed.',
+      '**事实锁定**：公司、职位、时间、学校和学位一律不改。',
+    ],
+    [
+      '**Inferences are opt-in.** Anything the AI infers goes in only once the user ticks it.',
+      '**推测要勾选**：AI 推测出来的内容，用户勾选了才会写入。',
+    ],
+    [
+      '**Numbers stay blank.** The AI never invents a metric; it leaves the space for the user to fill.',
+      '**数字留空**：AI 不编任何指标，空着等用户自己填。',
+    ]
+  ),
+  P(
+    'Every AI-written line then passes rule checks, and a model fact-checks it against the user’s own entries. If it fails, the original words stay.',
+    '每段 AI 写的文字先过规则检查，再由模型对照用户自己的经历核对；过不了，就保留原来的文字。'
+  ),
+
+  H('Boost: one line into a story', '开挂模式：把一句话挖成一段经历'),
+  CHAIN(
+    { en: 'How Boost works', zh: '开挂模式的流程' },
+    ['Read', 'Ask', 'Infer', 'Rewrite', 'Interactive work'],
+    ['读取', '追问', '推测', '改写', '交互作品']
+  ),
+  P(
+    'Boost takes one entry at a time, finds what is thin or missing — context, duties, methods, tools, results — and asks about exactly that. What the user can answer, it helps them say clearly. What they cannot, it fills in from what someone in that role usually does, and they decide what stays.',
+    '开挂模式一次处理一段经历，找出哪里单薄、哪里缺失——背景、职责、方法、工具、结果——然后只追问这些。用户答得上来的，帮他说清楚；答不上来的，按这个岗位通常会做的事给出推测，留不留由用户决定。'
+  ),
+  IMG(
+    'exploremehere-boost.png',
+    'A Boost session on the entry "Helped produce weekly programmes": five steps across the top, and context, duties, methods, tools and results each rated thin or missing.',
+    'A Boost session on one line, "Helped produce weekly programmes". Before anything is rewritten, it shows how little the line actually says — context and duties thin, methods, tools and results missing — and the questions start from there.',
+    '开挂模式处理一句「协助制作每周节目」。改写之前，它先指出这句话到底说了多少：背景和职责单薄，方法、工具和结果完全没有——追问就从这里开始。'
+  ),
+
+  H('Tailoring: one job, one version', '定制版本：一个岗位，一个版本'),
+  CHAIN(
+    null,
+    ['Add a job', 'Analyse it', 'Find the proof', 'Arrange a version'],
+    ['添加岗位', '分析岗位', '匹配证据', '生成定制版本']
+  ),
+  P(
+    'Paste a job ad, or pick a programme. The AI reads what they ask for, finds the user’s proof for each part, and arranges a version: what leads, what waits. The main site stays as it is, and every version has an address of its own. For study abroad, it writes to the programme’s own published requirements.',
+    '贴一份岗位描述，或者选一个留学项目。AI 读出对方要什么，为每一条找到用户自己的证据，再排出一个版本：什么放前面，什么往后放。主网站保持不变，每个版本都有自己的网址。留学方向则按项目官网公布的要求来写。'
+  ),
+  IMG(
+    'exploremehere-tailor.png',
+    'Tailoring for a junior product designer role: the ad’s requirements on the left, each marked covered with its proof, and the tailored version on the right with its own address.',
+    'The ad on the left, read line by line, with the proof for each requirement named. The version on the right is what comes out of it — the entry that answers the ad moved to the top, at its own address.',
+    '左边是岗位描述，逐条读出要求，并标出每一条的证据是哪段经历。右边是据此排出的版本——最对口的经历被挪到最前面，有自己的网址。'
+  ),
+
+  H('An edition for agencies', '机构版'),
+  P(
+    'The people who help students apply — career services, study-abroad agencies, schools — need to work on the same material with them. So there is an agency edition: an organisation buys seats, each student gets the full product, and advisers comment, review and move the service along in one workspace.',
+    '帮学生申请的人——就业指导、留学机构、学校——也需要和学生一起打磨同一份材料。所以有了机构版：机构按席位购买，每个学生拿到完整的产品，顾问在同一个工作台里批注、审核、推进服务。'
+  ),
+  UL(
+    ['**Three kinds of organisation** — career, study abroad, general', '**三类机构**：就业、留学、普通'],
+    [
+      '**Two plans** — seats on their own, or seats with a collaboration space for advisers',
+      '**两种方案**：席位版，以及带顾问协作空间的协作版',
+    ],
+    [
+      '**A 16-step study-abroad service flow**, from the first enquiry to arrival',
+      '**16 步留学服务流程**，从咨询登记一直到抵达',
+    ]
+  ),
+  P(
+    'The website always belongs to the student. An organisation never sees résumé files or unpublished drafts.',
+    '网站始终归学生自己，机构看不到简历原件和未发布的草稿。'
+  ),
+  IMG(
+    'exploremehere-business.png',
+    'The Exploremehere page for organisations: who it is for, and the two plans, seats and collaboration, priced per seat for six or twelve months.',
+    'The two plans as an organisation sees them: seats alone, or seats with a space where advisers work on students’ drafts with them.',
+    '机构看到的两种方案：只买席位，或者席位加一个顾问和学生一起改稿的协作空间。'
+  ),
+
+  H('Building it', '怎么做出来的'),
+  P(
+    'I designed and built it end to end on my own, working with AI coding agents: Next.js 16 and React 19 on Vercel, Supabase Postgres with row-level security, the Claude API with OpenAI as a fallback, Creem for payments and Resend for email. Visit stats use no cookies and no tracking.',
+    '从产品设计到全栈开发都由我一个人完成，和 AI 编程助手协作：Next.js 16 + React 19 部署在 Vercel，Supabase Postgres 加行级权限管理数据，Claude API 为主、OpenAI 备用，Creem 收款，Resend 发邮件。访问统计不用 cookie、不做追踪。'
+  ),
+  P(
+    'In September 2026 I rebuilt it as a multi-tenant platform. In the two months after, I shipped paid plans, the agency edition, the Mimi assistant, Boost, and the study-abroad and career service flows — 1,700+ commits on main.',
+    '2026 年 9 月重构为多租户平台。之后两个月里陆续上线付费方案、机构版、助手觅觅、开挂模式，以及留学和就业服务流程，主分支 1,700 多次提交。'
+  ),
+
+  H('Outcome', 'Outcome'),
+  P(
+    'Exploremehere is live at exploremehere.com, with a free site for anyone, paid plans and the agency edition open.',
+    'Exploremehere 已在 exploremehere.com 上线，个人免费版、付费方案和机构版都已开放。'
+  ),
+  Q(
+    'With AI in the product, the real design work is deciding what it must never do. Trust is the feature.',
+    '产品里有了 AI，真正的设计工作是规定它绝对不能做什么。信任本身就是功能。'
+  ),
+]
+
 /* ---------------------------------------------------------------- 我是懂球王 */
 
 const DONGQIUWANG = [
@@ -227,8 +356,8 @@ const DONGQIUWANG = [
 
   H('Outcome', 'Outcome'),
   P(
-    'The core loop is finished, and the product is in its last round of testing before launch.',
-    '目前核心产品闭环已经完成，正在进行上线前的最终测试。'
+    'It is live at woshidongqiuwang.com and running, with the core loop working end to end.',
+    '目前已在 woshidongqiuwang.com 上线运营，核心闭环完整跑通。'
   ),
   P(
     'This is the project where I finally did a whole one, end to end.',
@@ -366,8 +495,8 @@ const ZHIPAI = [
   H('It started with a real problem', '从一个真实的问题开始'),
   P('智排 did not start with "I want to build a SaaS".', '智排并不是从「我想做一个 SaaS」开始的。'),
   P(
-    'It started with watching a family member coordinate students, teachers, courses and classrooms at a tutoring centre — through Excel, Word and a great deal of talking to people.',
-    '最初是因为我观察到家人在教培机构工作时，需要长期通过 Excel、Word 和人工沟通协调学生、老师、课程和教室。'
+    'It started with watching a friend coordinate students, teachers, courses and classrooms at a tutoring centre — through Excel, Word and a great deal of talking to people.',
+    '最初是因为我观察到朋友在管理教培机构工作时，需要长期通过 Excel、Word 和人工沟通协调学生、老师、课程和教室。'
   ),
   P(
     'On the surface it is "make a timetable". Once I actually tried it, it was a constraint optimisation problem:',
@@ -504,10 +633,87 @@ const ZHIPAI = [
 
 const PROJECTS = [
   {
+    _id: 'project.exploremehere',
+    /**
+     * The one project that did not exist when the site was seeded, so the fields a
+     * seeded document already had — its address, its place in the order — are written
+     * here once, when the document is created, and never again: an edit made to them
+     * in the studio afterwards stands.
+     */
+    create: {
+      title: 'Exploremehere',
+      slug: { _type: 'slug', current: 'exploremehere' },
+      role: 'solo',
+      featured: true,
+      // First: the newest and the biggest of the four.
+      order: 0,
+      startDate: '2026-06-01',
+    },
+    status: 'live',
+    category: S('Product · Founder · 2026', '产品 · 创始人 · 2026'),
+    roleDetail: [
+      S('Founder', '创始人'),
+      S('Product Design', '产品设计'),
+      S('Full-stack Development', '全栈开发'),
+    ],
+    tagline: S('AI résumé websites for jobs and study abroad', 'AI 简历网站 · 求职与留学'),
+    summary: T(
+      'An AI résumé-website builder for job seekers and study-abroad applicants. The AI asks about what a résumé only mentions in passing, then builds a bilingual personal website and a version for each job or programme — without making anything up. An agency edition lets consultancies work on it with their students. I designed and built it solo.',
+      '面向求职和留学申请者的 AI 简历网站。AI 追问简历上一笔带过的经历，生成中英双语个人网站，并为每个岗位、每个项目生成定制版本，事实一律不编；另有面向就业和留学机构的机构版。从产品设计到全栈开发由我独立完成。'
+    ),
+    tags: [
+      S('AI product', 'AI 产品'),
+      S('Bilingual websites', '中英双语网站'),
+      S('Tailored versions', '定制版本'),
+      S('Agency edition', '机构版'),
+    ],
+    highlight: S('AI that never makes things up', 'AI 不编造事实'),
+    features: [
+      S(
+        'A bilingual personal website from a résumé in Chinese, English or both',
+        '从中文或英文简历（或两份）生成中英双语个人网站'
+      ),
+      S('Boost: read, ask, infer, rewrite — one line into a story', '开挂模式：读取、追问、推测、改写，把一句话挖成一段经历'),
+      S('A tailored version for each job or programme, each at its own address', '为每个岗位、每个项目生成定制版本，各有独立网址'),
+      S(
+        'Facts locked: companies, titles, dates, schools and degrees never change',
+        '事实锁定：公司、职位、时间、学校和学位不会被改'
+      ),
+      S(
+        'Every AI-written line rule-checked and fact-checked against the user’s entries',
+        '每段 AI 文字都过规则检查，并对照用户自己的经历核对'
+      ),
+      S(
+        'An agency edition: seats, an adviser workspace and a 16-step study-abroad flow',
+        '机构版：席位、顾问工作台和 16 步留学服务流程'
+      ),
+      S('Visit stats with no cookies and no tracking', '访问统计不用 cookie、不做追踪'),
+    ],
+    learnings: [
+      S(
+        'With AI in the product, the design work is deciding what it must never do. Trust is the feature.',
+        '产品里有了 AI，设计的重点是规定它绝对不能做什么。信任本身就是功能。'
+      ),
+      S(
+        'One person with AI coding agents can ship a multi-tenant platform. The bottleneck moves to deciding what to build.',
+        '一个人加上 AI 编程助手，也能做出一个多租户平台；瓶颈变成了决定做什么。'
+      ),
+    ],
+    stack: ['Next.js 16', 'React 19', 'TypeScript', 'Supabase', 'Vercel', 'Claude API', 'Creem', 'Resend'],
+    links: [LINK('live', 'Live site', '访问网站', 'https://exploremehere.com/')],
+    cover: {
+      file: 'exploremehere-home.png',
+      alt: 'The Exploremehere home page: "Show interviewers why you’re the best fit", and beside it a tailored version of a sample site for a junior product designer role.',
+    },
+    nodes: EXPLOREMEHERE,
+    related: ['project.dongqiuwang', 'project.zhipai'],
+  },
+
+  {
     _id: 'project.dongqiuwang',
     // The document is currently titled with its own slug — the name is 我是懂球王.
     title: '我是懂球王',
-    status: 'comingSoon',
+    status: 'live',
     category: S('Product · Self-initiated · 2026', '产品 · 自主发起 · 2026'),
     roleDetail: [
       S('Product Owner', '产品负责人'),
@@ -547,8 +753,8 @@ const PROJECTS = [
         '砍掉资讯流、聊天室和直播，这条闭环才真的做得完。'
       ),
       S(
-        'A CS background was not the blocker: breaking the product down, working with AI and iterating quickly got an idea to the point of launch.',
-        '没有传统 CS 背景同样可以：靠产品拆解、AI 协作和快速迭代，把一个想法推进到可上线状态。'
+        'A CS background was not the blocker: breaking the product down, working with AI and iterating quickly took an idea all the way to a live product.',
+        '没有传统 CS 背景同样可以：靠产品拆解、AI 协作和快速迭代，把一个想法做成了上线运营的产品。'
       ),
     ],
     stack: ['PostgreSQL', 'Prisma', 'BallDontLie API', 'Vercel', 'Cron jobs', 'Claude', 'Codex'],
@@ -625,8 +831,8 @@ const PROJECTS = [
     ],
     tagline: S('Class scheduling for tutoring centres', '教培机构排课与管理系统'),
     summary: T(
-      'A scheduling and admin system for tutoring centres. It began as a family member’s Excel workbook and turned out to be a constraint problem: students, teachers, subjects, rooms and time slots that all have to hold at once. It runs as a console for the centre plus a portal the students and teachers sign in to, and is being validated against a real one.',
-      '面向教培机构的排课与管理系统。起点是家人手里的一份 Excel，拆开之后才发现它其实是一个约束优化问题：学生、老师、科目、教室和时间必须同时成立。现在由一个机构总控台加上学生与老师登录的入口组成，正在一家真实机构里验证。'
+      'A scheduling and admin system for tutoring centres. It began as a friend’s Excel workbook and turned out to be a constraint problem: students, teachers, subjects, rooms and time slots that all have to hold at once. It runs as a console for the centre plus a portal the students and teachers sign in to, and is being validated against a real one.',
+      '面向教培机构的排课与管理系统。起点是朋友手里的一份 Excel，拆开之后才发现它其实是一个约束优化问题：学生、老师、科目、教室和时间必须同时成立。现在由一个机构总控台加上学生与老师登录的入口组成，正在一家真实机构里验证。'
     ),
     tags: [
       S('Constraint modelling', '约束建模'),

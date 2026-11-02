@@ -1,5 +1,5 @@
 /**
- * Renders the three case studies as a standalone page, without touching Sanity.
+ * Renders the four case studies as a standalone page, without touching Sanity.
  *
  * The words in `project-content.mjs` cannot be seen until they are in the dataset,
  * and putting them there needs an Editor token. This closes that gap: it reproduces
@@ -32,6 +32,7 @@ const out = resolve(
  * be told what they already are.
  */
 const DATASET = {
+  'project.exploremehere': { title: 'Exploremehere', slug: 'exploremehere', startDate: '2026-06-01' },
   'project.dongqiuwang': { title: '我是懂球王', slug: 'woshidongqiuwang', startDate: '2026-01-01' },
   'project.just-hoop': { title: 'Just Hoop', slug: 'just-hoop', startDate: '2026-03-01' },
   'project.zhipai': { title: '智排', slug: 'zhipai', startDate: '2025-01-01' },

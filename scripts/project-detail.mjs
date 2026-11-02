@@ -1,9 +1,9 @@
 /**
- * Writes the case studies onto the three featured project documents.
+ * Writes the case studies onto the four featured project documents.
  *
  * The Projects page carries a card — name, one line, a paragraph — and everything
  * longer than that lives on the project's own page. This is that content for
- * 我是懂球王, Just Hoop and 智排: the four-part write-up in both languages, plus the
+ * Exploremehere, 我是懂球王, Just Hoop and 智排: the write-up in both languages, plus the
  * lists the page renders as furniture around it (what it does, what I learned, what
  * it is built with) and the card fields that have to agree with them.
  *
@@ -93,7 +93,11 @@ const refsByFile = Object.fromEntries([...assets].map(([file, asset]) => [file, 
 const tx = client.transaction()
 
 for (const item of PROJECTS) {
-  const { _id, nodes, related, cover: coverSpec, ...fields } = item
+  const { _id, nodes, related, cover: coverSpec, create, ...fields } = item
+
+  // A project added after the seed has no document to patch yet. Created with its
+  // `create` fields first, and only when missing, so a re-run leaves them as edited.
+  if (create) tx.createIfNotExists({ _id, _type: 'project', ...create })
 
   const coverImage = cover(coverSpec)
   const set = {
@@ -174,4 +178,4 @@ if (DRY_RUN) {
 }
 
 await tx.commit()
-console.log('\n✓ Written. Three project pages carry their case study, two accounts their 抖音号.')
+console.log('\n✓ Written. Four project pages carry their case study, two accounts their 抖音号.')

@@ -33,6 +33,11 @@ a screenshot is replaced or retaken.
 
 | File | Where it lands |
 | --- | --- |
+| `exploremehere-home.png` | Exploremehere — cover: the home page, with a tailored version beside the headline |
+| `exploremehere-site.png` | Exploremehere — in the write-up, under why it exists: the sample site a user ends up with |
+| `exploremehere-boost.png` | Exploremehere — in the write-up, under Boost |
+| `exploremehere-tailor.png` | Exploremehere — in the write-up, under tailoring |
+| `exploremehere-business.png` | Exploremehere — in the write-up, under the agency edition |
 | `dongqiuwang-home.png` | 我是懂球王 — cover: the card on `/projects` and the top of the detail page |
 | `dongqiuwang-news-poll.png` | 我是懂球王 — in the write-up, under the section on how a call is made |
 | `dongqiuwang-card.png` | 我是懂球王 — in the write-up, under the core loop it feeds |
