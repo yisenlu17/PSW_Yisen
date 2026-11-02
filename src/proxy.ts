@@ -37,8 +37,19 @@ export function proxy(request: NextRequest) {
 }
 
 /**
- * Which language the bare domain opens in: what you last chose, else what your
- * browser asks for, else English.
+ * Where a reader is, as Vercel's edge sees it: an ISO country code, set on every
+ * request it forwards and overwritten when a client sends its own.
+ */
+const COUNTRY_HEADER = 'x-vercel-ip-country'
+
+/**
+ * Which language the bare domain opens in: what you last chose, else where you are
+ * opening it from — mainland China reads Chinese, everywhere else English — else,
+ * off Vercel where there is no country to go on, what your browser asks for.
+ *
+ * Only the mainland counts. Hong Kong, Macau and Taiwan have codes of their own and
+ * open in English, which is what was asked for; a reader there who wants Chinese is
+ * one tap away, and the cookie keeps that choice.
  *
  * Temporary by nature — it is a different answer for different people, so the
  * redirect above must not be cached as though it were one answer.
@@ -46,6 +57,9 @@ export function proxy(request: NextRequest) {
 function preferredLocale(request: NextRequest): Locale {
   const remembered = request.cookies.get(LOCALE_COOKIE)?.value
   if (isLocale(remembered)) return remembered
+
+  const country = request.headers.get(COUNTRY_HEADER)
+  if (country) return country.toUpperCase() === 'CN' ? 'zh' : 'en'
 
   const header = request.headers.get('accept-language')
   if (!header) return DEFAULT_LOCALE

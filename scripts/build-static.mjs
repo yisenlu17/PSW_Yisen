@@ -135,12 +135,18 @@ function* walk(dir) {
   }
 }
 
+/** The IANA names mainland China's one time zone goes by, current and legacy. */
+const MAINLAND_ZONES = ['Asia/Shanghai', 'Asia/Chongqing', 'Asia/Chungking', 'Asia/Harbin', 'Asia/Urumqi', 'Asia/Kashgar', 'PRC']
+
 /**
- * The page the bare address gets: whichever language you last chose, else whichever
- * your browser asks for, else English.
+ * The page the bare address gets: whichever language you last chose, else Chinese
+ * from mainland China and English elsewhere, else whichever your browser asks for.
  *
  * The same rule `proxy.ts` applies, moved to the client because that is the only
- * place left that can apply it. It is a `replace` rather than an assignment so the
+ * place left that can apply it. A file host is never told where its reader is, so
+ * the clock stands in for the country: the mainland keeps one time zone, under a
+ * handful of IANA names, none shared with Hong Kong, Macau or Taiwan — which, as in
+ * the proxy, read English. It is a `replace` rather than an assignment so the
  * back button returns to wherever the reader came from rather than to this file,
  * which would bounce them straight forward again. The `<a>` is what someone with
  * scripting off gets, and the `<meta>` catches the case in between.
@@ -168,8 +174,12 @@ function landingPage() {
       var pair = jar[c].split('=');
       if (pair[0].trim() === 'lang') { remembered = decodeURIComponent((pair[1] || '').trim()); }
     }
+    var zone = '';
+    try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
     if (locales.indexOf(remembered) !== -1) {
       pick = remembered;
+    } else if (zone) {
+      pick = ${JSON.stringify(MAINLAND_ZONES)}.indexOf(zone) !== -1 ? 'zh' : 'en';
     } else {
       var asked = navigator.languages || [navigator.language || ''];
       for (var i = 0; i < asked.length; i++) {
