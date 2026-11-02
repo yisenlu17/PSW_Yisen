@@ -37,13 +37,15 @@ const T = (copy) => ({ _type: 'localeText', ...copy })
 const INTRO = {
   en:
     "I'm Yisen Lu. I build AI products, fast enough that what gets tested is the idea " +
-    'and not the code — an NBA prediction platform that settles every call itself, and ' +
-    'a scheduling system now running inside a real tutoring centre. Alongside that: six ' +
+    'and not the code — Exploremehere, an AI résumé-website platform I founded, an NBA ' +
+    'prediction platform that settles every call itself, and a scheduling system now ' +
+    'running inside a real tutoring centre. Alongside that: six ' +
     'enterprise website projects in parallel at Orfeostory, community football operations ' +
     'at Stranger Soccer, 20+ financial process documents written solo at Ernst & Young.',
   zh:
-    '我是卢一森。我做 AI 产品，做得足够快，所以被验证的是想法，不是代码 —— 一个赛后自动结算的 ' +
-    'NBA 预测平台，一套已经在真实机构里跑起来的排课系统。除此之外：在 Orfeostory 同时推进六个' +
+    '我是卢一森。我做 AI 产品，做得足够快，所以被验证的是想法，不是代码 —— 我创立的 AI 简历网站' +
+    '平台 Exploremehere，一个赛后自动结算的 NBA 预测平台，一套已经在真实机构里跑起来的排课系统。' +
+    '除此之外：在 Orfeostory 同时推进六个' +
     '企业网站项目，在 Stranger Soccer 做社区足球运营，在安永独立完成 20 多份财务流程文档。',
 }
 
